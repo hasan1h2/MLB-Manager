@@ -37,10 +37,8 @@ class DocumentsView extends GetView<DocumentController> {
           separatorBuilder: (_, __) => const SizedBox(height: AppSizes.p8),
           itemBuilder: (context, index) {
             final doc = controller.attachments[index];
-            final isImage = doc.fileExtension.toLowerCase() == 'jpg' ||
-                doc.fileExtension.toLowerCase() == 'jpeg' ||
-                doc.fileExtension.toLowerCase() == 'png' ||
-                doc.fileExtension.toLowerCase() == 'webp';
+            final ext = doc.fileName.contains('.') ? doc.fileName.split('.').last.toLowerCase() : '';
+            final isImage = ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'webp' || (doc.mimeType?.startsWith('image/') == true);
 
             Widget leadingWidget;
             if (isImage) {
@@ -51,7 +49,7 @@ class DocumentsView extends GetView<DocumentController> {
                 borderRadius: AppSizes.r8,
                 fallbackIcon: Icons.image_outlined,
               );
-            } else if (doc.fileExtension.toLowerCase() == 'pdf') {
+            } else if (ext == 'pdf' || doc.mimeType == 'application/pdf') {
               leadingWidget = Container(
                 width: 44,
                 height: 44,

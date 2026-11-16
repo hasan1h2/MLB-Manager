@@ -5,6 +5,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/security/pin_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../shared/widgets/app_image.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -39,25 +40,14 @@ class _SplashViewState extends State<SplashView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppSizes.r24),
-              child: Image.asset(
-                AppConstants.appLogoAsset,
-                width: 96,
-                height: 96,
-                errorBuilder: (_, __, ___) => Container(
-                  padding: const EdgeInsets.all(AppSizes.p24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.account_balance_wallet_rounded,
-                    size: 72,
-                    color: AppColors.secondaryElectric,
-                  ),
-                ),
-              ),
+            const AppImage(
+              imagePath: AppConstants.appLogoAsset,
+              width: 96,
+              height: 96,
+              borderRadius: AppSizes.r24,
+              fallbackIcon: Icons.account_balance_wallet_rounded,
+              fallbackColor: AppColors.secondaryElectric,
+              backgroundColor: Colors.white10,
             ),
             const SizedBox(height: AppSizes.p24),
             Text(

@@ -4,6 +4,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../controllers/auth_controller.dart';
 
 class OnboardingView extends GetView<AuthController> {
@@ -18,25 +19,13 @@ class OnboardingView extends GetView<AuthController> {
           child: Column(
             children: [
               const Spacer(),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppSizes.r24),
-                child: Image.asset(
-                  AppConstants.appLogoAsset,
-                  width: 104,
-                  height: 104,
-                  errorBuilder: (_, __, ___) => Container(
-                    padding: const EdgeInsets.all(AppSizes.p32),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondaryElectric.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_wallet_rounded,
-                      size: 80,
-                      color: AppColors.secondaryElectric,
-                    ),
-                  ),
-                ),
+              const AppImage(
+                imagePath: AppConstants.appLogoAsset,
+                width: 104,
+                height: 104,
+                borderRadius: AppSizes.r24,
+                fallbackIcon: Icons.account_balance_wallet_rounded,
+                fallbackColor: AppColors.secondaryElectric,
               ),
               const SizedBox(height: AppSizes.p32),
               Text(
