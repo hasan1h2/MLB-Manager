@@ -6,6 +6,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/app_empty_state.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/app_loading_indicator.dart';
 import '../controllers/cattle_controller.dart';
 
@@ -15,7 +16,6 @@ class CattleListView extends GetView<CattleController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('cattle_management'.tr),
       ),
@@ -42,9 +42,14 @@ class CattleListView extends GetView<CattleController> {
 
             return Card(
               child: ListTile(
-                leading: CircleAvatar(
+                leading: AppImage(
+                  imagePath: c.photoPath,
+                  width: 46,
+                  height: 46,
+                  borderRadius: AppSizes.rFull,
+                  fallbackIcon: AppIcons.cattle,
+                  fallbackColor: isSold ? Colors.white : AppColors.tagBull,
                   backgroundColor: isSold ? AppColors.textMutedLight : AppColors.tagBull.withValues(alpha: 0.15),
-                  child: Icon(AppIcons.cattle, color: isSold ? Colors.white : AppColors.tagBull),
                 ),
                 title: Text(
                   '${c.tagNumber} ${c.name?.isNotEmpty == true ? '(${c.name})' : ''}',

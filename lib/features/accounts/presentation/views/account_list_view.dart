@@ -15,7 +15,6 @@ class AccountListView extends GetView<AccountController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('accounts_wallets'.tr),
         actions: [

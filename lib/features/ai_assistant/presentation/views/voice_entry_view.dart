@@ -12,7 +12,6 @@ class VoiceEntryView extends GetView<AiAssistantController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('voice_entry'.tr),
       ),

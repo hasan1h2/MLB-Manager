@@ -23,47 +23,59 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = backgroundColor ?? theme.cardTheme.color ?? (isDark ? AppColors.cardDark : Colors.white);
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final titleColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final valueColor = amountMinor < 0
+        ? AppColors.expenseRed
+        : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight);
+
     return Card(
-      color: backgroundColor ?? Colors.white,
+      color: cardBg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.r12),
-        side: const BorderSide(color: AppColors.borderLight),
+        side: BorderSide(color: borderColor),
       ),
       elevation: 0,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSizes.r12),
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.p16),
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.p14, vertical: AppSizes.p12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Text(
                       title,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondaryLight,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: titleColor,
+                        height: 1.25,
                       ),
                     ),
                   ),
+                  const SizedBox(width: AppSizes.p6),
                   Container(
-                    padding: const EdgeInsets.all(AppSizes.p8),
+                    padding: const EdgeInsets.all(AppSizes.p6),
                     decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.12),
+                      color: iconColor.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, size: 18, color: iconColor),
+                    child: Icon(icon, size: 16, color: iconColor),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSizes.p8),
+              const SizedBox(height: AppSizes.p6),
               FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
@@ -72,7 +84,8 @@ class SummaryCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: amountMinor < 0 ? AppColors.expenseRed : AppColors.textPrimaryLight,
+                    color: valueColor,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ),

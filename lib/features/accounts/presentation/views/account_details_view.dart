@@ -21,7 +21,6 @@ class AccountDetailsView extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(item.account.name),
       ),

@@ -13,7 +13,6 @@ class AiAssistantView extends GetView<AiAssistantController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('ai_assistant'.tr),
       ),

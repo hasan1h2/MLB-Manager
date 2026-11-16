@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/constants/app_icons.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/localization/app_locales.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../shared/widgets/app_confirm_dialog.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../controllers/settings_controller.dart';
 
 class SettingsView extends GetView<SettingsController> {
@@ -14,26 +13,29 @@ class SettingsView extends GetView<SettingsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('settings'.tr),
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSizes.p16),
         children: [
-          _buildLanguageSection(),
+          _buildLanguageSection(context),
           const SizedBox(height: AppSizes.p16),
-          _buildThemeSection(),
+          _buildThemeSection(context),
           const SizedBox(height: AppSizes.p16),
-          _buildSecuritySection(),
+          _buildSecuritySection(context),
           const SizedBox(height: AppSizes.p16),
-          _buildAboutSection(),
+          _buildAboutSection(context),
         ],
       ),
     );
   }
 
-  Widget _buildLanguageSection() {
+  Widget _buildLanguageSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedColor = isDark ? AppColors.secondaryElectric : AppColors.primaryNavy;
+    final unselectedTextColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
@@ -56,8 +58,11 @@ class SettingsView extends GetView<SettingsController> {
                     child: ChoiceChip(
                       label: const Center(child: Text('বাংলা (Bengali)')),
                       selected: isBn,
-                      selectedColor: AppColors.primaryNavy,
-                      labelStyle: TextStyle(color: isBn ? Colors.white : AppColors.textPrimaryLight),
+                      selectedColor: selectedColor,
+                      labelStyle: TextStyle(
+                        color: isBn ? Colors.white : unselectedTextColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                       onSelected: (_) => controller.changeLanguage(AppLocales.bengali),
                     ),
                   ),
@@ -66,8 +71,11 @@ class SettingsView extends GetView<SettingsController> {
                     child: ChoiceChip(
                       label: const Center(child: Text('English (US)')),
                       selected: !isBn,
-                      selectedColor: AppColors.primaryNavy,
-                      labelStyle: TextStyle(color: !isBn ? Colors.white : AppColors.textPrimaryLight),
+                      selectedColor: selectedColor,
+                      labelStyle: TextStyle(
+                        color: !isBn ? Colors.white : unselectedTextColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                       onSelected: (_) => controller.changeLanguage(AppLocales.english),
                     ),
                   ),
@@ -80,7 +88,7 @@ class SettingsView extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildThemeSection() {
+  Widget _buildThemeSection(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
@@ -97,14 +105,17 @@ class SettingsView extends GetView<SettingsController> {
             const SizedBox(height: AppSizes.p12),
             Obx(() {
               final currentMode = controller.themeController.themeMode;
-              return SegmentedButton<ThemeMode>(
-                segments: const [
-                  ButtonSegment(value: ThemeMode.system, label: Text('সিস্টেম')),
-                  ButtonSegment(value: ThemeMode.light, label: Text('লাইট')),
-                  ButtonSegment(value: ThemeMode.dark, label: Text('ডার্ক')),
-                ],
-                selected: {currentMode},
-                onSelectionChanged: (set) => controller.toggleTheme(set.first),
+              return SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<ThemeMode>(
+                  segments: const [
+                    ButtonSegment(value: ThemeMode.system, label: Text('সিস্টেম')),
+                    ButtonSegment(value: ThemeMode.light, label: Text('লাইট')),
+                    ButtonSegment(value: ThemeMode.dark, label: Text('ডার্ক')),
+                  ],
+                  selected: {currentMode},
+                  onSelectionChanged: (set) => controller.toggleTheme(set.first),
+                ),
               );
             }),
           ],
@@ -113,7 +124,9 @@ class SettingsView extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildSecuritySection() {
+  Widget _buildSecuritySection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
@@ -122,9 +135,9 @@ class SettingsView extends GetView<SettingsController> {
           children: [
             Row(
               children: [
-                const Icon(AppIcons.security, color: AppColors.secondaryElectric),
+                const Icon(Icons.security_rounded, color: AppColors.secondaryElectric),
                 const SizedBox(width: AppSizes.p8),
-                Text('security'.tr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                Text('security_pin'.tr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
               ],
             ),
             const SizedBox(height: AppSizes.p12),
@@ -132,36 +145,30 @@ class SettingsView extends GetView<SettingsController> {
               final hasPin = controller.pinService.hasPin.value;
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(hasPin ? Icons.lock_rounded : Icons.lock_open_rounded, color: hasPin ? AppColors.incomeGreen : AppColors.textMutedLight),
-                title: Text(hasPin ? 'অ্যাপ পিন সক্রিয় রয়েছে' : 'নতুন পিন সেট করুন'),
+                leading: Icon(hasPin ? Icons.lock_rounded : Icons.lock_open_rounded),
+                title: Text(hasPin ? 'app_pin_active'.tr : 'set_new_pin'.tr),
                 trailing: TextButton(
-                  onPressed: () {
-                    if (hasPin) {
-                      AppConfirmDialog.show(
-                        title: 'পিন অপসারণ',
-                        message: 'আপনি কি অ্যাপ সিকিউরিটি পিন বন্ধ করতে চান?',
-                        isDestructive: true,
-                        onConfirm: () => controller.removePin(),
-                      );
-                    } else {
-                      controller.openPinSetup();
-                    }
-                  },
-                  child: Text(hasPin ? 'বন্ধ করুন' : 'সেট করুন'),
+                  onPressed: () => controller.showPinSetupDialog(context),
+                  child: Text(
+                    hasPin ? 'change'.tr : 'set_pin'.tr,
+                    style: TextStyle(
+                      color: isDark ? AppColors.secondaryElectricLight : AppColors.secondaryElectric,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               );
             }),
             Obx(() {
               final bioAvailable = controller.pinService.isBiometricAvailable.value;
-              final bioEnabled = controller.pinService.isBiometricEnabled.value;
-              if (!bioAvailable) return const SizedBox();
+              if (!bioAvailable) return const SizedBox.shrink();
 
               return SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(AppIcons.fingerprint, color: AppColors.secondaryElectric),
-                title: Text('biometric_auth'.tr),
-                value: bioEnabled,
-                onChanged: (val) => controller.toggleBiometric(val),
+                secondary: const Icon(Icons.fingerprint_rounded),
+                title: Text('enable_biometric'.tr),
+                value: controller.pinService.isBiometricEnabled.value,
+                onChanged: (val) => controller.toggleBiometrics(val),
               );
             }),
           ],
@@ -170,7 +177,10 @@ class SettingsView extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildAboutSection() {
+  Widget _buildAboutSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryTextColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
@@ -179,28 +189,26 @@ class SettingsView extends GetView<SettingsController> {
           children: [
             Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppSizes.r8),
-                  child: Image.asset(
-                    AppConstants.appIconAsset,
-                    width: 36,
-                    height: 36,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.info_outline_rounded, color: AppColors.secondaryElectric),
-                  ),
+                const AppImage(
+                  imagePath: AppConstants.appIconAsset,
+                  width: 36,
+                  height: 36,
+                  borderRadius: AppSizes.r8,
+                  fallbackIcon: Icons.info_outline_rounded,
                 ),
                 const SizedBox(width: AppSizes.p12),
                 const Text('অ্যাপ সম্পর্কে', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
               ],
             ),
-            const SizedBox(height: AppSizes.p8),
+            const SizedBox(height: AppSizes.p10),
             Text(
-              '${'app_name'.tr} v1.0.0',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              '${'app_name'.tr} v${AppConstants.appVersion}',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
             ),
-            const SizedBox(height: 2),
-            const Text(
+            const SizedBox(height: 4),
+            Text(
               'ব্যক্তিগত অর্থায়ন, পরিবার ব্যবস্থাপনা ও বহু-ব্যবসা অ্যাকাউন্টিংয়ের সম্পূর্ণ অফলাইন-ফার্স্ট সমাধান।',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+              style: TextStyle(fontSize: 12.5, color: secondaryTextColor, height: 1.4),
             ),
           ],
         ),

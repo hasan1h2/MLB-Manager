@@ -30,6 +30,7 @@ class CattleController extends GetxController {
   final purchasePriceController = TextEditingController();
   final sellerController = TextEditingController();
   final RxString selectedGender = 'bull'.obs; // bull, cow, steer, heifer, calf
+  final Rx<String?> photoPath = Rx<String?>(null);
 
   // Expense Dialog Fields
   final expenseAmountController = TextEditingController();
@@ -111,6 +112,7 @@ class CattleController extends GetxController {
           weightKg: Value(weight),
           purchaseDate: Value(now),
           purchasePriceMinor: Value(priceMinor),
+          photoPath: Value(photoPath.value),
           status: const Value('active'),
           createdAt: Value(now),
         ),
@@ -122,6 +124,7 @@ class CattleController extends GetxController {
       breedController.clear();
       weightController.clear();
       purchasePriceController.clear();
+      photoPath.value = null;
       return true;
     } catch (e) {
       AppSnackbar.error('Error: $e');

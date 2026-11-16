@@ -5,6 +5,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../shared/widgets/app_empty_state.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/app_loading_indicator.dart';
 import '../controllers/document_controller.dart';
 
@@ -14,7 +15,6 @@ class DocumentsView extends GetView<DocumentController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('documents'.tr),
       ),
@@ -37,12 +37,45 @@ class DocumentsView extends GetView<DocumentController> {
           separatorBuilder: (_, __) => const SizedBox(height: AppSizes.p8),
           itemBuilder: (context, index) {
             final doc = controller.attachments[index];
+            final isImage = doc.fileExtension.toLowerCase() == 'jpg' ||
+                doc.fileExtension.toLowerCase() == 'jpeg' ||
+                doc.fileExtension.toLowerCase() == 'png' ||
+                doc.fileExtension.toLowerCase() == 'webp';
+
+            Widget leadingWidget;
+            if (isImage) {
+              leadingWidget = AppImage(
+                imagePath: doc.filePath,
+                width: 44,
+                height: 44,
+                borderRadius: AppSizes.r8,
+                fallbackIcon: Icons.image_outlined,
+              );
+            } else if (doc.fileExtension.toLowerCase() == 'pdf') {
+              leadingWidget = Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.expenseRed.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSizes.r8),
+                ),
+                child: const Icon(Icons.picture_as_pdf_outlined, color: AppColors.expenseRed, size: 24),
+              );
+            } else {
+              leadingWidget = Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryElectric.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSizes.r8),
+                ),
+                child: const Icon(AppIcons.documents, color: AppColors.secondaryElectric, size: 24),
+              );
+            }
+
             return Card(
               child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppColors.secondaryElectric.withValues(alpha: 0.12),
-                  child: const Icon(AppIcons.documents, color: AppColors.secondaryElectric),
-                ),
+                leading: leadingWidget,
                 title: Text(doc.fileName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 subtitle: Text(
                   '${(doc.fileSize / 1024).toStringAsFixed(1)} KB • ${AppDateUtils.formatTimestamp(doc.createdAt)}',

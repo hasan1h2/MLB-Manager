@@ -14,7 +14,6 @@ class BackupView extends GetView<BackupController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('backup_restore'.tr),
       ),

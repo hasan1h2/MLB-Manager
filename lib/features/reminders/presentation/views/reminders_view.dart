@@ -16,7 +16,6 @@ class RemindersView extends GetView<ReminderController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('upcoming_payments'.tr),
       ),

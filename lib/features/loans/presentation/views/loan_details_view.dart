@@ -25,7 +25,6 @@ class LoanDetailsView extends GetView<LoanController> {
     final isReceivable = item.loan.loanType == 'receivable';
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(item.loan.partyName),
       ),

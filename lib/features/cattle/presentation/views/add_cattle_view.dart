@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/currency_input_field.dart';
 import '../controllers/cattle_controller.dart';
@@ -14,7 +16,6 @@ class AddCattleView extends GetView<CattleController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('add_cattle'.tr),
       ),
@@ -59,6 +60,8 @@ class AddCattleView extends GetView<CattleController> {
             const SizedBox(height: AppSizes.p16),
             _buildGenderDropdown(),
             const SizedBox(height: AppSizes.p16),
+            _buildPhotoPicker(context),
+            const SizedBox(height: AppSizes.p16),
             CurrencyInputField(
               label: 'purchase_price'.tr,
               controller: controller.purchasePriceController,
@@ -78,6 +81,44 @@ class AddCattleView extends GetView<CattleController> {
         ),
       ),
     );
+  }
+
+  Widget _buildPhotoPicker(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Obx(() {
+      final path = controller.photoPath.value;
+      return Row(
+        children: [
+          AppImage(
+            imagePath: path,
+            width: 56,
+            height: 56,
+            borderRadius: AppSizes.r8,
+            fallbackIcon: AppIcons.cattle,
+            fallbackColor: AppColors.tagBull,
+            backgroundColor: isDark ? AppColors.surfaceDark : AppColors.tagBull.withValues(alpha: 0.12),
+          ),
+          const SizedBox(width: AppSizes.p12),
+          Expanded(
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+              label: Text(
+                path != null ? 'গরুর ছবি পরিবর্তন করুন' : 'গরুর ছবি যুক্ত করুন (ঐচ্ছিক)',
+                style: const TextStyle(fontSize: 13),
+              ),
+              onPressed: () async {
+                final picker = ImagePicker();
+                final img = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+                if (img != null) {
+                  controller.photoPath.value = img.path;
+                }
+              },
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildGenderDropdown() {

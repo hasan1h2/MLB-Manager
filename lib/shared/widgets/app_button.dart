@@ -12,6 +12,7 @@ class AppButton extends StatelessWidget {
   final bool isOutlined;
   final double? width;
   final double height;
+  final EdgeInsetsGeometry? padding;
 
   const AppButton({
     super.key,
@@ -24,11 +25,15 @@ class AppButton extends StatelessWidget {
     this.isOutlined = false,
     this.width,
     this.height = AppSizes.buttonHeight,
+    this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
-    final effectiveBg = backgroundColor ?? AppColors.primaryNavy;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final defaultBg = isDark ? AppColors.secondaryElectric : AppColors.primaryNavy;
+    final effectiveBg = backgroundColor ?? defaultBg;
     final effectiveText = textColor ?? (isOutlined ? effectiveBg : Colors.white);
 
     if (isOutlined) {
@@ -38,7 +43,8 @@ class AppButton extends StatelessWidget {
         child: OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: effectiveBg),
+            side: BorderSide(color: effectiveBg, width: 1.5),
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: AppSizes.p16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSizes.r8),
             ),
@@ -57,6 +63,7 @@ class AppButton extends StatelessWidget {
           backgroundColor: effectiveBg,
           foregroundColor: effectiveText,
           elevation: 0,
+          padding: padding ?? const EdgeInsets.symmetric(horizontal: AppSizes.p16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.r8),
           ),
@@ -78,32 +85,30 @@ class AppButton extends StatelessWidget {
       );
     }
 
-    if (icon != null) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (icon != null) ...[
           Icon(icon, size: AppSizes.iconSm, color: color),
           const SizedBox(width: AppSizes.p8),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
+        ],
+        Flexible(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              text,
+              maxLines: 1,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+                letterSpacing: 0.3,
+              ),
             ),
           ),
-        ],
-      );
-    }
-
-    return Text(
-      text,
-      style: TextStyle(
-        color: color,
-        fontWeight: FontWeight.w600,
-        fontSize: 15,
-      ),
+        ),
+      ],
     );
   }
 }

@@ -22,7 +22,6 @@ class PartyLedgerView extends GetView<PartyController> {
     final partyId = isCustomer ? (customerItem?.customer.id ?? '') : (supplierItem?.supplier.id ?? '');
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(isCustomer ? 'কাস্টমার লেজার' : 'সাপ্লায়ার লেজার'),
       ),

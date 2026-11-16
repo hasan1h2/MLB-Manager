@@ -15,7 +15,6 @@ class CustomerListView extends GetView<PartyController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('customers'.tr),
       ),

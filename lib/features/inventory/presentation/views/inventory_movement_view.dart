@@ -21,7 +21,6 @@ class InventoryMovementView extends GetView<InventoryController> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('${item.product.name} - স্টক সমন্বয়'),
       ),

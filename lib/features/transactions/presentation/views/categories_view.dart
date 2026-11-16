@@ -20,8 +20,7 @@ class CategoriesView extends GetView<TransactionController> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: AppColors.backgroundLight,
-        appBar: AppBar(
+          appBar: AppBar(
           title: Text('category'.tr),
           bottom: TabBar(
             tabs: [

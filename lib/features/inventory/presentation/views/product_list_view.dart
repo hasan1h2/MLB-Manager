@@ -6,6 +6,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/app_empty_state.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/app_loading_indicator.dart';
 import '../controllers/inventory_controller.dart';
 
@@ -15,7 +16,6 @@ class ProductListView extends GetView<InventoryController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('inventory_management'.tr),
       ),
@@ -41,15 +41,20 @@ class ProductListView extends GetView<InventoryController> {
             itemBuilder: (context, index) {
               final item = controller.productsWithStock[index];
               final isLowStock = item.currentStock <= item.product.minimumStock;
+              final isDark = Theme.of(context).brightness == Brightness.dark;
 
               return Card(
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isLowStock ? AppColors.warningAmberLight : AppColors.secondaryElectric.withValues(alpha: 0.12),
-                    child: Icon(
-                      AppIcons.inventory,
-                      color: isLowStock ? AppColors.warningAmberDark : AppColors.secondaryElectric,
-                    ),
+                  leading: AppImage(
+                    imagePath: null,
+                    width: 44,
+                    height: 44,
+                    borderRadius: AppSizes.r8,
+                    fallbackIcon: AppIcons.inventory,
+                    fallbackColor: isLowStock ? AppColors.warningAmberDark : AppColors.secondaryElectric,
+                    backgroundColor: isLowStock
+                        ? AppColors.warningAmberLight
+                        : (isDark ? AppColors.surfaceDark : AppColors.secondaryElectric.withValues(alpha: 0.12)),
                   ),
                   title: Text(item.product.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(

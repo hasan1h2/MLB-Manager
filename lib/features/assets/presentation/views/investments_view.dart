@@ -16,7 +16,6 @@ class InvestmentsView extends GetView<AssetController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('investments'.tr),
       ),

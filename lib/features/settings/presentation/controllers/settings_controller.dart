@@ -41,6 +41,10 @@ class SettingsController extends GetxController {
     Get.toNamed(AppRoutes.pinSetup);
   }
 
+  void showPinSetupDialog(BuildContext context) {
+    openPinSetup();
+  }
+
   Future<void> removePin() async {
     await pinService.removePin();
     AppSnackbar.info('পিন লক নিষ্ক্রিয় করা হয়েছে');
@@ -48,5 +52,9 @@ class SettingsController extends GetxController {
 
   Future<void> toggleBiometric(bool value) async {
     await pinService.setBiometricEnabled(value);
+  }
+
+  Future<void> toggleBiometrics(bool value) async {
+    await toggleBiometric(value);
   }
 }

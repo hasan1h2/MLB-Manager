@@ -14,7 +14,6 @@ class FamilyListView extends GetView<FamilyController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('family_management'.tr),
         actions: [

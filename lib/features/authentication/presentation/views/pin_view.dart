@@ -20,7 +20,6 @@ class PinView extends GetView<AuthController> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(isSettingNewPin ? 'set_pin'.tr : 'security'.tr),
         backgroundColor: Colors.transparent,

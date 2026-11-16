@@ -15,7 +15,6 @@ class AddSavingsGoalView extends GetView<AssetController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('add_savings_goal'.tr),
       ),

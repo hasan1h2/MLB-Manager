@@ -5,7 +5,10 @@ import 'app_dimensions.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
-    final textTheme = GoogleFonts.hindSiliguriTextTheme(ThemeData.light().textTheme);
+    final textTheme = GoogleFonts.hindSiliguriTextTheme(ThemeData.light().textTheme).apply(
+      bodyColor: AppColors.textPrimaryLight,
+      displayColor: AppColors.textPrimaryLight,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -43,6 +46,52 @@ class AppTheme {
         ),
         margin: EdgeInsets.zero,
       ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.white,
+        selectedColor: AppColors.primaryNavy,
+        disabledColor: Colors.grey.shade200,
+        labelStyle: GoogleFonts.hindSiliguri(
+          color: AppColors.textPrimaryLight,
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+        ),
+        secondaryLabelStyle: GoogleFonts.hindSiliguri(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        side: const BorderSide(color: AppColors.borderLight),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColors.primaryNavy;
+            }
+            return Colors.white;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.white;
+            }
+            return AppColors.textPrimaryLight;
+          }),
+          textStyle: WidgetStateProperty.all(
+            GoogleFonts.hindSiliguri(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
+          side: WidgetStateProperty.all(const BorderSide(color: AppColors.borderLight)),
+        ),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.secondaryElectric;
+          }
+          return AppColors.textSecondaryLight;
+        }),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryNavy,
@@ -62,6 +111,8 @@ class AppTheme {
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 14),
+        hintStyle: const TextStyle(color: AppColors.textMutedLight, fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
           borderSide: const BorderSide(color: AppColors.borderLight),
@@ -90,7 +141,10 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    final textTheme = GoogleFonts.hindSiliguriTextTheme(ThemeData.dark().textTheme);
+    final textTheme = GoogleFonts.hindSiliguriTextTheme(ThemeData.dark().textTheme).apply(
+      bodyColor: AppColors.textPrimaryDark,
+      displayColor: AppColors.textPrimaryDark,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -128,6 +182,52 @@ class AppTheme {
         ),
         margin: EdgeInsets.zero,
       ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceDark,
+        selectedColor: AppColors.secondaryElectric,
+        disabledColor: Colors.black26,
+        labelStyle: GoogleFonts.hindSiliguri(
+          color: AppColors.textPrimaryDark,
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+        ),
+        secondaryLabelStyle: GoogleFonts.hindSiliguri(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        side: const BorderSide(color: AppColors.borderDark),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColors.secondaryElectric;
+            }
+            return AppColors.surfaceDark;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.white;
+            }
+            return AppColors.textPrimaryDark;
+          }),
+          textStyle: WidgetStateProperty.all(
+            GoogleFonts.hindSiliguri(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
+          side: WidgetStateProperty.all(const BorderSide(color: AppColors.borderDark)),
+        ),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.secondaryElectricLight;
+          }
+          return AppColors.textMutedDark;
+        }),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.secondaryElectric,
@@ -147,6 +247,8 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surfaceDark,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle: const TextStyle(color: AppColors.textSecondaryDark, fontSize: 14),
+        hintStyle: const TextStyle(color: AppColors.textMutedDark, fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
           borderSide: const BorderSide(color: AppColors.borderDark),

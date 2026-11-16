@@ -15,8 +15,10 @@ class ShoppingView extends GetView<HouseholdController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('household_shopping'.tr),
         actions: [
@@ -48,16 +50,23 @@ class ShoppingView extends GetView<HouseholdController> {
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: AppColors.primaryNavy.withValues(alpha: 0.1),
-                  child: const Icon(AppIcons.shopping, color: AppColors.primaryNavy),
+                  backgroundColor: (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy).withValues(alpha: 0.15),
+                  child: Icon(AppIcons.shopping, color: isDark ? AppColors.secondaryElectric : AppColors.primaryNavy),
                 ),
                 title: Text(
                   record.storeName?.isNotEmpty == true ? record.storeName! : 'দৈনিক বাজার',
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  ),
                 ),
                 subtitle: Text(
                   AppDateUtils.formatTimestamp(record.shoppingDate),
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
                 ),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

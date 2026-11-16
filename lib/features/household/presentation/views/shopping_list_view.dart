@@ -18,9 +18,10 @@ class ShoppingListView extends GetView<HouseholdController> {
   @override
   Widget build(BuildContext context) {
     final dbService = Get.find<DatabaseService>();
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('shopping_list'.tr),
       ),
@@ -52,10 +53,17 @@ class ShoppingListView extends GetView<HouseholdController> {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       decoration: isDone ? TextDecoration.lineThrough : null,
-                      color: isDone ? AppColors.textMutedLight : AppColors.textPrimaryLight,
+                      color: isDone
+                          ? (isDark ? AppColors.textMutedDark : AppColors.textMutedLight)
+                          : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
                     ),
                   ),
-                  subtitle: Text('${item.quantity} ${item.unit}'),
+                  subtitle: Text(
+                    '${item.quantity} ${item.unit}',
+                    style: TextStyle(
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    ),
+                  ),
                   onChanged: (val) {
                     controller.toggleShoppingItem(item.id, val ?? false);
                   },

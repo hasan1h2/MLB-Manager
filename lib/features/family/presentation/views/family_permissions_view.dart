@@ -20,7 +20,6 @@ class FamilyPermissionsView extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('permissions'.tr),
       ),

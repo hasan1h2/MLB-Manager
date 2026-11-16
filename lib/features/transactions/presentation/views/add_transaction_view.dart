@@ -18,7 +18,6 @@ class AddTransactionView extends GetView<TransactionController> {
     controller.transactionType.value = initialType;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Obx(() => Text(
               controller.transactionType.value == 'income'
@@ -33,7 +32,7 @@ class AddTransactionView extends GetView<TransactionController> {
           children: [
             _buildTypeToggle(),
             const SizedBox(height: AppSizes.p16),
-            _buildScopeSelector(),
+            _buildScopeSelector(context),
             const SizedBox(height: AppSizes.p16),
             CurrencyInputField(
               label: 'amount'.tr,
@@ -77,47 +76,56 @@ class AddTransactionView extends GetView<TransactionController> {
   Widget _buildTypeToggle() {
     return Obx(() {
       final current = controller.transactionType.value;
-      return SegmentedButton<String>(
-        segments: [
-          ButtonSegment(
-            value: 'expense',
-            label: Text('add_expense'.tr),
-            icon: const Icon(AppIcons.expense, size: 16),
-          ),
-          ButtonSegment(
-            value: 'income',
-            label: Text('add_income'.tr),
-            icon: const Icon(AppIcons.income, size: 16),
-          ),
-          ButtonSegment(
-            value: 'transfer',
-            label: Text('transfer'.tr),
-            icon: const Icon(AppIcons.transfer, size: 16),
-          ),
-        ],
-        selected: {current},
-        onSelectionChanged: (set) {
-          controller.transactionType.value = set.first;
-        },
+      return SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<String>(
+          segments: [
+            ButtonSegment(
+              value: 'expense',
+              label: Text('expense'.tr),
+              icon: const Icon(AppIcons.expense, size: 16),
+            ),
+            ButtonSegment(
+              value: 'income',
+              label: Text('income'.tr),
+              icon: const Icon(AppIcons.income, size: 16),
+            ),
+            ButtonSegment(
+              value: 'transfer',
+              label: Text('transfer'.tr),
+              icon: const Icon(AppIcons.transfer, size: 16),
+            ),
+          ],
+          selected: {current},
+          onSelectionChanged: (set) {
+            controller.transactionType.value = set.first;
+          },
+        ),
       );
     });
   }
 
-  Widget _buildScopeSelector() {
+  Widget _buildScopeSelector(BuildContext context) {
     return Obx(() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('scope'.tr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(
+            'scope'.tr,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: AppSizes.p4),
-          Row(
-            children: [
-              _scopeRadio('personal', 'personal'),
-              const SizedBox(width: AppSizes.p16),
-              _scopeRadio('family', 'family'),
-              const SizedBox(width: AppSizes.p16),
-              _scopeRadio('business', 'business'),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _scopeRadio(context, 'personal', 'personal'),
+                const SizedBox(width: AppSizes.p12),
+                _scopeRadio(context, 'family', 'family'),
+                const SizedBox(width: AppSizes.p12),
+                _scopeRadio(context, 'business', 'business'),
+              ],
+            ),
           ),
           if (controller.scopeType.value == 'business' && controller.businesses.isNotEmpty) ...[
             const SizedBox(height: AppSizes.p8),
@@ -135,7 +143,11 @@ class AddTransactionView extends GetView<TransactionController> {
     });
   }
 
-  Widget _scopeRadio(String value, String labelKey) {
+  Widget _scopeRadio(BuildContext context, String value, String labelKey) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -146,7 +158,10 @@ class AddTransactionView extends GetView<TransactionController> {
             if (val != null) controller.scopeType.value = val;
           },
         ),
-        Text(labelKey.tr, style: const TextStyle(fontSize: 13)),
+        Text(
+          labelKey.tr,
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: textColor),
+        ),
       ],
     );
   }
@@ -190,19 +205,19 @@ class AddTransactionView extends GetView<TransactionController> {
 
   Widget _buildCategoryDropdown() {
     return Obx(() {
-      final cats = controller.categoriesForCurrentType;
-      if (cats.isEmpty) {
-        return const SizedBox();
+      final categories = controller.categories.where((c) => c.categoryType == controller.transactionType.value).toList();
+      if (categories.isEmpty) {
+        return const SizedBox.shrink();
       }
       return DropdownButtonFormField<String>(
-        value: controller.selectedCategoryId.value ?? cats.first.id,
+        value: controller.selectedCategoryId.value ?? categories.first.id,
         decoration: InputDecoration(
           labelText: 'category'.tr,
-          prefixIcon: const Icon(Icons.category_rounded),
+          prefixIcon: const Icon(Icons.category_outlined),
         ),
-        items: cats.map((c) {
+        items: categories.map((cat) {
           final isBn = Get.locale?.languageCode == 'bn';
-          return DropdownMenuItem(value: c.id, child: Text(isBn ? c.nameBn : c.nameEn));
+          return DropdownMenuItem(value: cat.id, child: Text(isBn ? cat.nameBn : cat.nameEn));
         }).toList(),
         onChanged: (val) => controller.selectedCategoryId.value = val,
       );
@@ -210,18 +225,31 @@ class AddTransactionView extends GetView<TransactionController> {
   }
 
   Widget _buildDatePicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Obx(() {
       return ListTile(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.r8),
-          side: const BorderSide(color: AppColors.borderLight),
+          side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
         ),
-        tileColor: Colors.white,
+        tileColor: isDark ? AppColors.surfaceDark : Colors.white,
         leading: const Icon(AppIcons.calendar, color: AppColors.secondaryElectric),
-        title: Text('date'.tr, style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight)),
+        title: Text(
+          'date'.tr,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+          ),
+        ),
         subtitle: Text(
           AppDateUtils.standardDateFormat.format(controller.transactionDate.value),
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+          ),
         ),
         trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
         onTap: () async {

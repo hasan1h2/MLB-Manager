@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/app_loading_indicator.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/currency_input_field.dart';
@@ -17,7 +18,6 @@ class CattleDetailsView extends GetView<CattleController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Obx(() => Text(controller.selectedCattle.value?.tagNumber ?? 'cattle_details'.tr)),
       ),
@@ -88,37 +88,54 @@ class CattleDetailsView extends GetView<CattleController> {
         color: AppColors.primaryNavy,
         borderRadius: BorderRadius.circular(AppSizes.r12),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'ট্যাগ: ${c.tagNumber}',
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isSold ? AppColors.incomeGreen : AppColors.secondaryElectric,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  isSold ? 'বিক্রিত' : 'সক্রিয়',
-                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
+          AppImage(
+            imagePath: c.photoPath,
+            width: 72,
+            height: 72,
+            borderRadius: AppSizes.r8,
+            fallbackIcon: AppIcons.cattle,
+            fallbackColor: AppColors.secondaryElectric,
+            backgroundColor: Colors.white.withValues(alpha: 0.1),
           ),
-          if (c.name?.isNotEmpty == true) ...[
-            const SizedBox(height: 4),
-            Text('নাম: ${c.name}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
-          ],
-          const SizedBox(height: 4),
-          Text(
-            'জাত: ${c.breed ?? 'N/A'} • লিঙ্গ: ${c.gender?.toUpperCase()} • বর্তমান ওজন: ${c.weightKg ?? 0} কেজি',
-            style: const TextStyle(color: AppColors.secondaryElectricLight, fontSize: 12),
+          const SizedBox(width: AppSizes.p12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'ট্যাগ: ${c.tagNumber}',
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isSold ? AppColors.incomeGreen : AppColors.secondaryElectric,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        isSold ? 'বিক্রিত' : 'সক্রিয়',
+                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+                if (c.name?.isNotEmpty == true) ...[
+                  const SizedBox(height: 4),
+                  Text('নাম: ${c.name}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  'জাত: ${c.breed ?? 'N/A'} • লিঙ্গ: ${c.gender?.toUpperCase()} • বর্তমান ওজন: ${c.weightKg ?? 0} কেজি',
+                  style: const TextStyle(color: AppColors.secondaryElectricLight, fontSize: 12),
+                ),
+              ],
+            ),
           ),
         ],
       ),

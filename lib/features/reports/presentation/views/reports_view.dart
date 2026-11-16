@@ -13,8 +13,10 @@ class ReportsView extends GetView<ReportController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('reports'.tr),
         actions: [
@@ -45,7 +47,7 @@ class ReportsView extends GetView<ReportController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildFilterChips(),
+              _buildFilterChips(isDark),
               const SizedBox(height: AppSizes.p16),
               _buildProfitLossCard(data),
               const SizedBox(height: AppSizes.p20),
@@ -54,7 +56,11 @@ class ReportsView extends GetView<ReportController> {
                 children: [
                   Text(
                     'লেনদেনের বিবরণী (${data.transactions.length})',
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    ),
                   ),
                   TextButton.icon(
                     icon: const Icon(Icons.table_rows_rounded, size: 16),
@@ -73,7 +79,7 @@ class ReportsView extends GetView<ReportController> {
     );
   }
 
-  Widget _buildFilterChips() {
+  Widget _buildFilterChips(bool isDark) {
     final filters = [
       'filter_this_month',
       'filter_last_month',
@@ -91,8 +97,18 @@ class ReportsView extends GetView<ReportController> {
             child: ChoiceChip(
               label: Text(f.tr),
               selected: isSelected,
-              selectedColor: AppColors.primaryNavy,
-              labelStyle: TextStyle(color: isSelected ? Colors.white : AppColors.textPrimaryLight),
+              selectedColor: isDark ? AppColors.secondaryElectric : AppColors.primaryNavy,
+              backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                fontSize: 13,
+              ),
+              side: BorderSide(
+                color: isSelected
+                    ? (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy)
+                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
+              ),
               onSelected: (_) => controller.setFilter(f),
             ),
           );

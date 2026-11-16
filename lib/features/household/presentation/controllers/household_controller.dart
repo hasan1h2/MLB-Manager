@@ -8,6 +8,29 @@ import '../../../../core/services/database_service.dart';
 import '../../../../core/utils/currency_utils.dart';
 import 'package:mlb_manager/shared/widgets/app_snackbar.dart';
 
+class CartItem {
+  final String id;
+  String productName;
+  final RxDouble quantity;
+  String unit;
+  final RxInt unitPriceMinor;
+  final Rx<String?> imagePath;
+
+  CartItem({
+    String? id,
+    required this.productName,
+    double quantity = 1.0,
+    this.unit = 'kg',
+    int unitPriceMinor = 0,
+    String? imagePath,
+  })  : id = id ?? const Uuid().v4(),
+        quantity = quantity.obs,
+        unitPriceMinor = unitPriceMinor.obs,
+        imagePath = Rx<String?>(imagePath);
+
+  int get subtotalMinor => (quantity.value * unitPriceMinor.value).round();
+}
+
 class ShoppingItemDraft {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController qtyController = TextEditingController(text: '1');
@@ -35,6 +58,9 @@ class HouseholdController extends GetxController {
   final RxList<ShoppingList> shoppingLists = <ShoppingList>[].obs;
   final RxList<ShoppingListItem> currentListItems = <ShoppingListItem>[].obs;
   final RxBool isLoading = true.obs;
+
+  // Shopping Cart Items
+  final RxList<CartItem> cartItems = <CartItem>[].obs;
 
   // Form Fields for Shopping Entry
   final storeNameController = TextEditingController();
@@ -69,6 +95,72 @@ class HouseholdController extends GetxController {
     });
   }
 
+  // --- Cart Management ---
+  void addToCart({
+    required String name,
+    double quantity = 1.0,
+    String unit = 'kg',
+    int unitPriceMinor = 0,
+    String? imagePath,
+  }) {
+    if (name.trim().isEmpty) return;
+    final newItem = CartItem(
+      productName: name.trim(),
+      quantity: quantity,
+      unit: unit,
+      unitPriceMinor: unitPriceMinor,
+      imagePath: imagePath,
+    );
+    cartItems.add(newItem);
+    cartItems.refresh();
+  }
+
+  void removeCartItem(int index) {
+    if (index >= 0 && index < cartItems.length) {
+      cartItems.removeAt(index);
+      cartItems.refresh();
+    }
+  }
+
+  void incrementQuantity(int index, [double step = 1.0]) {
+    if (index >= 0 && index < cartItems.length) {
+      cartItems[index].quantity.value += step;
+      cartItems.refresh();
+    }
+  }
+
+  void decrementQuantity(int index, [double step = 1.0]) {
+    if (index >= 0 && index < cartItems.length) {
+      final current = cartItems[index].quantity.value;
+      if (current > step) {
+        cartItems[index].quantity.value -= step;
+      } else {
+        removeCartItem(index);
+        return;
+      }
+      cartItems.refresh();
+    }
+  }
+
+  void updateQuantity(int index, double newQty) {
+    if (index >= 0 && index < cartItems.length) {
+      cartItems[index].quantity.value = newQty > 0 ? newQty : 1.0;
+      cartItems.refresh();
+    }
+  }
+
+  void updateUnitPrice(int index, int newPriceMinor) {
+    if (index >= 0 && index < cartItems.length) {
+      cartItems[index].unitPriceMinor.value = newPriceMinor >= 0 ? newPriceMinor : 0;
+      cartItems.refresh();
+    }
+  }
+
+  void clearCart() {
+    cartItems.clear();
+  }
+
+  // Legacy draft items
   void addItemDraft() {
     draftItems.add(ShoppingItemDraft());
   }
@@ -81,6 +173,13 @@ class HouseholdController extends GetxController {
   }
 
   int get subtotalMinor {
+    if (cartItems.isNotEmpty) {
+      int sum = 0;
+      for (var item in cartItems) {
+        sum += item.subtotalMinor;
+      }
+      return sum;
+    }
     int sum = 0;
     for (var item in draftItems) {
       sum += item.totalMinor;
@@ -95,8 +194,22 @@ class HouseholdController extends GetxController {
     return total < 0 ? 0 : total;
   }
 
+  int get cartPaidMinor {
+    final text = paidController.text.trim();
+    if (text.isEmpty) return totalBillMinor;
+    return CurrencyUtils.takaToMinor(text);
+  }
+
+  int get cartDueMinor {
+    final due = totalBillMinor - cartPaidMinor;
+    return due < 0 ? 0 : due;
+  }
+
   Future<bool> saveShoppingBill() async {
-    if (draftItems.isEmpty || draftItems.first.nameController.text.trim().isEmpty) {
+    final hasCartItems = cartItems.isNotEmpty;
+    final hasDraftItems = draftItems.isNotEmpty && draftItems.first.nameController.text.trim().isNotEmpty;
+
+    if (!hasCartItems && !hasDraftItems) {
       AppSnackbar.error('অনুগ্রহ করে অন্তত একটি পণ্য যোগ করুন');
       return false;
     }
@@ -114,7 +227,7 @@ class HouseholdController extends GetxController {
     final record = ShoppingRecordsCompanion(
       id: Value(recordId),
       shoppingDate: Value(shoppingDateMs),
-      storeName: Value(storeNameController.text.trim()),
+      storeName: Value(storeNameController.text.trim().isNotEmpty ? storeNameController.text.trim() : 'দৈনিক বাজার'),
       purchasedByMemberId: Value(selectedMemberId.value),
       subtotalMinor: Value(subtotalMinor),
       discountMinor: Value(discountMinor),
@@ -125,21 +238,38 @@ class HouseholdController extends GetxController {
     );
 
     final items = <ShoppingItemsCompanion>[];
-    for (var draft in draftItems) {
-      if (draft.nameController.text.trim().isNotEmpty) {
-        final qty = double.tryParse(draft.qtyController.text) ?? 1.0;
-        final unitPriceMinor = CurrencyUtils.takaToMinor(draft.unitPriceController.text);
+
+    if (hasCartItems) {
+      for (var cartItem in cartItems) {
         items.add(
           ShoppingItemsCompanion(
             id: Value(_uuid.v4()),
             shoppingRecordId: Value(recordId),
-            productName: Value(draft.nameController.text.trim()),
-            quantity: Value(qty),
-            unit: Value(draft.unit),
-            unitPriceMinor: Value(unitPriceMinor),
-            totalMinor: Value(draft.totalMinor),
+            productName: Value(cartItem.productName),
+            quantity: Value(cartItem.quantity.value),
+            unit: Value(cartItem.unit),
+            unitPriceMinor: Value(cartItem.unitPriceMinor.value),
+            totalMinor: Value(cartItem.subtotalMinor),
           ),
         );
+      }
+    } else {
+      for (var draft in draftItems) {
+        if (draft.nameController.text.trim().isNotEmpty) {
+          final qty = double.tryParse(draft.qtyController.text) ?? 1.0;
+          final unitPriceMinor = CurrencyUtils.takaToMinor(draft.unitPriceController.text);
+          items.add(
+            ShoppingItemsCompanion(
+              id: Value(_uuid.v4()),
+              shoppingRecordId: Value(recordId),
+              productName: Value(draft.nameController.text.trim()),
+              quantity: Value(qty),
+              unit: Value(draft.unit),
+              unitPriceMinor: Value(unitPriceMinor),
+              totalMinor: Value(draft.totalMinor),
+            ),
+          );
+        }
       }
     }
 
@@ -165,7 +295,7 @@ class HouseholdController extends GetxController {
         accountId: Value(selectedAccountId.value),
         amountMinor: Value(paid),
         transactionDate: Value(shoppingDateMs),
-        description: Value('বাজার খরচ: ${storeNameController.text.trim()}'),
+        description: Value('বাজার খরচ: ${storeNameController.text.trim().isNotEmpty ? storeNameController.text.trim() : "দৈনিক বাজার"}'),
         paymentStatus: Value(due > 0 ? 'partial' : 'paid'),
         sourceType: const Value('shopping'),
         sourceId: Value(recordId),
@@ -218,6 +348,7 @@ class HouseholdController extends GetxController {
       draft.dispose();
     }
     draftItems.clear();
+    cartItems.clear();
     addItemDraft();
   }
 

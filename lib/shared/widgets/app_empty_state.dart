@@ -20,6 +20,9 @@ class AppEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p32),
@@ -29,29 +32,33 @@ class AppEmptyState extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(AppSizes.p20),
-              decoration: const BoxDecoration(
-                color: AppColors.dividerLight,
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : AppColors.dividerLight,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 48, color: AppColors.textMutedLight),
+              child: Icon(
+                icon,
+                size: 48,
+                color: isDark ? AppColors.secondaryElectric : AppColors.textMutedLight,
+              ),
             ),
             const SizedBox(height: AppSizes.p16),
             Text(
               message ?? 'no_data_found'.tr,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondaryLight,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textSecondaryLight,
               ),
             ),
             if (actionText != null && onAction != null) ...[
-              const SizedBox(height: AppSizes.p16),
+              const SizedBox(height: AppSizes.p20),
               AppButton(
                 text: actionText!,
                 onPressed: onAction,
-                width: 160,
-                height: 40,
+                width: 200,
+                height: 42,
               ),
             ],
           ],

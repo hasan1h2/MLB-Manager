@@ -8,6 +8,7 @@ class CurrencyInputField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final ValueChanged<int>? onMinorChanged;
+  final ValueChanged<String>? onChanged;
   final String? Function(String?)? validator;
 
   const CurrencyInputField({
@@ -15,20 +16,23 @@ class CurrencyInputField extends StatelessWidget {
     required this.label,
     required this.controller,
     this.onMinorChanged,
+    this.onChanged,
     this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimaryLight,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
           ),
         ),
         const SizedBox(height: AppSizes.p4),
@@ -37,6 +41,7 @@ class CurrencyInputField extends StatelessWidget {
           validator: validator,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (val) {
+            onChanged?.call(val);
             final minor = CurrencyUtils.takaToMinor(val);
             onMinorChanged?.call(minor);
           },

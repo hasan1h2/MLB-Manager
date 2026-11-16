@@ -14,7 +14,6 @@ class BusinessDashboardView extends GetView<BusinessController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Obx(() => Text(controller.selectedBusiness.value?.name ?? 'business_dashboard'.tr)),
       ),

@@ -5,6 +5,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../controllers/ai_assistant_controller.dart';
 
 class OcrReviewView extends GetView<AiAssistantController> {
@@ -13,7 +14,6 @@ class OcrReviewView extends GetView<AiAssistantController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('ocr_review'.tr),
       ),
@@ -53,6 +53,36 @@ class OcrReviewView extends GetView<AiAssistantController> {
                 ),
               ),
               const SizedBox(height: AppSizes.p16),
+              Obx(() {
+                final img = controller.scannedImagePath.value;
+                if (img == null) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSizes.p16),
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ListTile(
+                          dense: true,
+                          leading: Icon(Icons.receipt_long_rounded, color: AppColors.secondaryElectric),
+                          title: Text('স্ক্যানকৃত রসিদের ছবি', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                        ),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 180),
+                          child: AppImage(
+                            imagePath: img,
+                            width: double.infinity,
+                            fit: BoxFit.contain,
+                            fallbackIcon: Icons.receipt_long_outlined,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
+                );
+              }),
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

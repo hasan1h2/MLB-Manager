@@ -15,8 +15,10 @@ class DashboardView extends GetView<DashboardController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +57,7 @@ class DashboardView extends GetView<DashboardController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildDateFilters(),
+                _buildDateFilters(context, isDark),
                 const SizedBox(height: AppSizes.p16),
                 _buildAvailableBalanceCard(),
                 const SizedBox(height: AppSizes.p16),
@@ -63,9 +65,9 @@ class DashboardView extends GetView<DashboardController> {
                 const SizedBox(height: AppSizes.p20),
                 _buildIncomeVsExpenseBar(),
                 const SizedBox(height: AppSizes.p20),
-                _buildFinancialInsightCard(),
+                _buildFinancialInsightCard(isDark),
                 const SizedBox(height: AppSizes.p20),
-                _buildRecentTransactionsHeader(),
+                _buildRecentTransactionsHeader(isDark),
                 const SizedBox(height: AppSizes.p8),
                 _buildRecentTransactionsList(),
                 if (controller.lowStockProducts.isNotEmpty) ...[
@@ -81,7 +83,7 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildDateFilters() {
+  Widget _buildDateFilters(BuildContext context, bool isDark) {
     final filters = [
       'filter_today',
       'filter_yesterday',
@@ -101,15 +103,17 @@ class DashboardView extends GetView<DashboardController> {
             child: ChoiceChip(
               label: Text(filterKey.tr),
               selected: isSelected,
-              selectedColor: AppColors.primaryNavy,
-              backgroundColor: Colors.white,
+              selectedColor: isDark ? AppColors.secondaryElectric : AppColors.primaryNavy,
+              backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : AppColors.textPrimaryLight,
+                color: isSelected ? Colors.white : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 fontSize: 13,
               ),
               side: BorderSide(
-                color: isSelected ? AppColors.primaryNavy : AppColors.borderLight,
+                color: isSelected
+                    ? (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy)
+                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
               ),
               onSelected: (_) => controller.setDateFilter(filterKey),
             ),
@@ -282,17 +286,17 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildFinancialInsightCard() {
+  Widget _buildFinancialInsightCard(bool isDark) {
     return Card(
-      color: AppColors.infoBlueLight,
+      color: isDark ? AppColors.cardDark : AppColors.infoBlueLight,
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(AppSizes.p8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
                 shape: BoxShape.circle,
               ),
               child: const Icon(AppIcons.ai, color: AppColors.secondaryElectric, size: 24),
@@ -304,14 +308,21 @@ class DashboardView extends GetView<DashboardController> {
                 children: [
                   Text(
                     'financial_insights'.tr,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primaryNavy),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: isDark ? AppColors.secondaryElectric : AppColors.primaryNavy,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     controller.totalExpensesMinor.value > controller.totalIncomeMinor.value
                         ? 'আপনার বর্তমান খরচ আয়ের চেয়ে বেশি হচ্ছে। বাজেট নিয়ন্ত্রণে রাখুন।'
                         : 'আপনার আয়ের অনুপাত ইতিবাচক রয়েছে। সঞ্চয় লক্ষ্য পূরণ করুন।',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textPrimaryLight),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    ),
                   ),
                 ],
               ),
@@ -322,13 +333,17 @@ class DashboardView extends GetView<DashboardController> {
     );
   }
 
-  Widget _buildRecentTransactionsHeader() {
+  Widget _buildRecentTransactionsHeader(bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           'recent_transactions'.tr,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+          ),
         ),
         TextButton(
           onPressed: () => Get.toNamed(AppRoutes.transactionList),

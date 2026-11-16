@@ -13,7 +13,6 @@ class ReceiptScannerView extends GetView<AiAssistantController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('ocr_receipt_scanner'.tr),
       ),

@@ -41,6 +41,7 @@ class AiAssistantController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   final RxString ocrRawText = ''.obs;
   final RxBool isProcessingOcr = false.obs;
+  final Rx<String?> scannedImagePath = Rx<String?>(null);
 
   // Review List
   final RxList<ParsedAiItem> extractedItems = <ParsedAiItem>[].obs;
@@ -154,6 +155,7 @@ class AiAssistantController extends GetxController {
 
       if (image == null) return;
 
+      scannedImagePath.value = image.path;
       isProcessingOcr.value = true;
       final inputImage = InputImage.fromFilePath(image.path);
       final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);

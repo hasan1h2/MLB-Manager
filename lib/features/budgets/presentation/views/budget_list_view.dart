@@ -15,7 +15,6 @@ class BudgetListView extends GetView<BudgetController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text('budget_management'.tr),
       ),
