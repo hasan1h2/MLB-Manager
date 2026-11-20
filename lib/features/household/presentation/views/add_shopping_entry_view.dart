@@ -1214,8 +1214,16 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                               : AppColors.textPrimaryLight,
                           fontSize: 14,
                         ),
-                        decoration:
-                            const InputDecoration(labelText: 'একক (Unit)'),
+                        decoration: InputDecoration(
+                          labelText: 'একক (Unit)',
+                          labelStyle: TextStyle(
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
                         items: const [
                           DropdownMenuItem(
                               value: 'none', child: Text('একক নেই')),
@@ -1291,12 +1299,28 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                     const SizedBox(width: AppSizes.p12),
                     Expanded(
                       child: OutlinedButton.icon(
-                        icon: const Icon(Icons.add_a_photo_outlined, size: 16),
+                        icon: Icon(Icons.add_a_photo_outlined,
+                            size: 16,
+                            color: isDark
+                                ? AppColors.secondaryElectricLight
+                                : AppColors.secondaryElectric),
                         label: Text(
                           path != null
                               ? 'ছবি পরিবর্তন করুন'
                               : 'পণ্যের ছবি যুক্ত করুন',
-                          style: const TextStyle(fontSize: 12),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                              color: isDark
+                                  ? AppColors.borderDark
+                                  : AppColors.borderLight),
                         ),
                         onPressed: () async {
                           final picker = ImagePicker();

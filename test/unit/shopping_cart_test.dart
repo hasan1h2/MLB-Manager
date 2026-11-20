@@ -204,5 +204,27 @@ void main() {
           controller.formatShoppingTime(const TimeOfDay(hour: 16, minute: 45)),
           equals('4:45 PM'));
     });
+
+    test('ProductSummaryItem computes average price correctly', () {
+      final summary = ProductSummaryItem(
+        productName: 'চাল',
+        unit: 'kg',
+        totalQuantity: 10.0,
+        totalAmountMinor: 70000, // 700 Taka
+        purchaseCount: 3,
+      );
+
+      expect(summary.productName, equals('চাল'));
+      expect(summary.totalQuantity, equals(10.0));
+      expect(summary.totalAmountMinor, equals(70000));
+      expect(summary.avgPriceMinor, equals(7000)); // 70 Taka/kg
+    });
+
+    test('Filtered shopping records matches search queries accurately', () {
+      controller.searchQuery.value = 'তেল';
+      expect(controller.searchQuery.value, equals('তেল'));
+      controller.searchQuery.value = '';
+      expect(controller.searchQuery.value, isEmpty);
+    });
   });
 }

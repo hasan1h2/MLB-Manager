@@ -28,6 +28,15 @@ class HouseholdDao {
         .get();
   }
 
+  Future<ShoppingRecord?> getShoppingRecordById(String id) {
+    return (db.select(db.shoppingRecords)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
+  }
+
+  Future<List<ShoppingItem>> getAllShoppingItems() {
+    return db.select(db.shoppingItems).get();
+  }
+
   /// Inserts a shopping record with line items atomically.
   /// If [expenseTransaction] and [journalEntries] are provided, posts the linked household expense
   /// transaction simultaneously so shopping expenses are never duplicated.
@@ -48,6 +57,37 @@ class HouseholdDao {
           await db.into(db.transactionEntries).insert(entry);
         }
       }
+    });
+  }
+
+  /// Atomically deletes a shopping record, its items, and reverses/deletes the linked journal transaction
+  Future<void> deleteShoppingRecordWithItems(String recordId) async {
+    await db.transaction(() async {
+      // Find linked transactions
+      final linkedTxs = await (db.select(db.transactions)
+            ..where((tbl) => tbl.sourceId.equals(recordId)))
+          .get();
+
+      for (var tx in linkedTxs) {
+        // Delete journal entries for this transaction
+        await (db.delete(db.transactionEntries)
+              ..where((tbl) => tbl.transactionId.equals(tx.id)))
+            .go();
+        // Delete the transaction
+        await (db.delete(db.transactions)
+              ..where((tbl) => tbl.id.equals(tx.id)))
+            .go();
+      }
+
+      // Delete child shopping items
+      await (db.delete(db.shoppingItems)
+            ..where((tbl) => tbl.shoppingRecordId.equals(recordId)))
+          .go();
+
+      // Delete the shopping record
+      await (db.delete(db.shoppingRecords)
+            ..where((tbl) => tbl.id.equals(recordId)))
+          .go();
     });
   }
 

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../../app/routes/app_routes.dart';
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../core/utils/date_utils.dart';
+import '../../../../shared/widgets/app_empty_state.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/app_loading_indicator.dart';
 import '../controllers/report_controller.dart';
 
@@ -20,6 +24,11 @@ class ReportsView extends GetView<ReportController> {
       appBar: AppBar(
         title: Text('reports'.tr),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.receipt_long_rounded),
+            tooltip: 'পণ্যসহ বিস্তারিত CSV',
+            onPressed: () => controller.exportDetailedCsv(),
+          ),
           IconButton(
             icon: const Icon(AppIcons.exportPdf),
             tooltip: 'export_pdf'.tr,
@@ -47,32 +56,27 @@ class ReportsView extends GetView<ReportController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Date Range Filter Chips
               _buildFilterChips(isDark),
               const SizedBox(height: AppSizes.p16),
-              _buildProfitLossCard(data),
-              const SizedBox(height: AppSizes.p20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'লেনদেনের বিবরণী (${data.transactions.length})',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      color: isDark
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.table_rows_rounded, size: 16),
-                    label: Text('export_csv'.tr),
-                    onPressed: () => controller.exportCsv(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSizes.p8),
-              _buildTransactionsList(data),
+
+              // Summary Card (Income, Expense, Net Profit)
+              _buildProfitLossCard(data, isDark),
+              const SizedBox(height: AppSizes.p16),
+
+              // Tab Selector: [ লেনদেনের বিবরণী | পণ্যভিত্তিক বাজার খরচ ]
+              _buildTabSelector(isDark),
+              const SizedBox(height: AppSizes.p12),
+
+              // Tab Content
+              Obx(() {
+                if (controller.selectedReportTab.value == 0) {
+                  return _buildTransactionsSection(data, isDark);
+                } else {
+                  return _buildMarketSpendSection(isDark);
+                }
+              }),
+
               const SizedBox(height: AppSizes.p32),
             ],
           ),
@@ -124,8 +128,20 @@ class ReportsView extends GetView<ReportController> {
     );
   }
 
-  Widget _buildProfitLossCard(ReportSummaryData data) {
+  Widget _buildProfitLossCard(ReportSummaryData data, bool isDark) {
+    final labelColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final titleColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Card(
+      elevation: 0,
+      color: isDark ? AppColors.cardDark : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.r16),
+        side: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p20),
         child: Column(
@@ -134,8 +150,7 @@ class ReportsView extends GetView<ReportController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('total_income'.tr,
-                    style: const TextStyle(
-                        fontSize: 14, color: AppColors.textSecondaryLight)),
+                    style: TextStyle(fontSize: 14, color: labelColor)),
                 Text(
                   CurrencyUtils.format(data.totalIncomeMinor),
                   style: const TextStyle(
@@ -150,8 +165,7 @@ class ReportsView extends GetView<ReportController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('total_expenses'.tr,
-                    style: const TextStyle(
-                        fontSize: 14, color: AppColors.textSecondaryLight)),
+                    style: TextStyle(fontSize: 14, color: labelColor)),
                 Text(
                   CurrencyUtils.format(data.totalExpenseMinor),
                   style: const TextStyle(
@@ -162,19 +176,23 @@ class ReportsView extends GetView<ReportController> {
               ],
             ),
             const SizedBox(height: 12),
-            const Divider(),
+            Divider(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'নিট লাভ / উদ্বৃত্ত',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: titleColor),
                 ),
                 Text(
                   CurrencyUtils.format(data.netProfitMinor),
                   style: TextStyle(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     fontSize: 20,
                     color: data.netProfitMinor >= 0
                         ? AppColors.incomeGreen
@@ -189,42 +207,399 @@ class ReportsView extends GetView<ReportController> {
     );
   }
 
-  Widget _buildTransactionsList(ReportSummaryData data) {
-    return Card(
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: data.transactions.length,
-        separatorBuilder: (_, __) => const Divider(height: 1, indent: 64),
-        itemBuilder: (context, index) {
-          final tx = data.transactions[index];
-          final isIncome = tx.transactionType == 'income';
-
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor:
-                  (isIncome ? AppColors.incomeGreen : AppColors.expenseRed)
-                      .withValues(alpha: 0.12),
-              child: Icon(
-                isIncome ? AppIcons.income : AppIcons.expense,
-                color: isIncome ? AppColors.incomeGreen : AppColors.expenseRed,
-                size: 20,
+  Widget _buildTabSelector(bool isDark) {
+    return Obx(() {
+      final tab = controller.selectedReportTab.value;
+      return Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(AppSizes.r8),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppSizes.r8),
+                onTap: () => controller.selectedReportTab.value = 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: tab == 0
+                        ? (isDark
+                            ? AppColors.secondaryElectric
+                            : AppColors.primaryNavy)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppSizes.r8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'লেনদেনের বিবরণী',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            tab == 0 ? FontWeight.w700 : FontWeight.w500,
+                        color: tab == 0
+                            ? Colors.white
+                            : (isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-            title: Text(tx.description?.isNotEmpty == true
-                ? tx.description!
-                : tx.transactionNumber),
-            subtitle: Text(AppDateUtils.formatTimestamp(tx.transactionDate)),
-            trailing: Text(
-              '${isIncome ? '+' : '-'}${CurrencyUtils.format(tx.amountMinor)}',
+            const SizedBox(width: 4),
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppSizes.r8),
+                onTap: () => controller.selectedReportTab.value = 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: tab == 1
+                        ? (isDark
+                            ? AppColors.secondaryElectric
+                            : AppColors.primaryNavy)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppSizes.r8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'পণ্যভিত্তিক বাজার খরচ',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            tab == 1 ? FontWeight.w700 : FontWeight.w500,
+                        color: tab == 1
+                            ? Colors.white
+                            : (isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  // --- Transactions Section (Clickable rows leading to details) ---
+  Widget _buildTransactionsSection(ReportSummaryData data, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'লেনদেনের তালিকা (${data.transactions.length})',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: isIncome ? AppColors.incomeGreen : AppColors.expenseRed,
+                fontSize: 15,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
               ),
             ),
-          );
-        },
-      ),
+            TextButton.icon(
+              icon: const Icon(Icons.download_rounded, size: 16),
+              label: const Text('সাধারণ CSV'),
+              onPressed: () => controller.exportCsv(),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSizes.p8),
+        if (data.transactions.isEmpty)
+          const AppEmptyState(message: 'এই সময়ের মধ্যে কোনো লেনদেন নেই')
+        else
+          Card(
+            elevation: 0,
+            color: isDark ? AppColors.cardDark : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSizes.r12),
+              side: BorderSide(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: data.transactions.length,
+              separatorBuilder: (_, __) => Divider(
+                height: 1,
+                indent: 64,
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              ),
+              itemBuilder: (context, index) {
+                final tx = data.transactions[index];
+                final isIncome = tx.transactionType == 'income';
+                final isTransfer = tx.transactionType == 'transfer';
+
+                Color color = AppColors.expenseRed;
+                IconData icon = AppIcons.expense;
+                if (isIncome) {
+                  color = AppColors.incomeGreen;
+                  icon = AppIcons.income;
+                } else if (isTransfer) {
+                  color = AppColors.secondaryElectric;
+                  icon = AppIcons.transfer;
+                }
+
+                final dateStr =
+                    AppDateUtils.formatTimestamp(tx.transactionDate);
+                final timeStr =
+                    tx.purchaseTime != null && tx.purchaseTime!.isNotEmpty
+                        ? ' • ${tx.purchaseTime}'
+                        : '';
+
+                return ListTile(
+                  onTap: () =>
+                      Get.toNamed(AppRoutes.transactionDetails, arguments: tx),
+                  leading: CircleAvatar(
+                    backgroundColor: color.withValues(alpha: 0.12),
+                    child: Icon(icon, color: color, size: 20),
+                  ),
+                  title: Text(
+                    tx.description?.isNotEmpty == true
+                        ? tx.description!
+                        : tx.transactionNumber,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '$dateStr$timeStr',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${isIncome ? '+' : (isTransfer ? '' : '-')}${CurrencyUtils.format(tx.amountMinor)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14.5,
+                          color: color,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_ios_rounded,
+                          size: 12,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
     );
+  }
+
+  // --- Market Product Spend Section ---
+  Widget _buildMarketSpendSection(bool isDark) {
+    final list = controller.marketProductSpend;
+
+    if (list.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.p24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.shopping_cart_outlined,
+                  size: 44,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight),
+              const SizedBox(height: AppSizes.p12),
+              Text(
+                'এই সময়ের মধ্যে পণ্যভিত্তিক কোনো বাজার খরচ নেই',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'পণ্যভিত্তিক খরচ (${list.length} টি পণ্য)',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
+              ),
+            ),
+            TextButton.icon(
+              icon: const Icon(Icons.table_view_rounded, size: 16),
+              label: const Text('পণ্যসহ CSV'),
+              onPressed: () => controller.exportDetailedCsv(),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSizes.p8),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: list.length,
+          separatorBuilder: (_, __) => const SizedBox(height: AppSizes.p8),
+          itemBuilder: (context, index) {
+            final p = list[index];
+            final unitLabel = _formatUnit(p.unit);
+            final qtyStr = p.totalQuantity > 0
+                ? '${p.totalQuantity.toStringAsFixed(p.totalQuantity.truncateToDouble() == p.totalQuantity ? 0 : 2)} $unitLabel'
+                : '';
+
+            return Card(
+              elevation: 0,
+              color: isDark ? AppColors.cardDark : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r12),
+                side: BorderSide(
+                    color:
+                        isDark ? AppColors.borderDark : AppColors.borderLight),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSizes.p12),
+                child: Row(
+                  children: [
+                    AppImage(
+                      imagePath: p.imagePath,
+                      width: 40,
+                      height: 40,
+                      borderRadius: AppSizes.r8,
+                      fallbackIcon: Icons.fastfood_outlined,
+                      fallbackColor: AppColors.secondaryElectric,
+                    ),
+                    const SizedBox(width: AppSizes.p12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.productName,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              if (qtyStr.isNotEmpty)
+                                Text(
+                                  'পরিমাণ: $qtyStr',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? AppColors.textSecondaryDark
+                                        : AppColors.textSecondaryLight,
+                                  ),
+                                ),
+                              if (qtyStr.isNotEmpty)
+                                const SizedBox(width: 8),
+                              Text(
+                                '• ${p.purchaseCount} বার',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? AppColors.textMutedDark
+                                      : AppColors.textMutedLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (p.avgPriceMinor > 0) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'গড় দর: ${CurrencyUtils.format(p.avgPriceMinor)} / $unitLabel',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.secondaryElectric,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Text(
+                      CurrencyUtils.format(p.totalAmountMinor),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.expenseRed,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  String _formatUnit(String unit) {
+    switch (unit) {
+      case 'kg':
+        return 'কেজি';
+      case 'liter':
+        return 'লিটার';
+      case 'piece':
+        return 'পিস';
+      case 'packet':
+        return 'প্যাকেট';
+      case 'g':
+        return 'গ্রাম';
+      case 'ml':
+        return 'মিলি';
+      case 'dozen':
+        return 'ডজন';
+      case 'box':
+        return 'বক্স';
+      case 'bottle':
+        return 'বোতল';
+      case 'carton':
+        return 'কার্টন';
+      default:
+        return unit;
+    }
   }
 }

@@ -39,6 +39,43 @@ class CartItem {
   int get subtotalMinor => lineTotalMinor.value;
 }
 
+class ProductSummaryItem {
+  final String productName;
+  final String unit;
+  final double totalQuantity;
+  final int totalAmountMinor;
+  final int purchaseCount;
+  final String? imagePath;
+
+  ProductSummaryItem({
+    required this.productName,
+    required this.unit,
+    required this.totalQuantity,
+    required this.totalAmountMinor,
+    required this.purchaseCount,
+    this.imagePath,
+  });
+
+  int get avgPriceMinor => (totalQuantity > 0)
+      ? (totalAmountMinor / totalQuantity).round()
+      : (purchaseCount > 0 ? (totalAmountMinor / purchaseCount).round() : 0);
+}
+
+class _ProductAggregator {
+  final String displayName;
+  final String unit;
+  double totalQuantity = 0.0;
+  int totalAmountMinor = 0;
+  int purchaseCount = 0;
+  String? imagePath;
+
+  _ProductAggregator({
+    required this.displayName,
+    required this.unit,
+    this.imagePath,
+  });
+}
+
 class ShoppingItemDraft {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController qtyController = TextEditingController(text: '1');
@@ -97,17 +134,133 @@ class HouseholdController extends GetxController {
   final directNoteController = TextEditingController();
   final Rx<String?> directCategoryId = Rx<String?>(null);
 
+  // Search, Filter & Product Summary States
+  final RxString searchQuery = ''.obs;
+  final Rx<DateTimeRange?> selectedDateRange = Rx<DateTimeRange?>(null);
+  final RxInt selectedViewTab = 0.obs; // 0: History, 1: Product Summary
+  final RxList<ProductSummaryItem> productSummaries = <ProductSummaryItem>[].obs;
+  final RxMap<String, String> cachedShortSummaries = <String, String>{}.obs;
+  final RxBool isSummaryLoading = false.obs;
+
+  List<ShoppingRecord> get filteredShoppingRecords {
+    final query = searchQuery.value.trim().toLowerCase();
+    final range = selectedDateRange.value;
+
+    return shoppingRecords.where((record) {
+      if (range != null) {
+        final startMs = range.start.millisecondsSinceEpoch;
+        final endMs =
+            range.end.add(const Duration(days: 1)).millisecondsSinceEpoch;
+        if (record.shoppingDate < startMs || record.shoppingDate >= endMs) {
+          return false;
+        }
+      }
+
+      if (query.isNotEmpty) {
+        final storeMatches =
+            record.storeName?.toLowerCase().contains(query) ?? false;
+        final notesMatches =
+            record.notes?.toLowerCase().contains(query) ?? false;
+        final summaryMatches =
+            cachedShortSummaries[record.id]?.toLowerCase().contains(query) ??
+                false;
+        if (!storeMatches && !notesMatches && !summaryMatches) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+  }
+
+  Future<String> getShortSummary(String recordId) async {
+    if (cachedShortSummaries.containsKey(recordId)) {
+      return cachedShortSummaries[recordId]!;
+    }
+    final items = await _dbService.householdDao.getItemsForRecord(recordId);
+    if (items.isEmpty) {
+      cachedShortSummaries[recordId] = 'শুধু মোট টাকা';
+      return 'শুধু মোট টাকা';
+    }
+    final names = items.map((i) => i.productName).toList();
+    String summary;
+    if (names.length <= 3) {
+      summary = names.join(', ');
+    } else {
+      summary = '${names.take(2).join(', ')} + আরও ${names.length - 2}টি';
+    }
+    cachedShortSummaries[recordId] = summary;
+    return summary;
+  }
+
+  Future<void> loadProductSummaries() async {
+    try {
+      isSummaryLoading.value = true;
+      final allItems = await _dbService.householdDao.getAllShoppingItems();
+
+      final map = <String, _ProductAggregator>{};
+
+      for (var item in allItems) {
+        final key = '${item.productName.trim().toLowerCase()}__${item.unit}';
+        if (!map.containsKey(key)) {
+          map[key] = _ProductAggregator(
+            displayName: item.productName.trim(),
+            unit: item.unit,
+            imagePath: item.imagePath,
+          );
+        }
+        final agg = map[key]!;
+        agg.totalQuantity += item.quantity;
+        agg.totalAmountMinor += item.totalMinor;
+        agg.purchaseCount += 1;
+        if (agg.imagePath == null && item.imagePath != null) {
+          agg.imagePath = item.imagePath;
+        }
+      }
+
+      final list = map.values.map((agg) {
+        return ProductSummaryItem(
+          productName: agg.displayName,
+          unit: agg.unit,
+          totalQuantity: agg.totalQuantity,
+          totalAmountMinor: agg.totalAmountMinor,
+          purchaseCount: agg.purchaseCount,
+          imagePath: agg.imagePath,
+        );
+      }).toList();
+
+      list.sort((a, b) => b.totalAmountMinor.compareTo(a.totalAmountMinor));
+      productSummaries.value = list;
+    } finally {
+      isSummaryLoading.value = false;
+    }
+  }
+
+  Future<bool> deleteShoppingRecord(String recordId) async {
+    try {
+      await _dbService.householdDao.deleteShoppingRecordWithItems(recordId);
+      cachedShortSummaries.remove(recordId);
+      await loadProductSummaries();
+      AppSnackbar.success('বাজারের হিসাব সফলভাবে মুছে ফেলা হয়েছে');
+      return true;
+    } catch (e) {
+      AppSnackbar.error('মুছতে ব্যর্থ হয়েছে: $e');
+      return false;
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
     watchData();
     addItemDraft();
+    loadProductSummaries();
   }
 
   void watchData() {
     _dbService.householdDao.watchShoppingRecords().listen((records) {
       shoppingRecords.value = records;
       isLoading.value = false;
+      loadProductSummaries();
     });
 
     _dbService.householdDao.watchShoppingLists().listen((lists) {

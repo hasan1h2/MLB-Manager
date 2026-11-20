@@ -35,7 +35,7 @@ class BusinessDashboardView extends GetView<BusinessController> {
               const SizedBox(height: AppSizes.p16),
               _buildMetricsGrid(m),
               const SizedBox(height: AppSizes.p24),
-              _buildQuickActionButtons(),
+              _buildQuickActionButtons(context),
               const SizedBox(height: AppSizes.p32),
             ],
           ),
@@ -128,10 +128,10 @@ class BusinessDashboardView extends GetView<BusinessController> {
     );
   }
 
-  Widget _buildQuickActionButtons() {
-    final theme = Theme.of(Get.context!);
+  Widget _buildQuickActionButtons(BuildContext context) {
+    final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final tileBg = isDark ? AppColors.cardDark : Colors.white;
+    final tileBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
     final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;

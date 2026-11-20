@@ -143,7 +143,7 @@ class TransactionListView extends GetView<TransactionController> {
                         ),
                       ],
                     ),
-                    if (tx.sourceType == 'shopping' && tx.sourceId != null) ...[
+                    if (tx.sourceId != null) ...[
                       const SizedBox(height: 4),
                       FutureBuilder<String?>(
                         future: controller.getShoppingSummary(tx.sourceId),

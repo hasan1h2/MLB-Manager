@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/constants/app_sizes.dart';
@@ -42,9 +45,45 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
     final args = Get.arguments;
     if (args is Transaction) {
       _transaction = args;
+    } else if (args is ShoppingRecord) {
+      _shoppingRecord = args;
+      _shoppingItems =
+          await _dbService.householdDao.getItemsForRecord(args.id);
+      // Find linked transaction if any
+      final txs =
+          await _dbService.coreDao.getTransactionsInRange(0, 9999999999999);
+      _transaction = txs.firstWhereOrNull((t) => t.sourceId == args.id);
+      _transaction ??= Transaction(
+        id: args.id,
+        transactionNumber: 'SHOP-${args.id.substring(0, 8)}',
+        transactionType: 'expense',
+        scopeType: 'family',
+        amountMinor: args.totalMinor,
+        transactionDate: args.shoppingDate,
+        description: args.storeName ?? 'দৈনিক বাজার',
+        paymentStatus: args.dueMinor > 0 ? 'partial' : 'paid',
+        purchaseTime: args.purchaseTime,
+        sourceType: 'shopping',
+        sourceId: args.id,
+        createdAt: args.createdAt,
+        updatedAt: args.createdAt,
+      );
     } else if (args is String) {
       final tx = await _dbService.coreDao.getTransactionById(args);
-      _transaction = tx;
+      if (tx != null) {
+        _transaction = tx;
+      } else {
+        // Maybe it's a shopping record ID
+        final rec = await _dbService.householdDao.getShoppingRecordById(args);
+        if (rec != null) {
+          _shoppingRecord = rec;
+          _shoppingItems =
+              await _dbService.householdDao.getItemsForRecord(rec.id);
+          final txs =
+              await _dbService.coreDao.getTransactionsInRange(0, 9999999999999);
+          _transaction = txs.firstWhereOrNull((t) => t.sourceId == rec.id);
+        }
+      }
     }
 
     if (_transaction != null) {
@@ -56,12 +95,16 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
         _category = await _dbService.coreDao.getCategoryById(tx.categoryId!);
       }
 
-      if (tx.sourceType == 'shopping' && tx.sourceId != null) {
-        final records = await _dbService.householdDao
-            .getShoppingRecordsInRange(0, 9999999999999);
-        _shoppingRecord = records.firstWhereOrNull((r) => r.id == tx.sourceId);
+      if (tx.sourceId != null && _shoppingRecord == null) {
+        _shoppingRecord =
+            await _dbService.householdDao.getShoppingRecordById(tx.sourceId!);
         _shoppingItems =
             await _dbService.householdDao.getItemsForRecord(tx.sourceId!);
+      } else if (tx.sourceType == 'shopping' && _shoppingItems.isEmpty) {
+        // Try finding items with sourceId or tx.id
+        final targetId = tx.sourceId ?? tx.id;
+        _shoppingItems =
+            await _dbService.householdDao.getItemsForRecord(targetId);
       }
     }
 
@@ -126,6 +169,11 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
         title: const Text('লেনদেনের বিস্তারিত'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.print_rounded, color: Colors.white),
+            tooltip: 'রসিদ প্রিন্ট / PDF',
+            onPressed: () => _printReceipt(tx, isDark),
+          ),
+          IconButton(
             icon: const Icon(AppIcons.delete, color: Colors.white),
             tooltip: 'মুছুন',
             onPressed: () {
@@ -134,6 +182,10 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                 message: 'delete_transaction_confirm'.tr,
                 isDestructive: true,
                 onConfirm: () async {
+                  if (_shoppingRecord != null) {
+                    await _dbService.householdDao
+                        .deleteShoppingRecordWithItems(_shoppingRecord!.id);
+                  }
                   await _txController.deleteTransaction(tx.id);
                   Get.back();
                 },
@@ -156,7 +208,13 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
             const SizedBox(height: AppSizes.p16),
 
             // Itemized Shopping Breakdown or Direct Total Badge
-            if (tx.sourceType == 'shopping') ...[
+            if (tx.sourceType == 'shopping' ||
+                tx.sourceType == 'voice' ||
+                tx.sourceType == 'ocr' ||
+                _shoppingRecord != null ||
+                _shoppingItems.isNotEmpty ||
+                tx.description?.contains('বাজার') == true ||
+                _category?.nameBn.contains('বাজার') == true) ...[
               _buildShoppingBreakdownCard(isDark),
               const SizedBox(height: AppSizes.p16),
             ],
@@ -172,6 +230,10 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                   message: 'delete_transaction_confirm'.tr,
                   isDestructive: true,
                   onConfirm: () async {
+                    if (_shoppingRecord != null) {
+                      await _dbService.householdDao
+                          .deleteShoppingRecordWithItems(_shoppingRecord!.id);
+                    }
                     await _txController.deleteTransaction(tx.id);
                     Get.back();
                   },
@@ -420,8 +482,19 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
   }
 
   Widget _buildShoppingBreakdownCard(bool isDark) {
-    final isDirectTotal =
-        _shoppingRecord?.entryMode == 'direct_total' || _shoppingItems.isEmpty;
+    final isDirectTotal = _shoppingRecord?.entryMode == 'direct_total';
+    final hasItems = _shoppingItems.isNotEmpty;
+    final isLegacyNoItems = !isDirectTotal && !hasItems;
+
+    String badgeText = '${_shoppingItems.length} টি পণ্য';
+    Color badgeColor = AppColors.incomeGreen;
+    if (isDirectTotal) {
+      badgeText = 'শুধু মোট টাকা';
+      badgeColor = AppColors.infoBlue;
+    } else if (isLegacyNoItems) {
+      badgeText = 'সাধারণ এন্ট্রি';
+      badgeColor = AppColors.textSecondaryDark;
+    }
 
     return Card(
       elevation: 0,
@@ -460,28 +533,50 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: isDirectTotal
-                        ? AppColors.infoBlue.withValues(alpha: 0.15)
-                        : AppColors.incomeGreen.withValues(alpha: 0.15),
+                    color: badgeColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(AppSizes.rFull),
                   ),
                   child: Text(
-                    isDirectTotal
-                        ? 'শুধু মোট টাকা'
-                        : '${_shoppingItems.length} টি পণ্য',
+                    badgeText,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: isDirectTotal
-                          ? AppColors.infoBlue
-                          : AppColors.incomeGreen,
+                      color: badgeColor,
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: AppSizes.p12),
-            if (isDirectTotal) ...[
+            if (isLegacyNoItems) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSizes.p12),
+                decoration: BoxDecoration(
+                  color:
+                      isDark ? AppColors.surfaceDark : AppColors.dividerLight,
+                  borderRadius: BorderRadius.circular(AppSizes.r8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded,
+                        color: AppColors.infoBlue, size: 20),
+                    const SizedBox(width: AppSizes.p10),
+                    Expanded(
+                      child: Text(
+                        'এই লেনদেনের পৃথক পণ্যের বিস্তারিত তালিকা সংরক্ষণ করা হয়নি (সাধারণ খরচ এন্ট্রি বা পূর্ববর্তী ডেটা)।',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (isDirectTotal) ...[
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSizes.p12),
@@ -729,6 +824,121 @@ class _TransactionDetailsViewState extends State<TransactionDetailsView> {
         ),
       ],
     );
+  }
+
+  Future<void> _printReceipt(Transaction tx, bool isDark) async {
+    final doc = pw.Document();
+    final dateStr = AppDateUtils.standardDateFormat
+        .format(DateTime.fromMillisecondsSinceEpoch(tx.transactionDate));
+    final timeStr = tx.purchaseTime ?? _shoppingRecord?.purchaseTime ?? '';
+
+    doc.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Padding(
+            padding: const pw.EdgeInsets.all(32),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Center(
+                  child: pw.Text('My Life & Business Manager (MLB Manager)',
+                      style: pw.TextStyle(
+                          fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                ),
+                pw.SizedBox(height: 4),
+                pw.Center(
+                  child: pw.Text('Expense / Purchase Receipt',
+                      style: const pw.TextStyle(fontSize: 14)),
+                ),
+                pw.SizedBox(height: 16),
+                pw.Divider(),
+                pw.SizedBox(height: 8),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Transaction #: ${tx.transactionNumber}'),
+                    pw.Text(
+                        'Date: $dateStr ${timeStr.isNotEmpty ? "($timeStr)" : ""}'),
+                  ],
+                ),
+                pw.SizedBox(height: 4),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Description: ${tx.description ?? "-"}'),
+                    pw.Text('Status: ${tx.paymentStatus.toUpperCase()}'),
+                  ],
+                ),
+                pw.SizedBox(height: 16),
+                pw.Divider(),
+                if (_shoppingItems.isNotEmpty) ...[
+                  pw.Text('Purchased Items:',
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                  pw.SizedBox(height: 8),
+                  pw.TableHelper.fromTextArray(
+                    headers: [
+                      '#',
+                      'Item Name',
+                      'Qty',
+                      'Unit',
+                      'Price (BDT)',
+                      'Total (BDT)'
+                    ],
+                    data: _shoppingItems.asMap().entries.map((entry) {
+                      final idx = entry.key + 1;
+                      final item = entry.value;
+                      final qty = item.quantity > 0
+                          ? item.quantity.toStringAsFixed(
+                              item.quantity.truncateToDouble() ==
+                                      item.quantity
+                                  ? 0
+                                  : 2)
+                          : '-';
+                      final price = item.unitPriceMinor > 0
+                          ? (item.unitPriceMinor / 100).toStringAsFixed(2)
+                          : '-';
+                      final total =
+                          (item.totalMinor / 100).toStringAsFixed(2);
+                      return [
+                        '$idx',
+                        item.productName,
+                        qty,
+                        item.unit,
+                        price,
+                        total
+                      ];
+                    }).toList(),
+                    headerStyle:
+                        pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    headerDecoration:
+                        const pw.BoxDecoration(color: PdfColors.grey300),
+                    cellAlignment: pw.Alignment.centerLeft,
+                  ),
+                  pw.SizedBox(height: 12),
+                ],
+                pw.Divider(),
+                pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                          'Total Amount: BDT ${(tx.amountMinor / 100).toStringAsFixed(2)}',
+                          style: pw.TextStyle(
+                              fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(onLayout: (format) async => doc.save());
   }
 
   String _formatUnit(String unit) {

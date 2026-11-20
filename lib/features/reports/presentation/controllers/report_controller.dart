@@ -11,7 +11,23 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/services/database_service.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../core/utils/date_utils.dart';
+import 'package:mlb_manager/features/household/presentation/controllers/household_controller.dart';
 import 'package:mlb_manager/shared/widgets/app_snackbar.dart';
+
+class _SpendAggregator {
+  final String displayName;
+  final String unit;
+  double totalQuantity = 0.0;
+  int totalAmountMinor = 0;
+  int purchaseCount = 0;
+  String? imagePath;
+
+  _SpendAggregator({
+    required this.displayName,
+    required this.unit,
+    this.imagePath,
+  });
+}
 
 class ReportSummaryData {
   final int totalIncomeMinor;
@@ -33,6 +49,9 @@ class ReportController extends GetxController {
   final RxString selectedFilter = 'filter_this_month'.obs;
   final Rx<ReportSummaryData?> summaryData = Rx<ReportSummaryData?>(null);
   final RxBool isLoading = true.obs;
+  final RxInt selectedReportTab = 0.obs; // 0: Summary, 1: Product Market Spend
+  final RxList<ProductSummaryItem> marketProductSpend =
+      <ProductSummaryItem>[].obs;
 
   @override
   void onInit() {
@@ -68,6 +87,48 @@ class ReportController extends GetxController {
         netProfitMinor: inc - exp,
         transactions: txs,
       );
+
+      // Aggregate product spend for market expenses in this range
+      final spendMap = <String, _SpendAggregator>{};
+      for (var t in txs) {
+        if (t.sourceId != null) {
+          final items =
+              await _dbService.householdDao.getItemsForRecord(t.sourceId!);
+          for (var item in items) {
+            final key =
+                '${item.productName.trim().toLowerCase()}__${item.unit}';
+            if (!spendMap.containsKey(key)) {
+              spendMap[key] = _SpendAggregator(
+                displayName: item.productName.trim(),
+                unit: item.unit,
+                imagePath: item.imagePath,
+              );
+            }
+            final agg = spendMap[key]!;
+            agg.totalQuantity += item.quantity;
+            agg.totalAmountMinor += item.totalMinor;
+            agg.purchaseCount += 1;
+            if (agg.imagePath == null && item.imagePath != null) {
+              agg.imagePath = item.imagePath;
+            }
+          }
+        }
+      }
+
+      final spendList = spendMap.values.map((agg) {
+        return ProductSummaryItem(
+          productName: agg.displayName,
+          unit: agg.unit,
+          totalQuantity: agg.totalQuantity,
+          totalAmountMinor: agg.totalAmountMinor,
+          purchaseCount: agg.purchaseCount,
+          imagePath: agg.imagePath,
+        );
+      }).toList();
+
+      spendList
+          .sort((a, b) => b.totalAmountMinor.compareTo(a.totalAmountMinor));
+      marketProductSpend.value = spendList;
     } finally {
       isLoading.value = false;
     }
@@ -161,6 +222,83 @@ class ReportController extends GetxController {
     await file.writeAsString(csvString);
 
     AppSnackbar.success('CSV ফাইল সংরক্ষিত হয়েছে: ${file.path}');
+  }
+
+  // --- Export Detailed CSV with Item Breakdown ---
+  Future<void> exportDetailedCsv() async {
+    final data = summaryData.value;
+    if (data == null) return;
+
+    final rows = <List<dynamic>>[];
+    rows.add([
+      'Date',
+      'Time',
+      'Tx Number',
+      'Type',
+      'Scope',
+      'Product Name',
+      'Quantity',
+      'Unit',
+      'Unit Price (BDT)',
+      'Line Total (BDT)',
+      'Transaction Total (BDT)',
+      'Description',
+    ]);
+
+    for (var tx in data.transactions) {
+      final dateStr = AppDateUtils.formatTimestamp(tx.transactionDate);
+      final timeStr = tx.purchaseTime ?? '';
+      final totalBdt = (tx.amountMinor / 100).toStringAsFixed(2);
+
+      if (tx.sourceId != null) {
+        final items =
+            await _dbService.householdDao.getItemsForRecord(tx.sourceId!);
+        if (items.isNotEmpty) {
+          for (var item in items) {
+            rows.add([
+              dateStr,
+              timeStr,
+              tx.transactionNumber,
+              tx.transactionType,
+              tx.scopeType,
+              item.productName,
+              item.quantity > 0 ? item.quantity.toString() : '-',
+              item.unit.isNotEmpty ? item.unit : '-',
+              item.unitPriceMinor > 0
+                  ? (item.unitPriceMinor / 100).toStringAsFixed(2)
+                  : '-',
+              (item.totalMinor / 100).toStringAsFixed(2),
+              totalBdt,
+              tx.description ?? '',
+            ]);
+          }
+          continue;
+        }
+      }
+
+      rows.add([
+        dateStr,
+        timeStr,
+        tx.transactionNumber,
+        tx.transactionType,
+        tx.scopeType,
+        '-',
+        '-',
+        '-',
+        '-',
+        totalBdt,
+        totalBdt,
+        tx.description ?? '',
+      ]);
+    }
+
+    final csvString = const ListToCsvConverter().convert(rows);
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File(
+        '${dir.path}/mlb_detailed_report_${DateTime.now().millisecondsSinceEpoch}.csv');
+    await file.writeAsString(csvString);
+
+    AppSnackbar.success('বিস্তারিত পণ্যসহ CSV সংরক্ষিত হয়েছে: ${file.path}');
   }
 
   // --- Export to Excel ---
