@@ -45,8 +45,12 @@ class FamilyController extends GetxController {
         FamilyMembersCompanion(
           id: Value(_uuid.v4()),
           name: Value(nameController.text.trim()),
-          phone: Value(phoneController.text.trim().isNotEmpty ? phoneController.text.trim() : null),
-          relationship: Value(relationshipController.text.trim().isNotEmpty ? relationshipController.text.trim() : null),
+          phone: Value(phoneController.text.trim().isNotEmpty
+              ? phoneController.text.trim()
+              : null),
+          relationship: Value(relationshipController.text.trim().isNotEmpty
+              ? relationshipController.text.trim()
+              : null),
           role: Value(selectedRole.value),
           isActive: const Value(1),
           createdAt: Value(now),
@@ -66,7 +70,8 @@ class FamilyController extends GetxController {
   }
 
   Future<void> deactivateMember(FamilyMember member) async {
-    final updated = member.copyWith(isActive: 0, updatedAt: DateTime.now().toUtc().millisecondsSinceEpoch);
+    final updated = member.copyWith(
+        isActive: 0, updatedAt: DateTime.now().toUtc().millisecondsSinceEpoch);
     await _dbService.coreDao.updateFamilyMember(updated);
     AppSnackbar.info('সদস্য নিষ্ক্রিয় করা হয়েছে');
   }

@@ -5,13 +5,16 @@ class ShoppingRecords extends Table {
   TextColumn get id => text()();
   IntColumn get shoppingDate => integer()();
   TextColumn get storeName => text().nullable()();
-  TextColumn get purchasedByMemberId => text().nullable().references(FamilyMembers, #id)();
+  TextColumn get purchasedByMemberId =>
+      text().nullable().references(FamilyMembers, #id)();
   IntColumn get subtotalMinor => integer().withDefault(const Constant(0))();
   IntColumn get discountMinor => integer().withDefault(const Constant(0))();
   IntColumn get totalMinor => integer().withDefault(const Constant(0))();
   IntColumn get paidMinor => integer().withDefault(const Constant(0))();
   IntColumn get dueMinor => integer().withDefault(const Constant(0))();
   TextColumn get notes => text().nullable()();
+  TextColumn get purchaseTime => text().nullable()();
+  TextColumn get entryMode => text().withDefault(const Constant('itemized'))();
   IntColumn get createdAt => integer()();
 
   @override
@@ -20,12 +23,15 @@ class ShoppingRecords extends Table {
 
 class ShoppingItems extends Table {
   TextColumn get id => text()();
-  TextColumn get shoppingRecordId => text().references(ShoppingRecords, #id, onDelete: KeyAction.cascade)();
+  TextColumn get shoppingRecordId =>
+      text().references(ShoppingRecords, #id, onDelete: KeyAction.cascade)();
   TextColumn get productName => text()();
   RealColumn get quantity => real()();
   TextColumn get unit => text()();
   IntColumn get unitPriceMinor => integer()();
   IntColumn get totalMinor => integer()();
+  TextColumn get note => text().nullable()();
+  TextColumn get imagePath => text().nullable()();
   TextColumn get categoryId => text().nullable().references(Categories, #id)();
 
   @override
@@ -35,7 +41,8 @@ class ShoppingItems extends Table {
 class ShoppingLists extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
-  TextColumn get createdByMemberId => text().nullable().references(FamilyMembers, #id)();
+  TextColumn get createdByMemberId =>
+      text().nullable().references(FamilyMembers, #id)();
   TextColumn get status => text().withDefault(const Constant('active'))();
   IntColumn get createdAt => integer()();
 
@@ -45,7 +52,8 @@ class ShoppingLists extends Table {
 
 class ShoppingListItems extends Table {
   TextColumn get id => text()();
-  TextColumn get shoppingListId => text().references(ShoppingLists, #id, onDelete: KeyAction.cascade)();
+  TextColumn get shoppingListId =>
+      text().references(ShoppingLists, #id, onDelete: KeyAction.cascade)();
   TextColumn get itemName => text()();
   RealColumn get quantity => real().withDefault(const Constant(1.0))();
   TextColumn get unit => text()();

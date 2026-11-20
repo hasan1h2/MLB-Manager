@@ -35,7 +35,8 @@ class AccountDetailsView extends StatelessWidget {
                   children: [
                     Text(
                       'current_balance'.tr,
-                      style: const TextStyle(fontSize: 14, color: AppColors.textSecondaryLight),
+                      style: const TextStyle(
+                          fontSize: 14, color: AppColors.textSecondaryLight),
                     ),
                     const SizedBox(height: AppSizes.p8),
                     Text(
@@ -52,16 +53,28 @@ class AccountDetailsView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('opening_balance'.tr, style: const TextStyle(fontSize: 13, color: AppColors.textSecondaryLight)),
-                        Text(CurrencyUtils.format(item.account.openingBalanceMinor), style: const TextStyle(fontWeight: FontWeight.w600)),
+                        Text('opening_balance'.tr,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondaryLight)),
+                        Text(
+                            CurrencyUtils.format(
+                                item.account.openingBalanceMinor),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: AppSizes.p8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('account_type'.tr, style: const TextStyle(fontSize: 13, color: AppColors.textSecondaryLight)),
-                        Text(item.account.accountType.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w600)),
+                        Text('account_type'.tr,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondaryLight)),
+                        Text(item.account.accountType.toUpperCase(),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ],
@@ -75,7 +88,8 @@ class AccountDetailsView extends StatelessWidget {
                 side: const BorderSide(color: AppColors.borderLight),
               ),
               tileColor: Colors.white,
-              leading: const Icon(AppIcons.transfer, color: AppColors.secondaryElectric),
+              leading: const Icon(AppIcons.transfer,
+                  color: AppColors.secondaryElectric),
               title: const Text('এই হিসাব থেকে স্থানান্তর করুন'),
               trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
               onTap: () {

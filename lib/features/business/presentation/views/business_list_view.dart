@@ -39,13 +39,18 @@ class BusinessListView extends GetView<BusinessController> {
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: AppColors.secondaryElectric.withValues(alpha: 0.12),
-                  child: const Icon(AppIcons.business, color: AppColors.secondaryElectric),
+                  backgroundColor:
+                      AppColors.secondaryElectric.withValues(alpha: 0.12),
+                  child: const Icon(AppIcons.business,
+                      color: AppColors.secondaryElectric),
                 ),
-                title: Text(b.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                title: Text(b.name,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 15)),
                 subtitle: Text(
                   '${b.businessType.toUpperCase()} • ${b.location ?? 'লোকেশন নেই'}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondaryLight),
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
                 onTap: () {

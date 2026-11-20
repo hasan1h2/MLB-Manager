@@ -11,7 +11,8 @@ import 'package:mlb_manager/shared/widgets/app_snackbar.dart';
 class LoanWithRemaining {
   final LoanAccount loan;
   final int remainingPrincipalMinor;
-  LoanWithRemaining({required this.loan, required this.remainingPrincipalMinor});
+  LoanWithRemaining(
+      {required this.loan, required this.remainingPrincipalMinor});
 }
 
 class LoanController extends GetxController {
@@ -50,11 +51,13 @@ class LoanController extends GetxController {
   Future<void> loadLoans() async {
     try {
       isLoading.value = true;
-      final list = await _dbService.loanDao.getLoans(loanType: selectedTypeFilter.value);
+      final list =
+          await _dbService.loanDao.getLoans(loanType: selectedTypeFilter.value);
       final withRemaining = <LoanWithRemaining>[];
       for (var l in list) {
         final rem = await _dbService.loanDao.getLoanRemainingPrincipal(l.id);
-        withRemaining.add(LoanWithRemaining(loan: l, remainingPrincipalMinor: rem));
+        withRemaining
+            .add(LoanWithRemaining(loan: l, remainingPrincipalMinor: rem));
       }
       loans.value = withRemaining;
     } finally {
@@ -92,7 +95,9 @@ class LoanController extends GetxController {
         LoanAccountsCompanion(
           id: Value(_uuid.v4()),
           partyName: Value(partyNameController.text.trim()),
-          phone: Value(phoneController.text.trim().isNotEmpty ? phoneController.text.trim() : null),
+          phone: Value(phoneController.text.trim().isNotEmpty
+              ? phoneController.text.trim()
+              : null),
           loanType: Value(loanType.value),
           principalMinor: Value(principal),
           interestRate: const Value(0.0),

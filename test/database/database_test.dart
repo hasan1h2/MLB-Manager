@@ -48,7 +48,9 @@ void main() {
       expect(member.role, equals('owner'));
     });
 
-    test('Can insert Accounts and compute balance from atomic double-entry journal', () async {
+    test(
+        'Can insert Accounts and compute balance from atomic double-entry journal',
+        () async {
       const accId = 'acc-cash';
       const offsetAccId = 'acc-income-offset';
       const now = 1700000000000;
@@ -120,7 +122,9 @@ void main() {
       expect(balance, equals(70000)); // 500 + 200 = 700 BDT
     });
 
-    test('Enforces atomic transaction rollback if double-entry sum is not balanced', () async {
+    test(
+        'Enforces atomic transaction rollback if double-entry sum is not balanced',
+        () async {
       const txId = 'tx-imbalanced';
       const now = 1700000000000;
 
@@ -165,15 +169,15 @@ void main() {
       const now = 1700000000000;
 
       await db.into(db.businesses).insert(
-        const BusinessesCompanion(
-          id: Value(bizId),
-          name: Value('খামার'),
-          businessType: Value('cattle'),
-          openingDate: Value(now),
-          createdAt: Value(now),
-          updatedAt: Value(now),
-        ),
-      );
+            const BusinessesCompanion(
+              id: Value(bizId),
+              name: Value('খামার'),
+              businessType: Value('cattle'),
+              openingDate: Value(now),
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
 
       await cattleDao.insertCattle(
         const CattleCompanion(
@@ -218,24 +222,26 @@ void main() {
 
       profitCalc = await cattleDao.calculateCattleProfit(cattleId);
       expect(profitCalc.isSold, isTrue);
-      expect(profitCalc.netProfitMinor, equals(2500000)); // 120k - 95k = 25,000 BDT Net Profit
+      expect(profitCalc.netProfitMinor,
+          equals(2500000)); // 120k - 95k = 25,000 BDT Net Profit
     });
 
-    test('InventoryDao: Can insert product and calculate current stock', () async {
+    test('InventoryDao: Can insert product and calculate current stock',
+        () async {
       const prodId = 'prod-001';
       const bizId = 'biz-01';
       const now = 1700000000000;
 
       await db.into(db.businesses).insert(
-        const BusinessesCompanion(
-          id: Value(bizId),
-          name: Value('মুদি দোকান'),
-          businessType: Value('retail'),
-          openingDate: Value(now),
-          createdAt: Value(now),
-          updatedAt: Value(now),
-        ),
-      );
+            const BusinessesCompanion(
+              id: Value(bizId),
+              name: Value('মুদি দোকান'),
+              businessType: Value('retail'),
+              openingDate: Value(now),
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
 
       await inventoryDao.insertProduct(
         const ProductsCompanion(
@@ -245,7 +251,7 @@ void main() {
           unit: Value('লিটার'),
           openingQuantity: Value(50.0),
           purchasePriceMinor: Value(16000), // 160 BDT
-          sellingPriceMinor: Value(18500),  // 185 BDT
+          sellingPriceMinor: Value(18500), // 185 BDT
           createdAt: Value(now),
         ),
       );

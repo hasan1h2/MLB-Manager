@@ -7,15 +7,20 @@ class BusinessDao {
 
   // --- Businesses ---
   Stream<List<BusinessesData>> watchBusinesses() {
-    return (db.select(db.businesses)..where((tbl) => tbl.status.equals('active'))).watch();
+    return (db.select(db.businesses)
+          ..where((tbl) => tbl.status.equals('active')))
+        .watch();
   }
 
   Future<List<BusinessesData>> getAllBusinesses() {
-    return (db.select(db.businesses)..where((tbl) => tbl.status.equals('active'))).get();
+    return (db.select(db.businesses)
+          ..where((tbl) => tbl.status.equals('active')))
+        .get();
   }
 
   Future<BusinessesData?> getBusinessById(String id) {
-    return (db.select(db.businesses)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (db.select(db.businesses)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
   }
 
   Future<int> insertBusiness(BusinessesCompanion business) {
@@ -28,15 +33,20 @@ class BusinessDao {
 
   // --- Customers ---
   Stream<List<Customer>> watchCustomers(String businessId) {
-    return (db.select(db.customers)..where((tbl) => tbl.businessId.equals(businessId))).watch();
+    return (db.select(db.customers)
+          ..where((tbl) => tbl.businessId.equals(businessId)))
+        .watch();
   }
 
   Future<List<Customer>> getAllCustomers(String businessId) {
-    return (db.select(db.customers)..where((tbl) => tbl.businessId.equals(businessId))).get();
+    return (db.select(db.customers)
+          ..where((tbl) => tbl.businessId.equals(businessId)))
+        .get();
   }
 
   Future<Customer?> getCustomerById(String id) {
-    return (db.select(db.customers)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (db.select(db.customers)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
   }
 
   Future<int> insertCustomer(CustomersCompanion customer) {
@@ -53,29 +63,37 @@ class BusinessDao {
           ..addColumns([db.salesRecords.dueMinor.sum()])
           ..where(db.salesRecords.customerId.equals(customerId)))
         .getSingle();
-    final int totalSalesDue = salesDue.read(db.salesRecords.dueMinor.sum()) ?? 0;
+    final int totalSalesDue =
+        salesDue.read(db.salesRecords.dueMinor.sum()) ?? 0;
 
     // Direct party payments
     final payments = await (db.selectOnly(db.partyPayments)
           ..addColumns([db.partyPayments.amountMinor.sum()])
-          ..where(db.partyPayments.partyId.equals(customerId) & db.partyPayments.partyType.equals('customer')))
+          ..where(db.partyPayments.partyId.equals(customerId) &
+              db.partyPayments.partyType.equals('customer')))
         .getSingle();
-    final int totalPayments = payments.read(db.partyPayments.amountMinor.sum()) ?? 0;
+    final int totalPayments =
+        payments.read(db.partyPayments.amountMinor.sum()) ?? 0;
 
     return customer.openingBalanceMinor + totalSalesDue - totalPayments;
   }
 
   // --- Suppliers ---
   Stream<List<Supplier>> watchSuppliers(String businessId) {
-    return (db.select(db.suppliers)..where((tbl) => tbl.businessId.equals(businessId))).watch();
+    return (db.select(db.suppliers)
+          ..where((tbl) => tbl.businessId.equals(businessId)))
+        .watch();
   }
 
   Future<List<Supplier>> getAllSuppliers(String businessId) {
-    return (db.select(db.suppliers)..where((tbl) => tbl.businessId.equals(businessId))).get();
+    return (db.select(db.suppliers)
+          ..where((tbl) => tbl.businessId.equals(businessId)))
+        .get();
   }
 
   Future<Supplier?> getSupplierById(String id) {
-    return (db.select(db.suppliers)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (db.select(db.suppliers)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
   }
 
   Future<int> insertSupplier(SuppliersCompanion supplier) {
@@ -91,13 +109,16 @@ class BusinessDao {
           ..addColumns([db.purchaseRecords.dueMinor.sum()])
           ..where(db.purchaseRecords.supplierId.equals(supplierId)))
         .getSingle();
-    final int totalPurchasesDue = purchasesDue.read(db.purchaseRecords.dueMinor.sum()) ?? 0;
+    final int totalPurchasesDue =
+        purchasesDue.read(db.purchaseRecords.dueMinor.sum()) ?? 0;
 
     final payments = await (db.selectOnly(db.partyPayments)
           ..addColumns([db.partyPayments.amountMinor.sum()])
-          ..where(db.partyPayments.partyId.equals(supplierId) & db.partyPayments.partyType.equals('supplier')))
+          ..where(db.partyPayments.partyId.equals(supplierId) &
+              db.partyPayments.partyType.equals('supplier')))
         .getSingle();
-    final int totalPayments = payments.read(db.partyPayments.amountMinor.sum()) ?? 0;
+    final int totalPayments =
+        payments.read(db.partyPayments.amountMinor.sum()) ?? 0;
 
     return supplier.openingBalanceMinor + totalPurchasesDue - totalPayments;
   }

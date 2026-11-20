@@ -32,7 +32,8 @@ class CurrencyInputField extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            color:
+                isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
           ),
         ),
         const SizedBox(height: AppSizes.p4),

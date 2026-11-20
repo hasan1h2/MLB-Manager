@@ -68,7 +68,9 @@ class AppConfirmDialog extends StatelessWidget {
                 const SizedBox(width: AppSizes.p12),
                 AppButton(
                   text: confirmText ?? 'confirm'.tr,
-                  backgroundColor: isDestructive ? AppColors.expenseRed : AppColors.primaryNavy,
+                  backgroundColor: isDestructive
+                      ? AppColors.expenseRed
+                      : AppColors.primaryNavy,
                   width: 100,
                   height: 38,
                   onPressed: () {

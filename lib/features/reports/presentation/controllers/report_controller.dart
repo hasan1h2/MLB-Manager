@@ -49,7 +49,8 @@ class ReportController extends GetxController {
     try {
       isLoading.value = true;
       final range = AppDateUtils.getFilterRange(selectedFilter.value);
-      final txs = await _dbService.coreDao.getTransactionsInRange(range.startMs, range.endMs);
+      final txs = await _dbService.coreDao
+          .getTransactionsInRange(range.startMs, range.endMs);
 
       int inc = 0;
       int exp = 0;
@@ -89,8 +90,10 @@ class ReportController extends GetxController {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text('My Life & Business Manager (MLB Manager)',
-                    style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                pw.Text('Financial Statement Report (${selectedFilter.value.tr})',
+                    style: pw.TextStyle(
+                        fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                pw.Text(
+                    'Financial Statement Report (${selectedFilter.value.tr})',
                     style: const pw.TextStyle(fontSize: 14)),
                 pw.SizedBox(height: 16),
                 pw.Divider(),
@@ -98,21 +101,24 @@ class ReportController extends GetxController {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text('Total Income:'),
-                    pw.Text(CurrencyUtils.format(data.totalIncomeMinor, useBengaliDigits: false)),
+                    pw.Text(CurrencyUtils.format(data.totalIncomeMinor,
+                        useBengaliDigits: false)),
                   ],
                 ),
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text('Total Expenses:'),
-                    pw.Text(CurrencyUtils.format(data.totalExpenseMinor, useBengaliDigits: false)),
+                    pw.Text(CurrencyUtils.format(data.totalExpenseMinor,
+                        useBengaliDigits: false)),
                   ],
                 ),
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text('Net Balance / Profit:'),
-                    pw.Text(CurrencyUtils.format(data.netProfitMinor, useBengaliDigits: false)),
+                    pw.Text(CurrencyUtils.format(data.netProfitMinor,
+                        useBengaliDigits: false)),
                   ],
                 ),
                 pw.SizedBox(height: 16),
@@ -134,7 +140,8 @@ class ReportController extends GetxController {
     if (data == null) return;
 
     final rows = <List<dynamic>>[];
-    rows.add(['Date', 'Tx Number', 'Type', 'Scope', 'Amount (BDT)', 'Description']);
+    rows.add(
+        ['Date', 'Tx Number', 'Type', 'Scope', 'Amount (BDT)', 'Description']);
 
     for (var tx in data.transactions) {
       rows.add([
@@ -149,7 +156,8 @@ class ReportController extends GetxController {
 
     final csvString = const ListToCsvConverter().convert(rows);
     final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/mlb_report_${DateTime.now().millisecondsSinceEpoch}.csv');
+    final file = File(
+        '${dir.path}/mlb_report_${DateTime.now().millisecondsSinceEpoch}.csv');
     await file.writeAsString(csvString);
 
     AppSnackbar.success('CSV ফাইল সংরক্ষিত হয়েছে: ${file.path}');
@@ -184,7 +192,8 @@ class ReportController extends GetxController {
     }
 
     final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/mlb_report_${DateTime.now().millisecondsSinceEpoch}.xlsx');
+    final file = File(
+        '${dir.path}/mlb_report_${DateTime.now().millisecondsSinceEpoch}.xlsx');
     final bytes = excel.encode();
     if (bytes != null) {
       await file.writeAsBytes(bytes);

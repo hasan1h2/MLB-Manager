@@ -51,10 +51,14 @@ class SavingsGoalsView extends GetView<AssetController> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(g.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                        Text(g.name,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 16)),
                         Text(
                           '${(percent * 100).toStringAsFixed(0)}%',
-                          style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.incomeGreen),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.incomeGreen),
                         ),
                       ],
                     ),
@@ -65,21 +69,28 @@ class SavingsGoalsView extends GetView<AssetController> {
                         value: percent,
                         minHeight: 8,
                         backgroundColor: AppColors.dividerLight,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.incomeGreen),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.incomeGreen),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('জমা: ${CurrencyUtils.format(g.currentAmountMinor)}', style: const TextStyle(fontSize: 12)),
-                        Text('লক্ষ্য: ${CurrencyUtils.format(g.targetAmountMinor)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text(
+                            'জমা: ${CurrencyUtils.format(g.currentAmountMinor)}',
+                            style: const TextStyle(fontSize: 12)),
+                        Text(
+                            'লক্ষ্য: ${CurrencyUtils.format(g.targetAmountMinor)}',
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'টার্গেট তারিখ: ${AppDateUtils.formatTimestamp(g.targetDate)}',
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryLight),
+                      style: const TextStyle(
+                          fontSize: 11, color: AppColors.textSecondaryLight),
                     ),
                   ],
                 ),

@@ -18,10 +18,12 @@ class FamilyMembers extends Table {
 class Businesses extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
-  TextColumn get businessType => text()(); // cattle, grocery, wholesale, retail, etc.
+  TextColumn get businessType =>
+      text()(); // cattle, grocery, wholesale, retail, etc.
   TextColumn get description => text().nullable()();
   IntColumn get openingDate => integer()();
-  IntColumn get initialCapitalMinor => integer().withDefault(const Constant(0))();
+  IntColumn get initialCapitalMinor =>
+      integer().withDefault(const Constant(0))();
   TextColumn get location => text().nullable()();
   TextColumn get phone => text().nullable()();
   TextColumn get status => text().withDefault(const Constant('active'))();
@@ -35,10 +37,13 @@ class Businesses extends Table {
 class Accounts extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
-  TextColumn get accountType => text()(); // cash, bank, bkash, nagad, rocket, other_wallet, custom
-  TextColumn get ownerMemberId => text().nullable().references(FamilyMembers, #id)();
+  TextColumn get accountType =>
+      text()(); // cash, bank, bkash, nagad, rocket, other_wallet, custom
+  TextColumn get ownerMemberId =>
+      text().nullable().references(FamilyMembers, #id)();
   TextColumn get businessId => text().nullable().references(Businesses, #id)();
-  IntColumn get openingBalanceMinor => integer().withDefault(const Constant(0))();
+  IntColumn get openingBalanceMinor =>
+      integer().withDefault(const Constant(0))();
   TextColumn get currencyCode => text().withDefault(const Constant('BDT'))();
   IntColumn get isActive => integer().withDefault(const Constant(1))();
   IntColumn get createdAt => integer()();
@@ -69,17 +74,22 @@ class Transactions extends Table {
   TextColumn get transactionNumber => text()();
   TextColumn get transactionType => text()(); // income, expense, transfer
   TextColumn get scopeType => text()(); // personal, family, business
-  TextColumn get familyMemberId => text().nullable().references(FamilyMembers, #id)();
+  TextColumn get familyMemberId =>
+      text().nullable().references(FamilyMembers, #id)();
   TextColumn get businessId => text().nullable().references(Businesses, #id)();
   TextColumn get categoryId => text().nullable().references(Categories, #id)();
   TextColumn get accountId => text().nullable().references(Accounts, #id)();
   IntColumn get amountMinor => integer()();
   IntColumn get transactionDate => integer()();
   TextColumn get description => text().nullable()();
-  TextColumn get paymentStatus => text().withDefault(const Constant('paid'))(); // paid, due, partial
-  TextColumn get sourceType => text().nullable()(); // manual, voice, ocr, shopping, cattle, sale, purchase
+  TextColumn get paymentStatus =>
+      text().withDefault(const Constant('paid'))(); // paid, due, partial
+  TextColumn get purchaseTime => text().nullable()();
+  TextColumn get sourceType => text()
+      .nullable()(); // manual, voice, ocr, shopping, cattle, sale, purchase
   TextColumn get sourceId => text().nullable()();
-  TextColumn get createdByMemberId => text().nullable().references(FamilyMembers, #id)();
+  TextColumn get createdByMemberId =>
+      text().nullable().references(FamilyMembers, #id)();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
   IntColumn get deletedAt => integer().nullable()();
@@ -90,7 +100,8 @@ class Transactions extends Table {
 
 class TransactionEntries extends Table {
   TextColumn get id => text()();
-  TextColumn get transactionId => text().references(Transactions, #id, onDelete: KeyAction.cascade)();
+  TextColumn get transactionId =>
+      text().references(Transactions, #id, onDelete: KeyAction.cascade)();
   TextColumn get accountId => text().references(Accounts, #id)();
   IntColumn get debitMinor => integer().withDefault(const Constant(0))();
   IntColumn get creditMinor => integer().withDefault(const Constant(0))();
@@ -102,7 +113,8 @@ class TransactionEntries extends Table {
 
 class TransactionAttachments extends Table {
   TextColumn get id => text()();
-  TextColumn get transactionId => text().references(Transactions, #id, onDelete: KeyAction.cascade)();
+  TextColumn get transactionId =>
+      text().references(Transactions, #id, onDelete: KeyAction.cascade)();
   TextColumn get filePath => text()();
   TextColumn get fileType => text().nullable()();
   IntColumn get createdAt => integer()();

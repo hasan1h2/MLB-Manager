@@ -94,7 +94,8 @@ final Map<String, String> enUS = {
   'family': 'Family',
   'business': 'Business',
   'transaction_saved': 'Transaction saved successfully',
-  'delete_transaction_confirm': 'Are you sure you want to delete this transaction?',
+  'delete_transaction_confirm':
+      'Are you sure you want to delete this transaction?',
 
   // Family
   'family_management': 'Family Management',

@@ -32,9 +32,11 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final defaultBg = isDark ? AppColors.secondaryElectric : AppColors.primaryNavy;
+    final defaultBg =
+        isDark ? AppColors.secondaryElectric : AppColors.primaryNavy;
     final effectiveBg = backgroundColor ?? defaultBg;
-    final effectiveText = textColor ?? (isOutlined ? effectiveBg : Colors.white);
+    final effectiveText =
+        textColor ?? (isOutlined ? effectiveBg : Colors.white);
 
     if (isOutlined) {
       return SizedBox(
@@ -44,7 +46,8 @@ class AppButton extends StatelessWidget {
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
             side: BorderSide(color: effectiveBg, width: 1.5),
-            padding: padding ?? const EdgeInsets.symmetric(horizontal: AppSizes.p16),
+            padding:
+                padding ?? const EdgeInsets.symmetric(horizontal: AppSizes.p16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSizes.r8),
             ),
@@ -63,7 +66,8 @@ class AppButton extends StatelessWidget {
           backgroundColor: effectiveBg,
           foregroundColor: effectiveText,
           elevation: 0,
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: AppSizes.p16),
+          padding:
+              padding ?? const EdgeInsets.symmetric(horizontal: AppSizes.p16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.r8),
           ),

@@ -97,19 +97,24 @@ class AddCattleView extends GetView<CattleController> {
             borderRadius: AppSizes.r8,
             fallbackIcon: AppIcons.cattle,
             fallbackColor: AppColors.tagBull,
-            backgroundColor: isDark ? AppColors.surfaceDark : AppColors.tagBull.withValues(alpha: 0.12),
+            backgroundColor: isDark
+                ? AppColors.surfaceDark
+                : AppColors.tagBull.withValues(alpha: 0.12),
           ),
           const SizedBox(width: AppSizes.p12),
           Expanded(
             child: OutlinedButton.icon(
               icon: const Icon(Icons.add_a_photo_outlined, size: 18),
               label: Text(
-                path != null ? 'গরুর ছবি পরিবর্তন করুন' : 'গরুর ছবি যুক্ত করুন (ঐচ্ছিক)',
+                path != null
+                    ? 'গরুর ছবি পরিবর্তন করুন'
+                    : 'গরুর ছবি যুক্ত করুন (ঐচ্ছিক)',
                 style: const TextStyle(fontSize: 13),
               ),
               onPressed: () async {
                 final picker = ImagePicker();
-                final img = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+                final img = await picker.pickImage(
+                    source: ImageSource.gallery, imageQuality: 70);
                 if (img != null) {
                   controller.photoPath.value = img.path;
                 }
@@ -126,14 +131,17 @@ class AddCattleView extends GetView<CattleController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('gender'.tr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('gender'.tr,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
             value: controller.selectedGender.value,
             items: const [
               DropdownMenuItem(value: 'bull', child: Text('ষাঁড় (Bull)')),
               DropdownMenuItem(value: 'cow', child: Text('গাভী (Cow)')),
-              DropdownMenuItem(value: 'heifer', child: Text('বকনা বাছুর (Heifer)')),
+              DropdownMenuItem(
+                  value: 'heifer', child: Text('বকনা বাছুর (Heifer)')),
               DropdownMenuItem(value: 'calf', child: Text('বাছুর (Calf)')),
             ],
             onChanged: (val) {

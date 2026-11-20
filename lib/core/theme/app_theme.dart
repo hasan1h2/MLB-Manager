@@ -5,7 +5,8 @@ import 'app_dimensions.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
-    final textTheme = GoogleFonts.hindSiliguriTextTheme(ThemeData.light().textTheme).apply(
+    final textTheme =
+        GoogleFonts.hindSiliguriTextTheme(ThemeData.light().textTheme).apply(
       bodyColor: AppColors.textPrimaryLight,
       displayColor: AppColors.textPrimaryLight,
     );
@@ -81,7 +82,8 @@ class AppTheme {
           textStyle: WidgetStateProperty.all(
             GoogleFonts.hindSiliguri(fontWeight: FontWeight.w600, fontSize: 13),
           ),
-          side: WidgetStateProperty.all(const BorderSide(color: AppColors.borderLight)),
+          side: WidgetStateProperty.all(
+              const BorderSide(color: AppColors.borderLight)),
         ),
       ),
       radioTheme: RadioThemeData(
@@ -110,9 +112,12 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        labelStyle: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 14),
-        hintStyle: const TextStyle(color: AppColors.textMutedLight, fontSize: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle:
+            const TextStyle(color: AppColors.textSecondaryLight, fontSize: 14),
+        hintStyle:
+            const TextStyle(color: AppColors.textMutedLight, fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
           borderSide: const BorderSide(color: AppColors.borderLight),
@@ -123,7 +128,8 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
-          borderSide: const BorderSide(color: AppColors.secondaryElectric, width: 1.5),
+          borderSide:
+              const BorderSide(color: AppColors.secondaryElectric, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
@@ -141,7 +147,8 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    final textTheme = GoogleFonts.hindSiliguriTextTheme(ThemeData.dark().textTheme).apply(
+    final textTheme =
+        GoogleFonts.hindSiliguriTextTheme(ThemeData.dark().textTheme).apply(
       bodyColor: AppColors.textPrimaryDark,
       displayColor: AppColors.textPrimaryDark,
     );
@@ -217,7 +224,8 @@ class AppTheme {
           textStyle: WidgetStateProperty.all(
             GoogleFonts.hindSiliguri(fontWeight: FontWeight.w600, fontSize: 13),
           ),
-          side: WidgetStateProperty.all(const BorderSide(color: AppColors.borderDark)),
+          side: WidgetStateProperty.all(
+              const BorderSide(color: AppColors.borderDark)),
         ),
       ),
       radioTheme: RadioThemeData(
@@ -246,9 +254,12 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceDark,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        labelStyle: const TextStyle(color: AppColors.textSecondaryDark, fontSize: 14),
-        hintStyle: const TextStyle(color: AppColors.textMutedDark, fontSize: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle:
+            const TextStyle(color: AppColors.textSecondaryDark, fontSize: 14),
+        hintStyle:
+            const TextStyle(color: AppColors.textMutedDark, fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
           borderSide: const BorderSide(color: AppColors.borderDark),
@@ -259,7 +270,8 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),
-          borderSide: const BorderSide(color: AppColors.secondaryElectricLight, width: 1.5),
+          borderSide: const BorderSide(
+              color: AppColors.secondaryElectricLight, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSmall),

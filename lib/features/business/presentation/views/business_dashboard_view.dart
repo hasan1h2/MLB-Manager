@@ -15,7 +15,8 @@ class BusinessDashboardView extends GetView<BusinessController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Obx(() => Text(controller.selectedBusiness.value?.name ?? 'business_dashboard'.tr)),
+        title: Obx(() => Text(controller.selectedBusiness.value?.name ??
+            'business_dashboard'.tr)),
       ),
       body: Obx(() {
         final b = controller.selectedBusiness.value;
@@ -56,12 +57,14 @@ class BusinessDashboardView extends GetView<BusinessController> {
         children: [
           Text(
             b.name,
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: AppSizes.p4),
           Text(
             '${b.businessType.toUpperCase()} • ${b.location ?? ''}',
-            style: const TextStyle(color: AppColors.secondaryElectricLight, fontSize: 13),
+            style: const TextStyle(
+                color: AppColors.secondaryElectricLight, fontSize: 13),
           ),
         ],
       ),
@@ -99,7 +102,9 @@ class BusinessDashboardView extends GetView<BusinessController> {
           title: 'net_profit'.tr,
           amountMinor: m.netProfitMinor,
           icon: AppIcons.business,
-          iconColor: m.netProfitMinor >= 0 ? AppColors.incomeGreen : AppColors.expenseRed,
+          iconColor: m.netProfitMinor >= 0
+              ? AppColors.incomeGreen
+              : AppColors.expenseRed,
         ),
         SummaryCard(
           title: 'inventory_value'.tr,
@@ -124,41 +129,65 @@ class BusinessDashboardView extends GetView<BusinessController> {
   }
 
   Widget _buildQuickActionButtons() {
+    final theme = Theme.of(Get.context!);
+    final isDark = theme.brightness == Brightness.dark;
+    final tileBg = isDark ? AppColors.cardDark : Colors.white;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Column(
       children: [
         ListTile(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.r8),
-            side: const BorderSide(color: AppColors.borderLight),
+            side: BorderSide(color: borderColor),
           ),
-          tileColor: Colors.white,
-          leading: const Icon(AppIcons.inventory, color: AppColors.secondaryElectric),
-          title: Text('inventory_management'.tr),
-          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          tileColor: tileBg,
+          leading: const Icon(AppIcons.inventory,
+              color: AppColors.secondaryElectric),
+          title: Text('inventory_management'.tr,
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600)),
+          trailing: Icon(Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight),
           onTap: () => Get.toNamed(AppRoutes.productList),
         ),
         const SizedBox(height: AppSizes.p8),
         ListTile(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.r8),
-            side: const BorderSide(color: AppColors.borderLight),
+            side: BorderSide(color: borderColor),
           ),
-          tileColor: Colors.white,
+          tileColor: tileBg,
           leading: const Icon(AppIcons.customers, color: AppColors.infoBlue),
-          title: Text('customers'.tr),
-          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          title: Text('customers'.tr,
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600)),
+          trailing: Icon(Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight),
           onTap: () => Get.toNamed(AppRoutes.customerList),
         ),
         const SizedBox(height: AppSizes.p8),
         ListTile(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.r8),
-            side: const BorderSide(color: AppColors.borderLight),
+            side: BorderSide(color: borderColor),
           ),
-          tileColor: Colors.white,
-          leading: const Icon(AppIcons.suppliers, color: AppColors.warningAmber),
-          title: Text('suppliers'.tr),
-          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          tileColor: tileBg,
+          leading:
+              const Icon(AppIcons.suppliers, color: AppColors.warningAmber),
+          title: Text('suppliers'.tr,
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600)),
+          trailing: Icon(Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight),
           onTap: () => Get.toNamed(AppRoutes.supplierList),
         ),
       ],

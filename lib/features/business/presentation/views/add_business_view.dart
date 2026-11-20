@@ -74,20 +74,35 @@ class AddBusinessView extends GetView<BusinessController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('business_type'.tr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('business_type'.tr,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
             value: controller.selectedType.value,
             items: const [
-              DropdownMenuItem(value: 'cattle', child: Text('গরুর খামার (Cattle Farm)')),
-              DropdownMenuItem(value: 'grocery', child: Text('মুদি দোকান (Grocery)')),
-              DropdownMenuItem(value: 'wholesale', child: Text('পাইকারি ব্যবসা (Wholesale)')),
-              DropdownMenuItem(value: 'retail', child: Text('খুচরা দোকান (Retail)')),
-              DropdownMenuItem(value: 'raw_materials', child: Text('কাঁচামাল সরবরাহ (Raw Materials)')),
-              DropdownMenuItem(value: 'agriculture', child: Text('কৃষি ব্যবসা (Agriculture)')),
-              DropdownMenuItem(value: 'manufacturing', child: Text('উৎপাদনমুখী শিল্প (Manufacturing)')),
-              DropdownMenuItem(value: 'service', child: Text('সেবা ও সার্ভিস (Service)')),
-              DropdownMenuItem(value: 'custom', child: Text('অন্যান্য ব্যবসা (Custom)')),
+              DropdownMenuItem(
+                  value: 'cattle', child: Text('গরুর খামার (Cattle Farm)')),
+              DropdownMenuItem(
+                  value: 'grocery', child: Text('মুদি দোকান (Grocery)')),
+              DropdownMenuItem(
+                  value: 'wholesale',
+                  child: Text('পাইকারি ব্যবসা (Wholesale)')),
+              DropdownMenuItem(
+                  value: 'retail', child: Text('খুচরা দোকান (Retail)')),
+              DropdownMenuItem(
+                  value: 'raw_materials',
+                  child: Text('কাঁচামাল সরবরাহ (Raw Materials)')),
+              DropdownMenuItem(
+                  value: 'agriculture',
+                  child: Text('কৃষি ব্যবসা (Agriculture)')),
+              DropdownMenuItem(
+                  value: 'manufacturing',
+                  child: Text('উৎপাদনমুখী শিল্প (Manufacturing)')),
+              DropdownMenuItem(
+                  value: 'service', child: Text('সেবা ও সার্ভিস (Service)')),
+              DropdownMenuItem(
+                  value: 'custom', child: Text('অন্যান্য ব্যবসা (Custom)')),
             ],
             onChanged: (val) {
               if (val != null) controller.selectedType.value = val;

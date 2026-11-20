@@ -23,6 +23,30 @@ class TransactionController extends GetxController {
   final RxString selectedScopeFilter = 'all'.obs;
   final RxBool isLoading = true.obs;
 
+  // Cached summary for shopping items
+  final RxMap<String, String> shoppingItemSummaries = <String, String>{}.obs;
+
+  Future<String?> getShoppingSummary(String? sourceId) async {
+    if (sourceId == null) return null;
+    if (shoppingItemSummaries.containsKey(sourceId)) {
+      return shoppingItemSummaries[sourceId];
+    }
+    final items = await _dbService.householdDao.getItemsForRecord(sourceId);
+    if (items.isEmpty) {
+      shoppingItemSummaries[sourceId] = 'শুধু মোট টাকা';
+      return 'শুধু মোট টাকা';
+    }
+    final names = items.map((i) => i.productName).toList();
+    String summary;
+    if (names.length <= 3) {
+      summary = names.join(', ');
+    } else {
+      summary = '${names.take(2).join(', ')} + আরও ${names.length - 2}টি';
+    }
+    shoppingItemSummaries[sourceId] = summary;
+    return summary;
+  }
+
   // Form Fields
   final amountController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -34,6 +58,15 @@ class TransactionController extends GetxController {
   final Rx<String?> selectedMemberId = Rx<String?>(null);
   final Rx<String?> selectedBusinessId = Rx<String?>(null);
   final Rx<DateTime> transactionDate = DateTime.now().obs;
+  final Rx<TimeOfDay?> transactionTime = Rx<TimeOfDay?>(null);
+
+  String? formatTime(TimeOfDay? time) {
+    if (time == null) return null;
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
 
   @override
   void onInit() {
@@ -74,10 +107,12 @@ class TransactionController extends GetxController {
 
   List<Transaction> get filteredTransactions {
     return transactions.where((tx) {
-      if (selectedTypeFilter.value != 'all' && tx.transactionType != selectedTypeFilter.value) {
+      if (selectedTypeFilter.value != 'all' &&
+          tx.transactionType != selectedTypeFilter.value) {
         return false;
       }
-      if (selectedScopeFilter.value != 'all' && tx.scopeType != selectedScopeFilter.value) {
+      if (selectedScopeFilter.value != 'all' &&
+          tx.scopeType != selectedScopeFilter.value) {
         return false;
       }
       return true;
@@ -86,7 +121,9 @@ class TransactionController extends GetxController {
 
   List<Category> get categoriesForCurrentType {
     if (transactionType.value == 'transfer') return [];
-    return categories.where((c) => c.categoryType == transactionType.value).toList();
+    return categories
+        .where((c) => c.categoryType == transactionType.value)
+        .toList();
   }
 
   Future<bool> saveTransaction() async {
@@ -102,12 +139,14 @@ class TransactionController extends GetxController {
     }
 
     if (transactionType.value == 'transfer') {
-      if (toAccountId.value == null || toAccountId.value == selectedAccountId.value) {
+      if (toAccountId.value == null ||
+          toAccountId.value == selectedAccountId.value) {
         AppSnackbar.error('Please select different destination account');
         return false;
       }
     } else {
-      if (selectedCategoryId.value == null && categoriesForCurrentType.isNotEmpty) {
+      if (selectedCategoryId.value == null &&
+          categoriesForCurrentType.isNotEmpty) {
         selectedCategoryId.value = categoriesForCurrentType.first.id;
       }
     }
@@ -124,13 +163,15 @@ class TransactionController extends GetxController {
         transactionType: Value(transactionType.value),
         scopeType: Value(scopeType.value),
         familyMemberId: Value(selectedMemberId.value),
-        businessId: Value(scopeType.value == 'business' ? selectedBusinessId.value : null),
+        businessId: Value(
+            scopeType.value == 'business' ? selectedBusinessId.value : null),
         categoryId: Value(selectedCategoryId.value),
         accountId: Value(selectedAccountId.value),
         amountMinor: Value(amountMinor),
         transactionDate: Value(txDateMs),
         description: Value(descriptionController.text.trim()),
         paymentStatus: const Value('paid'),
+        purchaseTime: Value(formatTime(transactionTime.value)),
         sourceType: const Value('manual'),
         createdAt: Value(now),
         updatedAt: Value(now),

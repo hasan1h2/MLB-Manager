@@ -13,7 +13,8 @@ class LoanDao {
     if (status != null) {
       query = query..where((tbl) => tbl.status.equals(status));
     }
-    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.startDate)])).watch();
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.startDate)]))
+        .watch();
   }
 
   Future<List<LoanAccount>> getLoans({String? loanType, String? status}) {
@@ -28,7 +29,8 @@ class LoanDao {
   }
 
   Future<LoanAccount?> getLoanById(String id) {
-    return (db.select(db.loanAccounts)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (db.select(db.loanAccounts)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
   }
 
   Future<int> insertLoan(LoanAccountsCompanion loan) {
@@ -64,7 +66,8 @@ class LoanDao {
           ..addColumns([db.loanPayments.principalPaidMinor.sum()])
           ..where(db.loanPayments.loanId.equals(loanId)))
         .getSingle();
-    final int totalPaid = payments.read(db.loanPayments.principalPaidMinor.sum()) ?? 0;
+    final int totalPaid =
+        payments.read(db.loanPayments.principalPaidMinor.sum()) ?? 0;
 
     final remaining = loan.principalMinor - totalPaid;
     return remaining < 0 ? 0 : remaining;
@@ -87,7 +90,8 @@ class LoanDao {
       // Check if loan is now fully settled
       final remaining = await getLoanRemainingPrincipal(payment.loanId.value);
       if (remaining <= 0) {
-        await (db.update(db.loanAccounts)..where((tbl) => tbl.id.equals(payment.loanId.value)))
+        await (db.update(db.loanAccounts)
+              ..where((tbl) => tbl.id.equals(payment.loanId.value)))
             .write(const LoanAccountsCompanion(status: Value('settled')));
       }
     });

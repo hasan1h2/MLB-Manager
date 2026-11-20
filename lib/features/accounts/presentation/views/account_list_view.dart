@@ -48,20 +48,27 @@ class AccountListView extends GetView<AccountController> {
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: AppColors.secondaryElectric.withValues(alpha: 0.12),
-                    child: const Icon(AppIcons.accounts, color: AppColors.secondaryElectric),
+                    backgroundColor:
+                        AppColors.secondaryElectric.withValues(alpha: 0.12),
+                    child: const Icon(AppIcons.accounts,
+                        color: AppColors.secondaryElectric),
                   ),
-                  title: Text(item.account.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  title: Text(item.account.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(
                     item.account.accountType.toUpperCase(),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textSecondaryLight),
                   ),
                   trailing: Text(
                     CurrencyUtils.format(item.balanceMinor),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: item.balanceMinor < 0 ? AppColors.expenseRed : AppColors.primaryNavy,
+                      color: item.balanceMinor < 0
+                          ? AppColors.expenseRed
+                          : AppColors.primaryNavy,
                     ),
                   ),
                   onTap: () {

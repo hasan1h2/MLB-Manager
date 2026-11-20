@@ -41,7 +41,8 @@ class BusinessController extends GetxController {
 
   // Selected Business Dashboard Metrics
   final Rx<BusinessesData?> selectedBusiness = Rx<BusinessesData?>(null);
-  final Rx<BusinessDashboardMetrics?> currentMetrics = Rx<BusinessDashboardMetrics?>(null);
+  final Rx<BusinessDashboardMetrics?> currentMetrics =
+      Rx<BusinessDashboardMetrics?>(null);
 
   // Form Fields
   final nameController = TextEditingController();
@@ -77,27 +78,38 @@ class BusinessController extends GetxController {
     if (business == null) return;
 
     // Total sales
-    final sales = await (_dbService.database.selectOnly(_dbService.database.salesRecords)
+    final sales = await (_dbService.database
+            .selectOnly(_dbService.database.salesRecords)
           ..addColumns([_dbService.database.salesRecords.totalMinor.sum()])
-          ..where(_dbService.database.salesRecords.businessId.equals(businessId)))
+          ..where(
+              _dbService.database.salesRecords.businessId.equals(businessId)))
         .getSingle();
-    final int totalSales = sales.read(_dbService.database.salesRecords.totalMinor.sum()) ?? 0;
+    final int totalSales =
+        sales.read(_dbService.database.salesRecords.totalMinor.sum()) ?? 0;
 
     // Total purchases
-    final purchases = await (_dbService.database.selectOnly(_dbService.database.purchaseRecords)
+    final purchases = await (_dbService.database
+            .selectOnly(_dbService.database.purchaseRecords)
           ..addColumns([_dbService.database.purchaseRecords.totalMinor.sum()])
-          ..where(_dbService.database.purchaseRecords.businessId.equals(businessId)))
+          ..where(_dbService.database.purchaseRecords.businessId
+              .equals(businessId)))
         .getSingle();
-    final int totalPurchases = purchases.read(_dbService.database.purchaseRecords.totalMinor.sum()) ?? 0;
+    final int totalPurchases =
+        purchases.read(_dbService.database.purchaseRecords.totalMinor.sum()) ??
+            0;
 
     // Operating expenses
-    final opExp = await (_dbService.database.selectOnly(_dbService.database.transactions)
+    final opExp = await (_dbService.database
+            .selectOnly(_dbService.database.transactions)
           ..addColumns([_dbService.database.transactions.amountMinor.sum()])
-          ..where(_dbService.database.transactions.businessId.equals(businessId) &
-              _dbService.database.transactions.transactionType.equals('expense') &
-              _dbService.database.transactions.deletedAt.isNull()))
+          ..where(
+              _dbService.database.transactions.businessId.equals(businessId) &
+                  _dbService.database.transactions.transactionType
+                      .equals('expense') &
+                  _dbService.database.transactions.deletedAt.isNull()))
         .getSingle();
-    final int operatingExpenses = opExp.read(_dbService.database.transactions.amountMinor.sum()) ?? 0;
+    final int operatingExpenses =
+        opExp.read(_dbService.database.transactions.amountMinor.sum()) ?? 0;
 
     // Gross Profit = Sales - Purchases
     final int grossProfit = totalSales - totalPurchases;
@@ -108,14 +120,16 @@ class BusinessController extends GetxController {
     int receivables = 0;
     final customers = await _dbService.businessDao.getAllCustomers(businessId);
     for (var c in customers) {
-      receivables += await _dbService.businessDao.getCustomerOutstandingDue(c.id);
+      receivables +=
+          await _dbService.businessDao.getCustomerOutstandingDue(c.id);
     }
 
     // Payables
     int payables = 0;
     final suppliers = await _dbService.businessDao.getAllSuppliers(businessId);
     for (var s in suppliers) {
-      payables += await _dbService.businessDao.getSupplierOutstandingPayable(s.id);
+      payables +=
+          await _dbService.businessDao.getSupplierOutstandingPayable(s.id);
     }
 
     // Inventory Value

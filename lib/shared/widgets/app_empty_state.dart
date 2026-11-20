@@ -39,7 +39,9 @@ class AppEmptyState extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 48,
-                color: isDark ? AppColors.secondaryElectric : AppColors.textMutedLight,
+                color: isDark
+                    ? AppColors.secondaryElectric
+                    : AppColors.textMutedLight,
               ),
             ),
             const SizedBox(height: AppSizes.p16),
@@ -49,7 +51,9 @@ class AppEmptyState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textSecondaryLight,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textSecondaryLight,
               ),
             ),
             if (actionText != null && onAction != null) ...[

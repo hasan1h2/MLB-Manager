@@ -55,18 +55,24 @@ class AddAccountView extends GetView<AccountController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('account_type'.tr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('account_type'.tr,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
             value: controller.selectedType.value,
             items: const [
               DropdownMenuItem(value: 'cash', child: Text('ক্যাশ (Cash)')),
-              DropdownMenuItem(value: 'bank', child: Text('ব্যাংক অ্যাকাউন্ট (Bank)')),
+              DropdownMenuItem(
+                  value: 'bank', child: Text('ব্যাংক অ্যাকাউন্ট (Bank)')),
               DropdownMenuItem(value: 'bkash', child: Text('বিকাশ (bKash)')),
               DropdownMenuItem(value: 'nagad', child: Text('নগদ (Nagad)')),
               DropdownMenuItem(value: 'rocket', child: Text('রকেট (Rocket)')),
-              DropdownMenuItem(value: 'other_wallet', child: Text('অন্যান্য মোবাইল ওয়ালেট')),
-              DropdownMenuItem(value: 'custom', child: Text('কাস্টম অ্যাকাউন্ট')),
+              DropdownMenuItem(
+                  value: 'other_wallet',
+                  child: Text('অন্যান্য মোবাইল ওয়ালেট')),
+              DropdownMenuItem(
+                  value: 'custom', child: Text('কাস্টম অ্যাকাউন্ট')),
             ],
             onChanged: (val) {
               if (val != null) controller.selectedType.value = val;

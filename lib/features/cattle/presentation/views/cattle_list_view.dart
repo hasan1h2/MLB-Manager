@@ -49,15 +49,19 @@ class CattleListView extends GetView<CattleController> {
                   borderRadius: AppSizes.rFull,
                   fallbackIcon: AppIcons.cattle,
                   fallbackColor: isSold ? Colors.white : AppColors.tagBull,
-                  backgroundColor: isSold ? AppColors.textMutedLight : AppColors.tagBull.withValues(alpha: 0.15),
+                  backgroundColor: isSold
+                      ? AppColors.textMutedLight
+                      : AppColors.tagBull.withValues(alpha: 0.15),
                 ),
                 title: Text(
                   '${c.tagNumber} ${c.name?.isNotEmpty == true ? '(${c.name})' : ''}',
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 15),
                 ),
                 subtitle: Text(
                   '${c.breed ?? 'জাত নেই'} • ${c.gender?.toUpperCase()} • ${c.weightKg ?? 0} কেজি',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondaryLight),
                 ),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -65,12 +69,17 @@ class CattleListView extends GetView<CattleController> {
                   children: [
                     Text(
                       CurrencyUtils.format(c.purchasePriceMinor),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 14),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isSold ? AppColors.incomeGreenLight : AppColors.secondaryElectric.withValues(alpha: 0.1),
+                        color: isSold
+                            ? AppColors.incomeGreenLight
+                            : AppColors.secondaryElectric
+                                .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -78,7 +87,9 @@ class CattleListView extends GetView<CattleController> {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: isSold ? AppColors.incomeGreenDark : AppColors.secondaryElectric,
+                          color: isSold
+                              ? AppColors.incomeGreenDark
+                              : AppColors.secondaryElectric,
                         ),
                       ),
                     ),

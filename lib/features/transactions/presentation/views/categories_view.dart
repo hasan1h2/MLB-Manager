@@ -20,7 +20,7 @@ class CategoriesView extends GetView<TransactionController> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-          appBar: AppBar(
+        appBar: AppBar(
           title: Text('category'.tr),
           bottom: TabBar(
             tabs: [
@@ -46,7 +46,8 @@ class CategoriesView extends GetView<TransactionController> {
 
   Widget _buildCategoryList(String type) {
     return Obx(() {
-      final list = controller.categories.where((c) => c.categoryType == type).toList();
+      final list =
+          controller.categories.where((c) => c.categoryType == type).toList();
       final isBn = Get.locale?.languageCode == 'bn';
 
       return ListView.separated(
@@ -58,29 +59,39 @@ class CategoriesView extends GetView<TransactionController> {
           return Card(
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: (type == 'income' ? AppColors.incomeGreen : AppColors.expenseRed).withValues(alpha: 0.12),
+                backgroundColor: (type == 'income'
+                        ? AppColors.incomeGreen
+                        : AppColors.expenseRed)
+                    .withValues(alpha: 0.12),
                 child: Icon(
                   type == 'income' ? AppIcons.income : AppIcons.expense,
-                  color: type == 'income' ? AppColors.incomeGreen : AppColors.expenseRed,
+                  color: type == 'income'
+                      ? AppColors.incomeGreen
+                      : AppColors.expenseRed,
                   size: 20,
                 ),
               ),
               title: Text(
                 isBn ? cat.nameBn : cat.nameEn,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
               subtitle: Text(
                 isBn ? cat.nameEn : cat.nameBn,
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.textSecondaryLight),
               ),
               trailing: cat.isSystem == 1
                   ? Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppColors.dividerLight,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text('System', style: TextStyle(fontSize: 11, color: AppColors.textMutedLight)),
+                      child: const Text('System',
+                          style: TextStyle(
+                              fontSize: 11, color: AppColors.textMutedLight)),
                     )
                   : null,
             ),
@@ -97,14 +108,17 @@ class CategoriesView extends GetView<TransactionController> {
 
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.r12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.r12)),
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.p20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ক্যাটাগরি যোগ করুন', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              Text('ক্যাটাগরি যোগ করুন',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: AppSizes.p16),
               AppTextField(label: 'বাংলায় নাম', controller: nameBnController),
               const SizedBox(height: AppSizes.p12),
@@ -138,9 +152,10 @@ class CategoriesView extends GetView<TransactionController> {
                     CategoriesCompanion(
                       id: drift.Value(const Uuid().v4()),
                       nameBn: drift.Value(nameBnController.text.trim()),
-                      nameEn: drift.Value(nameEnController.text.trim().isNotEmpty
-                          ? nameEnController.text.trim()
-                          : nameBnController.text.trim()),
+                      nameEn: drift.Value(
+                          nameEnController.text.trim().isNotEmpty
+                              ? nameEnController.text.trim()
+                              : nameBnController.text.trim()),
                       categoryType: drift.Value(catType.value),
                       scope: const drift.Value('both'),
                       isSystem: const drift.Value(0),

@@ -68,6 +68,15 @@ class AppDatabase extends _$AppDatabase {
         onCreate: (m) async {
           await m.createAll();
         },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(transactions, transactions.purchaseTime);
+            await m.addColumn(shoppingRecords, shoppingRecords.purchaseTime);
+            await m.addColumn(shoppingRecords, shoppingRecords.entryMode);
+            await m.addColumn(shoppingItems, shoppingItems.note);
+            await m.addColumn(shoppingItems, shoppingItems.imagePath);
+          }
+        },
       );
 }
 

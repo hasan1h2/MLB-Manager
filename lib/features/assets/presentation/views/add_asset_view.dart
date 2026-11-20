@@ -66,18 +66,27 @@ class AddAssetView extends GetView<AssetController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('সম্পদের ধরণ', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          const Text('সম্পদের ধরণ',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
             value: controller.selectedAssetCategory.value,
             items: const [
               DropdownMenuItem(value: 'land', child: Text('জমি / প্লট (Land)')),
-              DropdownMenuItem(value: 'house', child: Text('বাড়ি / ফ্ল্যাট (Building/Flat)')),
-              DropdownMenuItem(value: 'gold', child: Text('স্বর্ণ / অলংকার (Gold)')),
-              DropdownMenuItem(value: 'vehicle', child: Text('গাড়ি / যানবাহন (Vehicle)')),
-              DropdownMenuItem(value: 'cattle', child: Text('গবাদি পশু সম্পদ (Cattle)')),
-              DropdownMenuItem(value: 'machinery', child: Text('যন্ত্রপাতি / কলকব্জা (Machinery)')),
-              DropdownMenuItem(value: 'other', child: Text('অন্যান্য সম্পদ (Other)')),
+              DropdownMenuItem(
+                  value: 'house',
+                  child: Text('বাড়ি / ফ্ল্যাট (Building/Flat)')),
+              DropdownMenuItem(
+                  value: 'gold', child: Text('স্বর্ণ / অলংকার (Gold)')),
+              DropdownMenuItem(
+                  value: 'vehicle', child: Text('গাড়ি / যানবাহন (Vehicle)')),
+              DropdownMenuItem(
+                  value: 'cattle', child: Text('গবাদি পশু সম্পদ (Cattle)')),
+              DropdownMenuItem(
+                  value: 'machinery',
+                  child: Text('যন্ত্রপাতি / কলকব্জা (Machinery)')),
+              DropdownMenuItem(
+                  value: 'other', child: Text('অন্যান্য সম্পদ (Other)')),
             ],
             onChanged: (val) {
               if (val != null) controller.selectedAssetCategory.value = val;

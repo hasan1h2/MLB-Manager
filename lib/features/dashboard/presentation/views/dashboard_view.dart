@@ -103,16 +103,23 @@ class DashboardView extends GetView<DashboardController> {
             child: ChoiceChip(
               label: Text(filterKey.tr),
               selected: isSelected,
-              selectedColor: isDark ? AppColors.secondaryElectric : AppColors.primaryNavy,
+              selectedColor:
+                  isDark ? AppColors.secondaryElectric : AppColors.primaryNavy,
               backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                color: isSelected
+                    ? Colors.white
+                    : (isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight),
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 fontSize: 13,
               ),
               side: BorderSide(
                 color: isSelected
-                    ? (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy)
+                    ? (isDark
+                        ? AppColors.secondaryElectric
+                        : AppColors.primaryNavy)
                     : (isDark ? AppColors.borderDark : AppColors.borderLight),
               ),
               onSelected: (_) => controller.setDateFilter(filterKey),
@@ -156,7 +163,8 @@ class DashboardView extends GetView<DashboardController> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const Icon(Icons.account_balance_wallet_rounded, color: AppColors.secondaryElectricLight),
+              const Icon(Icons.account_balance_wallet_rounded,
+                  color: AppColors.secondaryElectricLight),
             ],
           ),
           const SizedBox(height: AppSizes.p12),
@@ -266,16 +274,30 @@ class DashboardView extends GetView<DashboardController> {
               children: [
                 Row(
                   children: [
-                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.incomeGreen, shape: BoxShape.circle)),
+                    Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                            color: AppColors.incomeGreen,
+                            shape: BoxShape.circle)),
                     const SizedBox(width: 4),
-                    Text('${'total_income'.tr}: ${(incomePercent * 100).toStringAsFixed(1)}%', style: const TextStyle(fontSize: 11)),
+                    Text(
+                        '${'total_income'.tr}: ${(incomePercent * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(fontSize: 11)),
                   ],
                 ),
                 Row(
                   children: [
-                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.expenseRed, shape: BoxShape.circle)),
+                    Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                            color: AppColors.expenseRed,
+                            shape: BoxShape.circle)),
                     const SizedBox(width: 4),
-                    Text('${'total_expenses'.tr}: ${(expensePercent * 100).toStringAsFixed(1)}%', style: const TextStyle(fontSize: 11)),
+                    Text(
+                        '${'total_expenses'.tr}: ${(expensePercent * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(fontSize: 11)),
                   ],
                 ),
               ],
@@ -299,7 +321,8 @@ class DashboardView extends GetView<DashboardController> {
                 color: isDark ? AppColors.surfaceDark : Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(AppIcons.ai, color: AppColors.secondaryElectric, size: 24),
+              child: const Icon(AppIcons.ai,
+                  color: AppColors.secondaryElectric, size: 24),
             ),
             const SizedBox(width: AppSizes.p12),
             Expanded(
@@ -311,17 +334,22 @@ class DashboardView extends GetView<DashboardController> {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
-                      color: isDark ? AppColors.secondaryElectric : AppColors.primaryNavy,
+                      color: isDark
+                          ? AppColors.secondaryElectric
+                          : AppColors.primaryNavy,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    controller.totalExpensesMinor.value > controller.totalIncomeMinor.value
+                    controller.totalExpensesMinor.value >
+                            controller.totalIncomeMinor.value
                         ? 'আপনার বর্তমান খরচ আয়ের চেয়ে বেশি হচ্ছে। বাজেট নিয়ন্ত্রণে রাখুন।'
                         : 'আপনার আয়ের অনুপাত ইতিবাচক রয়েছে। সঞ্চয় লক্ষ্য পূরণ করুন।',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                     ),
                   ),
                 ],
@@ -342,7 +370,8 @@ class DashboardView extends GetView<DashboardController> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            color:
+                isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
           ),
         ),
         TextButton(
@@ -354,14 +383,26 @@ class DashboardView extends GetView<DashboardController> {
   }
 
   Widget _buildRecentTransactionsList() {
+    final theme = Theme.of(Get.context!);
+    final isDark = theme.brightness == Brightness.dark;
+
     if (controller.recentTransactions.isEmpty) {
       return Card(
+        color: isDark ? AppColors.cardDark : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.r12),
+          side: BorderSide(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.p24),
           child: Center(
             child: Text(
               'no_data_found'.tr,
-              style: const TextStyle(color: AppColors.textSecondaryLight),
+              style: TextStyle(
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight),
             ),
           ),
         ),
@@ -369,17 +410,32 @@ class DashboardView extends GetView<DashboardController> {
     }
 
     return Card(
+      elevation: 0,
+      color: isDark ? AppColors.cardDark : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.r12),
+        side: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: controller.recentTransactions.length,
-        separatorBuilder: (_, __) => const Divider(height: 1, indent: 64),
+        separatorBuilder: (_, __) => Divider(
+          height: 1,
+          indent: 64,
+          color: isDark ? AppColors.borderDark : AppColors.dividerLight,
+        ),
         itemBuilder: (context, index) {
           final tx = controller.recentTransactions[index];
           final isIncome = tx.transactionType == 'income';
           return ListTile(
+            onTap: () =>
+                Get.toNamed(AppRoutes.transactionDetails, arguments: tx),
             leading: CircleAvatar(
-              backgroundColor: isIncome ? AppColors.incomeGreenLight : AppColors.expenseRedLight,
+              backgroundColor: isIncome
+                  ? AppColors.incomeGreenLight
+                  : AppColors.expenseRedLight,
               child: Icon(
                 isIncome ? AppIcons.income : AppIcons.expense,
                 color: isIncome ? AppColors.incomeGreen : AppColors.expenseRed,
@@ -387,12 +443,24 @@ class DashboardView extends GetView<DashboardController> {
               ),
             ),
             title: Text(
-              tx.description?.isNotEmpty == true ? tx.description! : tx.transactionNumber,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              tx.description?.isNotEmpty == true
+                  ? tx.description!
+                  : tx.transactionNumber,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
+              ),
             ),
             subtitle: Text(
               AppDateUtils.formatTimestamp(tx.transactionDate),
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+              style: TextStyle(
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight),
             ),
             trailing: Text(
               '${isIncome ? '+' : '-'}${CurrencyUtils.format(tx.amountMinor)}',
@@ -418,11 +486,14 @@ class DashboardView extends GetView<DashboardController> {
           children: [
             Row(
               children: [
-                const Icon(Icons.warning_amber_rounded, color: AppColors.warningAmberDark),
+                const Icon(Icons.warning_amber_rounded,
+                    color: AppColors.warningAmberDark),
                 const SizedBox(width: AppSizes.p8),
                 Text(
                   'low_stock_alerts'.tr,
-                  style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.warningAmberDark),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.warningAmberDark),
                 ),
               ],
             ),
@@ -430,7 +501,8 @@ class DashboardView extends GetView<DashboardController> {
             for (var p in controller.lowStockProducts.take(3))
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Text('• ${p.name} (ন্যূনতম সীমা: ${p.minimumStock} ${p.unit})'),
+                child: Text(
+                    '• ${p.name} (ন্যূনতম সীমা: ${p.minimumStock} ${p.unit})'),
               ),
           ],
         ),

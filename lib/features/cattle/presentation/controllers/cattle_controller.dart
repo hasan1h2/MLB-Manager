@@ -19,7 +19,8 @@ class CattleController extends GetxController {
 
   // Selected Cattle Details & Calculation
   final Rx<CattleData?> selectedCattle = Rx<CattleData?>(null);
-  final Rx<CattleProfitCalculation?> selectedProfit = Rx<CattleProfitCalculation?>(null);
+  final Rx<CattleProfitCalculation?> selectedProfit =
+      Rx<CattleProfitCalculation?>(null);
   final RxList<CattleExpense> selectedCattleExpenses = <CattleExpense>[].obs;
 
   // Form Fields for Add Cattle
@@ -50,7 +51,8 @@ class CattleController extends GetxController {
 
   Future<void> initCattleBusiness() async {
     final businesses = await _dbService.businessDao.getAllBusinesses();
-    final cattleBiz = businesses.firstWhereOrNull((b) => b.businessType == 'cattle');
+    final cattleBiz =
+        businesses.firstWhereOrNull((b) => b.businessType == 'cattle');
     if (cattleBiz != null) {
       activeBusinessId.value = cattleBiz.id;
     } else if (businesses.isNotEmpty) {

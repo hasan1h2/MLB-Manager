@@ -10,7 +10,8 @@ class DashboardBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<MainNavController>(() => MainNavController(), fenix: true);
     Get.lazyPut<DashboardController>(() => DashboardController(), fenix: true);
-    Get.lazyPut<TransactionController>(() => TransactionController(), fenix: true);
+    Get.lazyPut<TransactionController>(() => TransactionController(),
+        fenix: true);
     Get.lazyPut<BusinessController>(() => BusinessController(), fenix: true);
     Get.lazyPut<ReportController>(() => ReportController(), fenix: true);
   }

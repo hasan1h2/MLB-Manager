@@ -43,11 +43,15 @@ class AiAssistantView extends GetView<AiAssistantController> {
         Card(
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: AppColors.secondaryElectric.withValues(alpha: 0.12),
-              child: const Icon(AppIcons.mic, color: AppColors.secondaryElectric),
+              backgroundColor:
+                  AppColors.secondaryElectric.withValues(alpha: 0.12),
+              child:
+                  const Icon(AppIcons.mic, color: AppColors.secondaryElectric),
             ),
-            title: Text('voice_entry'.tr, style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('মুখে বলে স্বয়ংক্রিয় লেনদেন যুক্ত করুন', style: TextStyle(fontSize: 12)),
+            title: Text('voice_entry'.tr,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            subtitle: const Text('মুখে বলে স্বয়ংক্রিয় লেনদেন যুক্ত করুন',
+                style: TextStyle(fontSize: 12)),
             trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
             onTap: () => Get.toNamed(AppRoutes.voiceEntry),
           ),
@@ -59,8 +63,10 @@ class AiAssistantView extends GetView<AiAssistantController> {
               backgroundColor: Colors.purple.withValues(alpha: 0.12),
               child: const Icon(AppIcons.ocr, color: Colors.purple),
             ),
-            title: Text('ocr_receipt_scanner'.tr, style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('রসিদ বা মেমোর ছবি তুলে অটোমেটিক এন্ট্রি', style: TextStyle(fontSize: 12)),
+            title: Text('ocr_receipt_scanner'.tr,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            subtitle: const Text('রসিদ বা মেমোর ছবি তুলে অটোমেটিক এন্ট্রি',
+                style: TextStyle(fontSize: 12)),
             trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
             onTap: () => Get.toNamed(AppRoutes.receiptScanner),
           ),
@@ -81,13 +87,17 @@ class AiAssistantView extends GetView<AiAssistantController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('আগামী মাসের সম্ভাব্য মোট খরচ', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                  const Icon(Icons.auto_graph_rounded, color: AppColors.secondaryElectric),
+                  const Text('আগামী মাসের সম্ভাব্য মোট খরচ',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  const Icon(Icons.auto_graph_rounded,
+                      color: AppColors.secondaryElectric),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
-                CurrencyUtils.format(controller.forecastedMonthlyExpenseMinor.value),
+                CurrencyUtils.format(
+                    controller.forecastedMonthlyExpenseMinor.value),
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -97,12 +107,16 @@ class AiAssistantView extends GetView<AiAssistantController> {
               const SizedBox(height: 4),
               Text(
                 'নির্ভরযোগ্যতা সূচক: ${controller.forecastConfidence.value}',
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryLight),
+                style: const TextStyle(
+                    fontSize: 11, color: AppColors.textSecondaryLight),
               ),
               const SizedBox(height: 8),
               const Text(
                 '* স্থানীয় মুভিং-অ্যাভারেজ গাণিতিক মডেলের মাধ্যমে অনুমিত। এটি কোনো আর্থিক নিশ্চয়তা নয়।',
-                style: TextStyle(fontSize: 10, color: AppColors.textMutedLight, fontStyle: FontStyle.italic),
+                style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textMutedLight,
+                    fontStyle: FontStyle.italic),
               ),
             ],
           ),
@@ -117,17 +131,21 @@ class AiAssistantView extends GetView<AiAssistantController> {
         padding: const EdgeInsets.all(AppSizes.p16),
         child: Row(
           children: [
-            const Icon(Icons.privacy_tip_outlined, color: AppColors.incomeGreen, size: 28),
+            const Icon(Icons.privacy_tip_outlined,
+                color: AppColors.incomeGreen, size: 28),
             const SizedBox(width: AppSizes.p12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  Text('১০০% অফলাইন ও সম্পূর্ণ গোপনীয়', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                  Text('১০০% অফলাইন ও সম্পূর্ণ গোপনীয়',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                   SizedBox(height: 2),
                   Text(
                     'আপনার ভয়েস ও রসিদের কোনো ছবি ইন্টারনেটে পাঠানো হয় না। ডিভাইসের অভ্যন্তরীণ প্রযুক্তিতে প্রক্রিয়াজাত হয়।',
-                    style: TextStyle(fontSize: 11, color: AppColors.textSecondaryLight),
+                    style: TextStyle(
+                        fontSize: 11, color: AppColors.textSecondaryLight),
                   ),
                 ],
               ),

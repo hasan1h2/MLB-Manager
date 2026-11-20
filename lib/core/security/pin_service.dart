@@ -27,7 +27,8 @@ class PinService extends GetxService {
       final pinHash = await _secureStorage.read(key: AppConstants.keyAppPin);
       hasPin.value = pinHash != null && pinHash.isNotEmpty;
 
-      final biometricSaved = await _secureStorage.read(key: AppConstants.keyBiometricEnabled);
+      final biometricSaved =
+          await _secureStorage.read(key: AppConstants.keyBiometricEnabled);
       isBiometricEnabled.value = biometricSaved == 'true';
     } catch (_) {
       hasPin.value = false;

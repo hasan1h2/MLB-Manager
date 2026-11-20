@@ -18,7 +18,8 @@ class ReceiptScannerView extends GetView<AiAssistantController> {
       ),
       body: Obx(() {
         if (controller.isProcessingOcr.value) {
-          return const AppLoadingIndicator(message: 'ছবি থেকে টেক্সট এক্সট্রাক্ট করা হচ্ছে...');
+          return const AppLoadingIndicator(
+              message: 'ছবি থেকে টেক্সট এক্সট্রাক্ট করা হচ্ছে...');
         }
 
         return Padding(
@@ -43,21 +44,24 @@ class ReceiptScannerView extends GetView<AiAssistantController> {
               const Text(
                 'ক্যামেরা দিয়ে সরাসরি ছবি তুলুন অথবা গ্যালারি থেকে পূর্বে সংরক্ষিত মেমোর ছবি নির্বাচন করুন',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+                style: TextStyle(
+                    fontSize: 13, color: AppColors.textSecondaryLight),
               ),
               const SizedBox(height: AppSizes.p48),
               AppButton(
                 text: 'ক্যামেরা দিয়ে ছবি তুলুন',
                 icon: Icons.camera_alt_rounded,
                 backgroundColor: AppColors.primaryNavy,
-                onPressed: () => controller.pickAndScanReceipt(fromCamera: true),
+                onPressed: () =>
+                    controller.pickAndScanReceipt(fromCamera: true),
               ),
               const SizedBox(height: AppSizes.p16),
               AppButton(
                 text: 'গ্যালারি থেকে ছবি নিন',
                 icon: Icons.photo_library_rounded,
                 isOutlined: true,
-                onPressed: () => controller.pickAndScanReceipt(fromCamera: false),
+                onPressed: () =>
+                    controller.pickAndScanReceipt(fromCamera: false),
               ),
             ],
           ),

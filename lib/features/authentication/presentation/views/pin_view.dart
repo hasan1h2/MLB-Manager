@@ -31,7 +31,9 @@ class PinView extends GetView<AuthController> {
           children: [
             const Spacer(),
             Icon(
-              isSettingNewPin ? Icons.lock_reset_rounded : Icons.lock_outline_rounded,
+              isSettingNewPin
+                  ? Icons.lock_reset_rounded
+                  : Icons.lock_outline_rounded,
               size: 56,
               color: AppColors.primaryNavy,
             ),
@@ -39,7 +41,9 @@ class PinView extends GetView<AuthController> {
             Obx(() {
               if (isSettingNewPin) {
                 return Text(
-                  controller.isConfirmingPin.value ? 'confirm_pin'.tr : 'set_pin'.tr,
+                  controller.isConfirmingPin.value
+                      ? 'confirm_pin'.tr
+                      : 'set_pin'.tr,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -59,9 +63,10 @@ class PinView extends GetView<AuthController> {
             const SizedBox(height: AppSizes.p24),
             // Pin indicators
             Obx(() {
-              final activePin = isSettingNewPin && controller.isConfirmingPin.value
-                  ? controller.confirmPin.value
-                  : controller.enteredPin.value;
+              final activePin =
+                  isSettingNewPin && controller.isConfirmingPin.value
+                      ? controller.confirmPin.value
+                      : controller.enteredPin.value;
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(4, (index) {
@@ -72,9 +77,13 @@ class PinView extends GetView<AuthController> {
                     height: 16,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isFilled ? AppColors.secondaryElectric : Colors.transparent,
+                      color: isFilled
+                          ? AppColors.secondaryElectric
+                          : Colors.transparent,
                       border: Border.all(
-                        color: isFilled ? AppColors.secondaryElectric : AppColors.borderDark,
+                        color: isFilled
+                            ? AppColors.secondaryElectric
+                            : AppColors.borderDark,
                         width: 2,
                       ),
                     ),
@@ -113,7 +122,8 @@ class PinView extends GetView<AuthController> {
                         controller.pinService.isBiometricEnabled.value) {
                       return IconButton(
                         iconSize: 32,
-                        icon: const Icon(Icons.fingerprint_rounded, color: AppColors.secondaryElectric),
+                        icon: const Icon(Icons.fingerprint_rounded,
+                            color: AppColors.secondaryElectric),
                         onPressed: () => controller.tryBiometricAuth(),
                       );
                     }
@@ -125,7 +135,8 @@ class PinView extends GetView<AuthController> {
                     width: 72,
                     height: 72,
                     child: IconButton(
-                      icon: const Icon(Icons.backspace_outlined, color: AppColors.textPrimaryLight),
+                      icon: const Icon(Icons.backspace_outlined,
+                          color: AppColors.textPrimaryLight),
                       onPressed: () => controller.onDeletePressed(),
                     ),
                   );
@@ -133,9 +144,10 @@ class PinView extends GetView<AuthController> {
                 return InkWell(
                   onTap: () {
                     controller.onNumberPressed(key);
-                    final activePin = isSettingNewPin && controller.isConfirmingPin.value
-                        ? controller.confirmPin.value
-                        : controller.enteredPin.value;
+                    final activePin =
+                        isSettingNewPin && controller.isConfirmingPin.value
+                            ? controller.confirmPin.value
+                            : controller.enteredPin.value;
                     if (activePin.length >= 4) {
                       if (isSettingNewPin) {
                         if (controller.isConfirmingPin.value) {

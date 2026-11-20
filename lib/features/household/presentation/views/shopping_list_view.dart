@@ -26,7 +26,9 @@ class ShoppingListView extends GetView<HouseholdController> {
         title: Text('shopping_list'.tr),
       ),
       body: StreamBuilder<List<ShoppingListItem>>(
-        stream: dbService.database.select(dbService.database.shoppingListItems).watch(),
+        stream: dbService.database
+            .select(dbService.database.shoppingListItems)
+            .watch(),
         builder: (context, snapshot) {
           final items = snapshot.data ?? [];
           if (items.isEmpty) {
@@ -54,14 +56,20 @@ class ShoppingListView extends GetView<HouseholdController> {
                       fontWeight: FontWeight.w600,
                       decoration: isDone ? TextDecoration.lineThrough : null,
                       color: isDone
-                          ? (isDark ? AppColors.textMutedDark : AppColors.textMutedLight)
-                          : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                          ? (isDark
+                              ? AppColors.textMutedDark
+                              : AppColors.textMutedLight)
+                          : (isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight),
                     ),
                   ),
                   subtitle: Text(
                     '${item.quantity} ${item.unit}',
                     style: TextStyle(
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
                     ),
                   ),
                   onChanged: (val) {
@@ -88,21 +96,30 @@ class ShoppingListView extends GetView<HouseholdController> {
 
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.r12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.r12)),
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.p20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ফর্দে পণ্য যোগ করুন', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              Text('ফর্দে পণ্য যোগ করুন',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: AppSizes.p16),
-              AppTextField(label: 'পণ্যের নাম', controller: nameController, hint: 'যেমন: আলু, পেঁয়াজ, ডিম'),
+              AppTextField(
+                  label: 'পণ্যের নাম',
+                  controller: nameController,
+                  hint: 'যেমন: আলু, পেঁয়াজ, ডিম'),
               const SizedBox(height: AppSizes.p12),
               Row(
                 children: [
                   Expanded(
-                    child: AppTextField(label: 'পরিমাণ', controller: qtyController, keyboardType: TextInputType.number),
+                    child: AppTextField(
+                        label: 'পরিমাণ',
+                        controller: qtyController,
+                        keyboardType: TextInputType.number),
                   ),
                   const SizedBox(width: AppSizes.p12),
                   Expanded(
@@ -113,7 +130,8 @@ class ShoppingListView extends GetView<HouseholdController> {
                         DropdownMenuItem(value: 'kg', child: Text('কেজি')),
                         DropdownMenuItem(value: 'liter', child: Text('লিটার')),
                         DropdownMenuItem(value: 'piece', child: Text('পিস')),
-                        DropdownMenuItem(value: 'packet', child: Text('প্যাকেট')),
+                        DropdownMenuItem(
+                            value: 'packet', child: Text('প্যাকেট')),
                       ],
                       onChanged: (v) => unit = v ?? 'kg',
                     ),

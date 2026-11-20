@@ -14,7 +14,7 @@ class AppConstants {
 
   // Database
   static const String databaseName = 'mlb_manager.sqlite';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
 
   // Pagination
   static const int defaultPageSize = 25;

@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mlb_manager/core/database/app_database.dart';
@@ -43,7 +44,9 @@ void main() {
       expect(controller.totalBillMinor, equals(0));
     });
 
-    test('Adding products to cart displays correctly with name, unit, qty, price, and subtotal', () {
+    test(
+        'Adding products to cart displays correctly with name, unit, qty, price, and subtotal',
+        () {
       // 2 kg rice at 70 Taka/kg = 140 Taka (14,000 Poisha)
       controller.addToCart(
         name: 'বাসমতি চাল',
@@ -77,7 +80,9 @@ void main() {
       expect(controller.totalBillMinor, equals(32000));
     });
 
-    test('Increment and decrement quantity dynamically recalculates subtotal and cart total', () {
+    test(
+        'Increment and decrement quantity dynamically recalculates subtotal and cart total',
+        () {
       controller.addToCart(
         name: 'আলু',
         quantity: 1.0,
@@ -106,9 +111,19 @@ void main() {
       expect(controller.subtotalMinor, equals(10000));
     });
 
-    test('Removing an item from cart updates the cart list and total bill correctly', () {
-      controller.addToCart(name: 'ডিম', quantity: 12.0, unit: 'piece', unitPriceMinor: 1200); // 144 Taka = 14400 Poisha
-      controller.addToCart(name: 'দুধ', quantity: 1.0, unit: 'liter', unitPriceMinor: 9000);   // 90 Taka = 9000 Poisha
+    test(
+        'Removing an item from cart updates the cart list and total bill correctly',
+        () {
+      controller.addToCart(
+          name: 'ডিম',
+          quantity: 12.0,
+          unit: 'piece',
+          unitPriceMinor: 1200); // 144 Taka = 14400 Poisha
+      controller.addToCart(
+          name: 'দুধ',
+          quantity: 1.0,
+          unit: 'liter',
+          unitPriceMinor: 9000); // 90 Taka = 9000 Poisha
 
       expect(controller.cartItems.length, equals(2));
       expect(controller.subtotalMinor, equals(23400));
@@ -121,8 +136,14 @@ void main() {
       expect(controller.totalBillMinor, equals(9000));
     });
 
-    test('Discount and paid amount calculation updates net payable and remaining due', () {
-      controller.addToCart(name: 'মাংস', quantity: 1.0, unit: 'kg', unitPriceMinor: 75000); // 750 Taka
+    test(
+        'Discount and paid amount calculation updates net payable and remaining due',
+        () {
+      controller.addToCart(
+          name: 'মাংস',
+          quantity: 1.0,
+          unit: 'kg',
+          unitPriceMinor: 75000); // 750 Taka
 
       expect(controller.subtotalMinor, equals(75000));
 
@@ -135,6 +156,53 @@ void main() {
       controller.paidController.text = '500';
       expect(controller.cartPaidMinor, equals(50000));
       expect(controller.cartDueMinor, equals(20000)); // 200 Taka due
+    });
+
+    test('Allows saving item without per-unit price using direct line total',
+        () {
+      // User buys 1 bunch of vegetables for 60 Taka without entering per-unit rate
+      controller.addToCart(
+        name: 'মিক্স সবজি',
+        quantity: 1.0,
+        unit: 'none',
+        unitPriceMinor: 0,
+        lineTotalMinor: 6000,
+        note: 'বাজারের তাজা সবজি',
+      );
+
+      expect(controller.cartItems.length, equals(1));
+      final item = controller.cartItems.first;
+      expect(item.productName, equals('মিক্স সবজি'));
+      expect(item.unitPriceMinor.value, equals(0)); // Unit price is 0/optional
+      expect(item.lineTotalMinor.value, equals(6000)); // Line total is 60 Taka
+      expect(item.subtotalMinor, equals(6000));
+      expect(item.note.value, equals('বাজারের তাজা সবজি'));
+      expect(controller.subtotalMinor, equals(6000));
+      expect(controller.totalBillMinor, equals(6000));
+    });
+
+    test(
+        'Direct Total Mode calculates total bill from directAmountController without items',
+        () {
+      controller.entryMode.value = 'direct_total';
+      controller.directAmountController.text = '250'; // 250 Taka = 25000 Poisha
+
+      expect(controller.subtotalMinor, equals(25000));
+      expect(controller.totalBillMinor, equals(25000));
+      expect(controller.cartPaidMinor, equals(25000));
+      expect(controller.cartDueMinor, equals(0));
+    });
+
+    test('Purchase time formatting handles optional time properly', () {
+      expect(controller.formatShoppingTime(null), isNull);
+      // 10:30 AM
+      expect(
+          controller.formatShoppingTime(const TimeOfDay(hour: 10, minute: 30)),
+          equals('10:30 AM'));
+      // 16:45 -> 4:45 PM
+      expect(
+          controller.formatShoppingTime(const TimeOfDay(hour: 16, minute: 45)),
+          equals('4:45 PM'));
     });
   });
 }

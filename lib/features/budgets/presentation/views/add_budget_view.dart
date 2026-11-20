@@ -62,14 +62,18 @@ class AddBudgetView extends GetView<BudgetController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('বাজেট স্কোপ', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          const Text('বাজেট স্কোপ',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
             value: controller.selectedScope.value,
             items: const [
-              DropdownMenuItem(value: 'family', child: Text('পারিবারিক (Family)')),
-              DropdownMenuItem(value: 'personal', child: Text('ব্যক্তিগত (Personal)')),
-              DropdownMenuItem(value: 'business', child: Text('ব্যবসায়িক (Business)')),
+              DropdownMenuItem(
+                  value: 'family', child: Text('পারিবারিক (Family)')),
+              DropdownMenuItem(
+                  value: 'personal', child: Text('ব্যক্তিগত (Personal)')),
+              DropdownMenuItem(
+                  value: 'business', child: Text('ব্যবসায়িক (Business)')),
             ],
             onChanged: (val) {
               if (val != null) controller.selectedScope.value = val;

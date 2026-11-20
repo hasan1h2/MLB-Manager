@@ -65,7 +65,9 @@ class AddFamilyMemberView extends GetView<FamilyController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('role'.tr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('role'.tr,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p8),
           DropdownButtonFormField<String>(
             value: current,

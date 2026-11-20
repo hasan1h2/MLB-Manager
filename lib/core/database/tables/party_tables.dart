@@ -7,7 +7,8 @@ class Customers extends Table {
   TextColumn get name => text()();
   TextColumn get phone => text().nullable()();
   TextColumn get address => text().nullable()();
-  IntColumn get openingBalanceMinor => integer().withDefault(const Constant(0))();
+  IntColumn get openingBalanceMinor =>
+      integer().withDefault(const Constant(0))();
   TextColumn get notes => text().nullable()();
   IntColumn get createdAt => integer()();
 
@@ -21,7 +22,8 @@ class Suppliers extends Table {
   TextColumn get name => text()();
   TextColumn get phone => text().nullable()();
   TextColumn get address => text().nullable()();
-  IntColumn get openingBalanceMinor => integer().withDefault(const Constant(0))();
+  IntColumn get openingBalanceMinor =>
+      integer().withDefault(const Constant(0))();
   TextColumn get notes => text().nullable()();
   IntColumn get createdAt => integer()();
 
@@ -34,7 +36,8 @@ class PartyPayments extends Table {
   TextColumn get partyType => text()(); // customer, supplier
   TextColumn get partyId => text()();
   TextColumn get businessId => text().references(Businesses, #id)();
-  TextColumn get transactionId => text().nullable().references(Transactions, #id)();
+  TextColumn get transactionId =>
+      text().nullable().references(Transactions, #id)();
   IntColumn get amountMinor => integer()();
   IntColumn get paymentDate => integer()();
   TextColumn get paymentMethod => text().nullable()();

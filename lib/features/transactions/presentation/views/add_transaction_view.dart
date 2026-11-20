@@ -22,7 +22,9 @@ class AddTransactionView extends GetView<TransactionController> {
         title: Obx(() => Text(
               controller.transactionType.value == 'income'
                   ? 'add_income'.tr
-                  : (controller.transactionType.value == 'transfer' ? 'transfer'.tr : 'add_expense'.tr),
+                  : (controller.transactionType.value == 'transfer'
+                      ? 'transfer'.tr
+                      : 'add_expense'.tr),
             )),
       ),
       body: SingleChildScrollView(
@@ -48,7 +50,13 @@ class AddTransactionView extends GetView<TransactionController> {
               return _buildCategoryDropdown();
             }),
             const SizedBox(height: AppSizes.p16),
-            _buildDatePicker(context),
+            Row(
+              children: [
+                Expanded(child: _buildDatePicker(context)),
+                const SizedBox(width: AppSizes.p12),
+                Expanded(child: _buildTimePicker(context)),
+              ],
+            ),
             const SizedBox(height: AppSizes.p16),
             AppTextField(
               label: 'description'.tr,
@@ -74,11 +82,35 @@ class AddTransactionView extends GetView<TransactionController> {
   }
 
   Widget _buildTypeToggle() {
+    final isDark = Theme.of(Get.context!).brightness == Brightness.dark;
+
     return Obx(() {
       final current = controller.transactionType.value;
       return SizedBox(
         width: double.infinity,
         child: SegmentedButton<String>(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return isDark
+                    ? AppColors.secondaryElectric
+                    : AppColors.primaryNavy;
+              }
+              return isDark ? AppColors.surfaceDark : Colors.white;
+            }),
+            foregroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return Colors.white;
+              }
+              return isDark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimaryLight;
+            }),
+            side: WidgetStateProperty.all(
+              BorderSide(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            ),
+          ),
           segments: [
             ButtonSegment(
               value: 'expense',
@@ -127,11 +159,14 @@ class AddTransactionView extends GetView<TransactionController> {
               ],
             ),
           ),
-          if (controller.scopeType.value == 'business' && controller.businesses.isNotEmpty) ...[
+          if (controller.scopeType.value == 'business' &&
+              controller.businesses.isNotEmpty) ...[
             const SizedBox(height: AppSizes.p8),
             DropdownButtonFormField<String>(
-              value: controller.selectedBusinessId.value ?? controller.businesses.first.id,
-              decoration: const InputDecoration(labelText: 'ব্যবসা নির্বাচন করুন'),
+              value: controller.selectedBusinessId.value ??
+                  controller.businesses.first.id,
+              decoration:
+                  const InputDecoration(labelText: 'ব্যবসা নির্বাচন করুন'),
               items: controller.businesses.map((b) {
                 return DropdownMenuItem(value: b.id, child: Text(b.name));
               }).toList(),
@@ -146,7 +181,8 @@ class AddTransactionView extends GetView<TransactionController> {
   Widget _scopeRadio(BuildContext context, String value, String labelKey) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -160,7 +196,8 @@ class AddTransactionView extends GetView<TransactionController> {
         ),
         Text(
           labelKey.tr,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: textColor),
+          style: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.w500, color: textColor),
         ),
       ],
     );
@@ -175,7 +212,9 @@ class AddTransactionView extends GetView<TransactionController> {
       return DropdownButtonFormField<String>(
         value: controller.selectedAccountId.value ?? accounts.first.id,
         decoration: InputDecoration(
-          labelText: controller.transactionType.value == 'transfer' ? 'from_account'.tr : 'account'.tr,
+          labelText: controller.transactionType.value == 'transfer'
+              ? 'from_account'.tr
+              : 'account'.tr,
           prefixIcon: const Icon(AppIcons.accounts),
         ),
         items: accounts.map((acc) {
@@ -188,9 +227,12 @@ class AddTransactionView extends GetView<TransactionController> {
 
   Widget _buildToAccountDropdown() {
     return Obx(() {
-      final accounts = controller.accounts.where((a) => a.id != controller.selectedAccountId.value).toList();
+      final accounts = controller.accounts
+          .where((a) => a.id != controller.selectedAccountId.value)
+          .toList();
       return DropdownButtonFormField<String>(
-        value: controller.toAccountId.value ?? (accounts.isNotEmpty ? accounts.first.id : null),
+        value: controller.toAccountId.value ??
+            (accounts.isNotEmpty ? accounts.first.id : null),
         decoration: InputDecoration(
           labelText: 'to_account'.tr,
           prefixIcon: const Icon(AppIcons.accounts),
@@ -205,7 +247,9 @@ class AddTransactionView extends GetView<TransactionController> {
 
   Widget _buildCategoryDropdown() {
     return Obx(() {
-      final categories = controller.categories.where((c) => c.categoryType == controller.transactionType.value).toList();
+      final categories = controller.categories
+          .where((c) => c.categoryType == controller.transactionType.value)
+          .toList();
       if (categories.isEmpty) {
         return const SizedBox.shrink();
       }
@@ -217,7 +261,8 @@ class AddTransactionView extends GetView<TransactionController> {
         ),
         items: categories.map((cat) {
           final isBn = Get.locale?.languageCode == 'bn';
-          return DropdownMenuItem(value: cat.id, child: Text(isBn ? cat.nameBn : cat.nameEn));
+          return DropdownMenuItem(
+              value: cat.id, child: Text(isBn ? cat.nameBn : cat.nameEn));
         }).toList(),
         onChanged: (val) => controller.selectedCategoryId.value = val,
       );
@@ -229,29 +274,8 @@ class AddTransactionView extends GetView<TransactionController> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Obx(() {
-      return ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.r8),
-          side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
-        ),
-        tileColor: isDark ? AppColors.surfaceDark : Colors.white,
-        leading: const Icon(AppIcons.calendar, color: AppColors.secondaryElectric),
-        title: Text(
-          'date'.tr,
-          style: TextStyle(
-            fontSize: 12,
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-          ),
-        ),
-        subtitle: Text(
-          AppDateUtils.standardDateFormat.format(controller.transactionDate.value),
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-          ),
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+      return InkWell(
+        borderRadius: BorderRadius.circular(AppSizes.r8),
         onTap: () async {
           final picked = await showDatePicker(
             context: context,
@@ -263,6 +287,129 @@ class AddTransactionView extends GetView<TransactionController> {
             controller.transactionDate.value = picked;
           }
         },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.p12, vertical: AppSizes.p10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSizes.r8),
+            border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+          ),
+          child: Row(
+            children: [
+              const Icon(AppIcons.calendar,
+                  color: AppColors.secondaryElectric, size: 20),
+              const SizedBox(width: AppSizes.p8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'date'.tr,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                    Text(
+                      AppDateUtils.standardDateFormat
+                          .format(controller.transactionDate.value),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildTimePicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Obx(() {
+      final time = controller.transactionTime.value;
+      final timeStr = controller.formatTime(time);
+
+      return InkWell(
+        borderRadius: BorderRadius.circular(AppSizes.r8),
+        onTap: () async {
+          final picked = await showTimePicker(
+            context: context,
+            initialTime: time ?? TimeOfDay.now(),
+          );
+          if (picked != null) {
+            controller.transactionTime.value = picked;
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.p12, vertical: AppSizes.p10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSizes.r8),
+            border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.access_time_rounded,
+                  color: AppColors.infoBlue, size: 20),
+              const SizedBox(width: AppSizes.p8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'সময় (ঐচ্ছিক)',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                    Text(
+                      timeStr ?? 'সময় নির্বাচন',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: timeStr != null
+                            ? (isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight)
+                            : (isDark
+                                ? AppColors.textMutedDark
+                                : AppColors.textMutedLight),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (time != null)
+                InkWell(
+                  onTap: () => controller.transactionTime.value = null,
+                  child: Icon(Icons.close_rounded,
+                      size: 16,
+                      color: isDark
+                          ? AppColors.textMutedDark
+                          : AppColors.textMutedLight),
+                ),
+            ],
+          ),
+        ),
       );
     });
   }

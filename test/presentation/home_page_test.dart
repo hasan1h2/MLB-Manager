@@ -41,7 +41,8 @@ void main() {
     Get.reset();
   });
 
-  testWidgets('MainNavView and DashboardView load properly on AppPages.initial', (WidgetTester tester) async {
+  testWidgets('MainNavView and DashboardView load properly on AppPages.initial',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       GetMaterialApp(
         translations: AppTranslations(),
@@ -71,7 +72,8 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Bottom navigation switches tabs cleanly without error', (WidgetTester tester) async {
+  testWidgets('Bottom navigation switches tabs cleanly without error',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       GetMaterialApp(
         translations: AppTranslations(),

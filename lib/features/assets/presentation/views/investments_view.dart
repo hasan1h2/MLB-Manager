@@ -41,17 +41,25 @@ class InvestmentsView extends GetView<AssetController> {
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: AppColors.incomeGreen.withValues(alpha: 0.12),
-                  child: const Icon(AppIcons.investments, color: AppColors.incomeGreen),
+                  backgroundColor:
+                      AppColors.incomeGreen.withValues(alpha: 0.12),
+                  child: const Icon(AppIcons.investments,
+                      color: AppColors.incomeGreen),
                 ),
-                title: Text(inv.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                title: Text(inv.name,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 15)),
                 subtitle: Text(
                   '${inv.investmentType.toUpperCase()} • ${AppDateUtils.formatTimestamp(inv.investmentDate)}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondaryLight),
                 ),
                 trailing: Text(
                   CurrencyUtils.format(inv.currentValueMinor),
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.primaryNavy),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: AppColors.primaryNavy),
                 ),
               ),
             );

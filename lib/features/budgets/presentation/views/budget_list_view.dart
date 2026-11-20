@@ -55,16 +55,22 @@ class BudgetListView extends GetView<BudgetController> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(b.budget.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                          Text(b.budget.name,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 16)),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
                               color: barColor.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               '${(b.utilizationPercent * 100).toStringAsFixed(0)}% ব্যবহৃত',
-                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: barColor),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  color: barColor),
                             ),
                           ),
                         ],
@@ -85,11 +91,14 @@ class BudgetListView extends GetView<BudgetController> {
                         children: [
                           Text(
                             'খরচ: ${CurrencyUtils.format(b.actualSpendingMinor)}',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondaryLight),
                           ),
                           Text(
                             'বাজেট সীমা: ${CurrencyUtils.format(b.budget.limitMinor)}',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -104,12 +113,15 @@ class BudgetListView extends GetView<BudgetController> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: b.isOverBudget ? AppColors.expenseRed : AppColors.incomeGreenDark,
+                              color: b.isOverBudget
+                                  ? AppColors.expenseRed
+                                  : AppColors.incomeGreenDark,
                             ),
                           ),
                           Text(
                             'স্কোপ: ${b.budget.scopeType.toUpperCase()}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textMutedLight),
+                            style: const TextStyle(
+                                fontSize: 11, color: AppColors.textMutedLight),
                           ),
                         ],
                       ),

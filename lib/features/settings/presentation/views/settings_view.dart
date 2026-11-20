@@ -33,10 +33,15 @@ class SettingsView extends GetView<SettingsController> {
 
   Widget _buildLanguageSection(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final selectedColor = isDark ? AppColors.secondaryElectric : AppColors.primaryNavy;
-    final unselectedTextColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final selectedColor =
+        isDark ? AppColors.secondaryElectric : AppColors.primaryNavy;
+    final unselectedTextColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final unselectedBg = isDark ? AppColors.surfaceDark : Colors.white;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
 
     return Card(
+      color: isDark ? AppColors.cardDark : Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
         child: Column(
@@ -44,9 +49,16 @@ class SettingsView extends GetView<SettingsController> {
           children: [
             Row(
               children: [
-                const Icon(Icons.language_rounded, color: AppColors.secondaryElectric),
+                const Icon(Icons.language_rounded,
+                    color: AppColors.secondaryElectric),
                 const SizedBox(width: AppSizes.p8),
-                Text('language'.tr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                Text('language'.tr,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight)),
               ],
             ),
             const SizedBox(height: AppSizes.p12),
@@ -59,11 +71,15 @@ class SettingsView extends GetView<SettingsController> {
                       label: const Center(child: Text('বাংলা (Bengali)')),
                       selected: isBn,
                       selectedColor: selectedColor,
+                      backgroundColor: unselectedBg,
+                      side:
+                          BorderSide(color: isBn ? selectedColor : borderColor),
                       labelStyle: TextStyle(
                         color: isBn ? Colors.white : unselectedTextColor,
                         fontWeight: FontWeight.w600,
                       ),
-                      onSelected: (_) => controller.changeLanguage(AppLocales.bengali),
+                      onSelected: (_) =>
+                          controller.changeLanguage(AppLocales.bengali),
                     ),
                   ),
                   const SizedBox(width: AppSizes.p8),
@@ -72,11 +88,15 @@ class SettingsView extends GetView<SettingsController> {
                       label: const Center(child: Text('English (US)')),
                       selected: !isBn,
                       selectedColor: selectedColor,
+                      backgroundColor: unselectedBg,
+                      side: BorderSide(
+                          color: !isBn ? selectedColor : borderColor),
                       labelStyle: TextStyle(
                         color: !isBn ? Colors.white : unselectedTextColor,
                         fontWeight: FontWeight.w600,
                       ),
-                      onSelected: (_) => controller.changeLanguage(AppLocales.english),
+                      onSelected: (_) =>
+                          controller.changeLanguage(AppLocales.english),
                     ),
                   ),
                 ],
@@ -89,7 +109,10 @@ class SettingsView extends GetView<SettingsController> {
   }
 
   Widget _buildThemeSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
+      color: isDark ? AppColors.cardDark : Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
         child: Column(
@@ -97,9 +120,16 @@ class SettingsView extends GetView<SettingsController> {
           children: [
             Row(
               children: [
-                const Icon(Icons.palette_outlined, color: AppColors.secondaryElectric),
+                const Icon(Icons.palette_outlined,
+                    color: AppColors.secondaryElectric),
                 const SizedBox(width: AppSizes.p8),
-                Text('theme'.tr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                Text('theme'.tr,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight)),
               ],
             ),
             const SizedBox(height: AppSizes.p12),
@@ -108,13 +138,39 @@ class SettingsView extends GetView<SettingsController> {
               return SizedBox(
                 width: double.infinity,
                 child: SegmentedButton<ThemeMode>(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return isDark
+                            ? AppColors.secondaryElectric
+                            : AppColors.primaryNavy;
+                      }
+                      return isDark ? AppColors.surfaceDark : Colors.white;
+                    }),
+                    foregroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return Colors.white;
+                      }
+                      return isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight;
+                    }),
+                    side: WidgetStateProperty.all(
+                      BorderSide(
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight),
+                    ),
+                  ),
                   segments: const [
-                    ButtonSegment(value: ThemeMode.system, label: Text('সিস্টেম')),
+                    ButtonSegment(
+                        value: ThemeMode.system, label: Text('সিস্টেম')),
                     ButtonSegment(value: ThemeMode.light, label: Text('লাইট')),
                     ButtonSegment(value: ThemeMode.dark, label: Text('ডার্ক')),
                   ],
                   selected: {currentMode},
-                  onSelectionChanged: (set) => controller.toggleTheme(set.first),
+                  onSelectionChanged: (set) =>
+                      controller.toggleTheme(set.first),
                 ),
               );
             }),
@@ -135,9 +191,12 @@ class SettingsView extends GetView<SettingsController> {
           children: [
             Row(
               children: [
-                const Icon(Icons.security_rounded, color: AppColors.secondaryElectric),
+                const Icon(Icons.security_rounded,
+                    color: AppColors.secondaryElectric),
                 const SizedBox(width: AppSizes.p8),
-                Text('security_pin'.tr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                Text('security_pin'.tr,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 16)),
               ],
             ),
             const SizedBox(height: AppSizes.p12),
@@ -145,14 +204,17 @@ class SettingsView extends GetView<SettingsController> {
               final hasPin = controller.pinService.hasPin.value;
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(hasPin ? Icons.lock_rounded : Icons.lock_open_rounded),
+                leading:
+                    Icon(hasPin ? Icons.lock_rounded : Icons.lock_open_rounded),
                 title: Text(hasPin ? 'app_pin_active'.tr : 'set_new_pin'.tr),
                 trailing: TextButton(
                   onPressed: () => controller.showPinSetupDialog(context),
                   child: Text(
                     hasPin ? 'change'.tr : 'set_pin'.tr,
                     style: TextStyle(
-                      color: isDark ? AppColors.secondaryElectricLight : AppColors.secondaryElectric,
+                      color: isDark
+                          ? AppColors.secondaryElectricLight
+                          : AppColors.secondaryElectric,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -160,7 +222,8 @@ class SettingsView extends GetView<SettingsController> {
               );
             }),
             Obx(() {
-              final bioAvailable = controller.pinService.isBiometricAvailable.value;
+              final bioAvailable =
+                  controller.pinService.isBiometricAvailable.value;
               if (!bioAvailable) return const SizedBox.shrink();
 
               return SwitchListTile(
@@ -179,7 +242,8 @@ class SettingsView extends GetView<SettingsController> {
 
   Widget _buildAboutSection(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondaryTextColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final secondaryTextColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return Card(
       child: Padding(
@@ -197,7 +261,9 @@ class SettingsView extends GetView<SettingsController> {
                   fallbackIcon: Icons.info_outline_rounded,
                 ),
                 const SizedBox(width: AppSizes.p12),
-                const Text('অ্যাপ সম্পর্কে', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                const Text('অ্যাপ সম্পর্কে',
+                    style:
+                        TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
               ],
             ),
             const SizedBox(height: AppSizes.p10),
@@ -208,7 +274,8 @@ class SettingsView extends GetView<SettingsController> {
             const SizedBox(height: 4),
             Text(
               'ব্যক্তিগত অর্থায়ন, পরিবার ব্যবস্থাপনা ও বহু-ব্যবসা অ্যাকাউন্টিংয়ের সম্পূর্ণ অফলাইন-ফার্স্ট সমাধান।',
-              style: TextStyle(fontSize: 12.5, color: secondaryTextColor, height: 1.4),
+              style: TextStyle(
+                  fontSize: 12.5, color: secondaryTextColor, height: 1.4),
             ),
           ],
         ),

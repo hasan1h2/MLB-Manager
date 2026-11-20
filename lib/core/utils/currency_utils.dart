@@ -21,7 +21,8 @@ class CurrencyUtils {
   }
 
   /// Converts Poisha (minor units) to decimal string e.g. 15050 -> "150.50"
-  static String minorToTakaString(int minorUnits, {bool includeSymbol = true, bool useBengaliDigits = false}) {
+  static String minorToTakaString(int minorUnits,
+      {bool includeSymbol = true, bool useBengaliDigits = false}) {
     final bool isNegative = minorUnits < 0;
     final int absMinor = minorUnits.abs();
     final int major = absMinor ~/ AppConstants.minorUnitMultiplier;
@@ -44,8 +45,10 @@ class CurrencyUtils {
   }
 
   /// Formats integer minor units directly into formatted display text
-  static String format(int minorUnits, {bool includeSymbol = true, bool useBengaliDigits = false}) {
-    return minorToTakaString(minorUnits, includeSymbol: includeSymbol, useBengaliDigits: useBengaliDigits);
+  static String format(int minorUnits,
+      {bool includeSymbol = true, bool useBengaliDigits = false}) {
+    return minorToTakaString(minorUnits,
+        includeSymbol: includeSymbol, useBengaliDigits: useBengaliDigits);
   }
 
   /// Converts English digits to Bengali digits

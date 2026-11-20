@@ -23,7 +23,9 @@ class AddPartyView extends GetView<PartyController> {
           children: [
             AppTextField(
               label: 'নাম',
-              hint: isCustomer ? 'গ্রাহকের পুরো নাম' : 'সাপ্লায়ার বা প্রতিষ্ঠানের নাম',
+              hint: isCustomer
+                  ? 'গ্রাহকের পুরো নাম'
+                  : 'সাপ্লায়ার বা প্রতিষ্ঠানের নাম',
               controller: controller.nameController,
               prefixIcon: Icons.person_outline_rounded,
             ),

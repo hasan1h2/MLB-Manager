@@ -14,6 +14,8 @@ class CartItem {
   final RxDouble quantity;
   String unit;
   final RxInt unitPriceMinor;
+  final RxInt lineTotalMinor;
+  final Rx<String?> note;
   final Rx<String?> imagePath;
 
   CartItem({
@@ -22,22 +24,33 @@ class CartItem {
     double quantity = 1.0,
     this.unit = 'kg',
     int unitPriceMinor = 0,
+    int? lineTotalMinor,
+    String? note,
     String? imagePath,
   })  : id = id ?? const Uuid().v4(),
         quantity = quantity.obs,
         unitPriceMinor = unitPriceMinor.obs,
+        lineTotalMinor = (lineTotalMinor ??
+                (unitPriceMinor > 0 ? (quantity * unitPriceMinor).round() : 0))
+            .obs,
+        note = Rx<String?>(note),
         imagePath = Rx<String?>(imagePath);
 
-  int get subtotalMinor => (quantity.value * unitPriceMinor.value).round();
+  int get subtotalMinor => lineTotalMinor.value;
 }
 
 class ShoppingItemDraft {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController qtyController = TextEditingController(text: '1');
   final TextEditingController unitPriceController = TextEditingController();
+  final TextEditingController lineTotalController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
   String unit = 'kg';
 
   int get totalMinor {
+    if (lineTotalController.text.trim().isNotEmpty) {
+      return CurrencyUtils.takaToMinor(lineTotalController.text);
+    }
     final qty = double.tryParse(qtyController.text) ?? 1.0;
     final unitPriceMinor = CurrencyUtils.takaToMinor(unitPriceController.text);
     return (qty * unitPriceMinor).round();
@@ -47,6 +60,8 @@ class ShoppingItemDraft {
     nameController.dispose();
     qtyController.dispose();
     unitPriceController.dispose();
+    lineTotalController.dispose();
+    noteController.dispose();
   }
 }
 
@@ -59,6 +74,9 @@ class HouseholdController extends GetxController {
   final RxList<ShoppingListItem> currentListItems = <ShoppingListItem>[].obs;
   final RxBool isLoading = true.obs;
 
+  // Entry Mode: 'itemized' (পণ্যের তালিকা) vs 'direct_total' (শুধু মোট টাকা)
+  final RxString entryMode = 'itemized'.obs;
+
   // Shopping Cart Items
   final RxList<CartItem> cartItems = <CartItem>[].obs;
 
@@ -66,10 +84,18 @@ class HouseholdController extends GetxController {
   final storeNameController = TextEditingController();
   final discountController = TextEditingController(text: '0');
   final paidController = TextEditingController();
+  final notesController = TextEditingController();
   final RxList<ShoppingItemDraft> draftItems = <ShoppingItemDraft>[].obs;
   final Rx<DateTime> shoppingDate = DateTime.now().obs;
+  final Rx<TimeOfDay?> shoppingTime = Rx<TimeOfDay?>(null);
   final Rx<String?> selectedAccountId = Rx<String?>(null);
   final Rx<String?> selectedMemberId = Rx<String?>(null);
+
+  // Direct Total Mode Form Fields
+  final directTitleController = TextEditingController(text: 'দৈনিক বাজার');
+  final directAmountController = TextEditingController();
+  final directNoteController = TextEditingController();
+  final Rx<String?> directCategoryId = Rx<String?>(null);
 
   @override
   void onInit() {
@@ -93,6 +119,14 @@ class HouseholdController extends GetxController {
         selectedAccountId.value = accounts.first.id;
       }
     });
+
+    _dbService.coreDao.getAllCategories(type: 'expense').then((categories) {
+      if (categories.isNotEmpty && directCategoryId.value == null) {
+        final grocery = categories.firstWhereOrNull(
+            (c) => c.nameEn.contains('Grocery') || c.nameBn.contains('বাজার'));
+        directCategoryId.value = grocery?.id ?? categories.first.id;
+      }
+    });
   }
 
   // --- Cart Management ---
@@ -101,14 +135,22 @@ class HouseholdController extends GetxController {
     double quantity = 1.0,
     String unit = 'kg',
     int unitPriceMinor = 0,
+    int? lineTotalMinor,
+    String? note,
     String? imagePath,
   }) {
     if (name.trim().isEmpty) return;
+
+    final computedTotal = lineTotalMinor ??
+        (unitPriceMinor > 0 ? (quantity * unitPriceMinor).round() : 0);
+
     final newItem = CartItem(
       productName: name.trim(),
       quantity: quantity,
       unit: unit,
       unitPriceMinor: unitPriceMinor,
+      lineTotalMinor: computedTotal,
+      note: note,
       imagePath: imagePath,
     );
     cartItems.add(newItem);
@@ -125,6 +167,12 @@ class HouseholdController extends GetxController {
   void incrementQuantity(int index, [double step = 1.0]) {
     if (index >= 0 && index < cartItems.length) {
       cartItems[index].quantity.value += step;
+      if (cartItems[index].unitPriceMinor.value > 0) {
+        cartItems[index].lineTotalMinor.value =
+            (cartItems[index].quantity.value *
+                    cartItems[index].unitPriceMinor.value)
+                .round();
+      }
       cartItems.refresh();
     }
   }
@@ -134,6 +182,12 @@ class HouseholdController extends GetxController {
       final current = cartItems[index].quantity.value;
       if (current > step) {
         cartItems[index].quantity.value -= step;
+        if (cartItems[index].unitPriceMinor.value > 0) {
+          cartItems[index].lineTotalMinor.value =
+              (cartItems[index].quantity.value *
+                      cartItems[index].unitPriceMinor.value)
+                  .round();
+        }
       } else {
         removeCartItem(index);
         return;
@@ -145,13 +199,36 @@ class HouseholdController extends GetxController {
   void updateQuantity(int index, double newQty) {
     if (index >= 0 && index < cartItems.length) {
       cartItems[index].quantity.value = newQty > 0 ? newQty : 1.0;
+      if (cartItems[index].unitPriceMinor.value > 0) {
+        cartItems[index].lineTotalMinor.value =
+            (cartItems[index].quantity.value *
+                    cartItems[index].unitPriceMinor.value)
+                .round();
+      }
       cartItems.refresh();
     }
   }
 
   void updateUnitPrice(int index, int newPriceMinor) {
     if (index >= 0 && index < cartItems.length) {
-      cartItems[index].unitPriceMinor.value = newPriceMinor >= 0 ? newPriceMinor : 0;
+      cartItems[index].unitPriceMinor.value =
+          newPriceMinor >= 0 ? newPriceMinor : 0;
+      cartItems[index].lineTotalMinor.value = (cartItems[index].quantity.value *
+              cartItems[index].unitPriceMinor.value)
+          .round();
+      cartItems.refresh();
+    }
+  }
+
+  void updateLineTotal(int index, int newLineTotalMinor) {
+    if (index >= 0 && index < cartItems.length) {
+      cartItems[index].lineTotalMinor.value =
+          newLineTotalMinor >= 0 ? newLineTotalMinor : 0;
+      if (cartItems[index].quantity.value > 0 &&
+          cartItems[index].unitPriceMinor.value > 0) {
+        cartItems[index].unitPriceMinor.value =
+            (newLineTotalMinor / cartItems[index].quantity.value).round();
+      }
       cartItems.refresh();
     }
   }
@@ -173,6 +250,10 @@ class HouseholdController extends GetxController {
   }
 
   int get subtotalMinor {
+    if (entryMode.value == 'direct_total') {
+      return CurrencyUtils.takaToMinor(directAmountController.text);
+    }
+
     if (cartItems.isNotEmpty) {
       int sum = 0;
       for (var item in cartItems) {
@@ -187,7 +268,10 @@ class HouseholdController extends GetxController {
     return sum;
   }
 
-  int get discountMinor => CurrencyUtils.takaToMinor(discountController.text);
+  int get discountMinor {
+    if (entryMode.value == 'direct_total') return 0;
+    return CurrencyUtils.takaToMinor(discountController.text);
+  }
 
   int get totalBillMinor {
     final total = subtotalMinor - discountMinor;
@@ -195,6 +279,7 @@ class HouseholdController extends GetxController {
   }
 
   int get cartPaidMinor {
+    if (entryMode.value == 'direct_total') return totalBillMinor;
     final text = paidController.text.trim();
     if (text.isEmpty) return totalBillMinor;
     return CurrencyUtils.takaToMinor(text);
@@ -205,70 +290,116 @@ class HouseholdController extends GetxController {
     return due < 0 ? 0 : due;
   }
 
-  Future<bool> saveShoppingBill() async {
-    final hasCartItems = cartItems.isNotEmpty;
-    final hasDraftItems = draftItems.isNotEmpty && draftItems.first.nameController.text.trim().isNotEmpty;
+  String? formatShoppingTime(TimeOfDay? time) {
+    if (time == null) return null;
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
 
-    if (!hasCartItems && !hasDraftItems) {
-      AppSnackbar.error('অনুগ্রহ করে অন্তত একটি পণ্য যোগ করুন');
-      return false;
+  Future<bool> saveShoppingBill() async {
+    final isDirectMode = entryMode.value == 'direct_total';
+
+    if (isDirectMode) {
+      final directAmountMinor =
+          CurrencyUtils.takaToMinor(directAmountController.text);
+      if (directAmountMinor <= 0) {
+        AppSnackbar.error('অনুগ্রহ করে মোট খরচের পরিমাণ লিখুন');
+        return false;
+      }
+    } else {
+      final hasCartItems = cartItems.isNotEmpty;
+      final hasDraftItems = draftItems.isNotEmpty &&
+          draftItems.first.nameController.text.trim().isNotEmpty;
+
+      if (!hasCartItems && !hasDraftItems) {
+        AppSnackbar.error('অনুগ্রহ করে অন্তত একটি পণ্য যোগ করুন');
+        return false;
+      }
     }
 
     final total = totalBillMinor;
-    final paid = paidController.text.trim().isNotEmpty
-        ? CurrencyUtils.takaToMinor(paidController.text)
-        : total;
+    final paid = isDirectMode
+        ? total
+        : (paidController.text.trim().isNotEmpty
+            ? CurrencyUtils.takaToMinor(paidController.text)
+            : total);
     final due = total - paid;
 
     final recordId = _uuid.v4();
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
     final shoppingDateMs = shoppingDate.value.toUtc().millisecondsSinceEpoch;
+    final formattedTime = formatShoppingTime(shoppingTime.value);
+
+    final storeTitle = isDirectMode
+        ? (directTitleController.text.trim().isNotEmpty
+            ? directTitleController.text.trim()
+            : 'দৈনিক বাজার')
+        : (storeNameController.text.trim().isNotEmpty
+            ? storeNameController.text.trim()
+            : 'দৈনিক বাজার');
+
+    final recordNote = isDirectMode
+        ? directNoteController.text.trim()
+        : notesController.text.trim();
 
     final record = ShoppingRecordsCompanion(
       id: Value(recordId),
       shoppingDate: Value(shoppingDateMs),
-      storeName: Value(storeNameController.text.trim().isNotEmpty ? storeNameController.text.trim() : 'দৈনিক বাজার'),
+      storeName: Value(storeTitle),
       purchasedByMemberId: Value(selectedMemberId.value),
       subtotalMinor: Value(subtotalMinor),
       discountMinor: Value(discountMinor),
       totalMinor: Value(total),
       paidMinor: Value(paid),
       dueMinor: Value(due < 0 ? 0 : due),
+      notes: Value(recordNote.isNotEmpty ? recordNote : null),
+      purchaseTime: Value(formattedTime),
+      entryMode: Value(isDirectMode ? 'direct_total' : 'itemized'),
       createdAt: Value(now),
     );
 
     final items = <ShoppingItemsCompanion>[];
 
-    if (hasCartItems) {
-      for (var cartItem in cartItems) {
-        items.add(
-          ShoppingItemsCompanion(
-            id: Value(_uuid.v4()),
-            shoppingRecordId: Value(recordId),
-            productName: Value(cartItem.productName),
-            quantity: Value(cartItem.quantity.value),
-            unit: Value(cartItem.unit),
-            unitPriceMinor: Value(cartItem.unitPriceMinor.value),
-            totalMinor: Value(cartItem.subtotalMinor),
-          ),
-        );
-      }
-    } else {
-      for (var draft in draftItems) {
-        if (draft.nameController.text.trim().isNotEmpty) {
-          final qty = double.tryParse(draft.qtyController.text) ?? 1.0;
-          final unitPriceMinor = CurrencyUtils.takaToMinor(draft.unitPriceController.text);
+    if (!isDirectMode) {
+      if (cartItems.isNotEmpty) {
+        for (var cartItem in cartItems) {
           items.add(
             ShoppingItemsCompanion(
               id: Value(_uuid.v4()),
               shoppingRecordId: Value(recordId),
-              productName: Value(draft.nameController.text.trim()),
-              quantity: Value(qty),
-              unit: Value(draft.unit),
-              unitPriceMinor: Value(unitPriceMinor),
-              totalMinor: Value(draft.totalMinor),
+              productName: Value(cartItem.productName),
+              quantity: Value(cartItem.quantity.value),
+              unit: Value(cartItem.unit),
+              unitPriceMinor: Value(cartItem.unitPriceMinor.value),
+              totalMinor: Value(cartItem.subtotalMinor),
+              note: Value(cartItem.note.value),
+              imagePath: Value(cartItem.imagePath.value),
             ),
           );
+        }
+      } else {
+        for (var draft in draftItems) {
+          if (draft.nameController.text.trim().isNotEmpty) {
+            final qty = double.tryParse(draft.qtyController.text) ?? 1.0;
+            final unitPriceMinor =
+                CurrencyUtils.takaToMinor(draft.unitPriceController.text);
+            items.add(
+              ShoppingItemsCompanion(
+                id: Value(_uuid.v4()),
+                shoppingRecordId: Value(recordId),
+                productName: Value(draft.nameController.text.trim()),
+                quantity: Value(qty),
+                unit: Value(draft.unit),
+                unitPriceMinor: Value(unitPriceMinor),
+                totalMinor: Value(draft.totalMinor),
+                note: Value(draft.noteController.text.trim().isNotEmpty
+                    ? draft.noteController.text.trim()
+                    : null),
+              ),
+            );
+          }
         }
       }
     }
@@ -282,8 +413,14 @@ class HouseholdController extends GetxController {
       final txNumber = 'SHOP-${now.toString().substring(5)}';
 
       // Find or assign Household Grocery category
-      final categories = await _dbService.coreDao.getAllCategories(type: 'expense');
-      final groceryCat = categories.firstWhereOrNull((c) => c.nameEn.contains('Grocery') || c.nameBn.contains('বাজার'));
+      final categories =
+          await _dbService.coreDao.getAllCategories(type: 'expense');
+      final groceryCat = categories.firstWhereOrNull(
+          (c) => c.nameEn.contains('Grocery') || c.nameBn.contains('বাজার'));
+      final targetCatId = isDirectMode && directCategoryId.value != null
+          ? directCategoryId.value
+          : (groceryCat?.id ??
+              (categories.isNotEmpty ? categories.first.id : null));
 
       expenseTx = TransactionsCompanion(
         id: Value(txId),
@@ -291,12 +428,13 @@ class HouseholdController extends GetxController {
         transactionType: const Value('expense'),
         scopeType: const Value('family'),
         familyMemberId: Value(selectedMemberId.value),
-        categoryId: Value(groceryCat?.id ?? (categories.isNotEmpty ? categories.first.id : null)),
+        categoryId: Value(targetCatId),
         accountId: Value(selectedAccountId.value),
         amountMinor: Value(paid),
         transactionDate: Value(shoppingDateMs),
-        description: Value('বাজার খরচ: ${storeNameController.text.trim().isNotEmpty ? storeNameController.text.trim() : "দৈনিক বাজার"}'),
+        description: Value('বাজার খরচ: $storeTitle'),
         paymentStatus: Value(due > 0 ? 'partial' : 'paid'),
+        purchaseTime: Value(formattedTime),
         sourceType: const Value('shopping'),
         sourceId: Value(recordId),
         createdAt: Value(now),
@@ -344,6 +482,10 @@ class HouseholdController extends GetxController {
     storeNameController.clear();
     discountController.text = '0';
     paidController.clear();
+    notesController.clear();
+    directAmountController.clear();
+    directNoteController.clear();
+    shoppingTime.value = null;
     for (var draft in draftItems) {
       draft.dispose();
     }
@@ -362,6 +504,10 @@ class HouseholdController extends GetxController {
     storeNameController.dispose();
     discountController.dispose();
     paidController.dispose();
+    notesController.dispose();
+    directTitleController.dispose();
+    directAmountController.dispose();
+    directNoteController.dispose();
     for (var draft in draftItems) {
       draft.dispose();
     }

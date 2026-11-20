@@ -69,7 +69,8 @@ class DashboardController extends GetxController {
       totalAvailableBalanceMinor.value = totalBal;
 
       // 2. Total Income & Expense in filter date range (excluding internal transfers)
-      final txs = await _dbService.coreDao.getTransactionsInRange(range.startMs, range.endMs);
+      final txs = await _dbService.coreDao
+          .getTransactionsInRange(range.startMs, range.endMs);
       int income = 0;
       int expense = 0;
       int busProfit = 0;
@@ -93,7 +94,8 @@ class DashboardController extends GetxController {
 
       // 3. Money Receivable (Customer dues + Loan receivables)
       int receivable = 0;
-      final loansRec = await _dbService.loanDao.getLoans(loanType: 'receivable', status: 'active');
+      final loansRec = await _dbService.loanDao
+          .getLoans(loanType: 'receivable', status: 'active');
       for (var l in loansRec) {
         receivable += await _dbService.loanDao.getLoanRemainingPrincipal(l.id);
       }
@@ -101,21 +103,24 @@ class DashboardController extends GetxController {
       for (var b in businesses) {
         final custs = await _dbService.businessDao.getAllCustomers(b.id);
         for (var c in custs) {
-          receivable += await _dbService.businessDao.getCustomerOutstandingDue(c.id);
+          receivable +=
+              await _dbService.businessDao.getCustomerOutstandingDue(c.id);
         }
       }
       moneyReceivableMinor.value = receivable;
 
       // 4. Money Payable (Supplier payables + Loan payables)
       int payable = 0;
-      final loansPay = await _dbService.loanDao.getLoans(loanType: 'payable', status: 'active');
+      final loansPay = await _dbService.loanDao
+          .getLoans(loanType: 'payable', status: 'active');
       for (var l in loansPay) {
         payable += await _dbService.loanDao.getLoanRemainingPrincipal(l.id);
       }
       for (var b in businesses) {
         final supps = await _dbService.businessDao.getAllSuppliers(b.id);
         for (var s in supps) {
-          payable += await _dbService.businessDao.getSupplierOutstandingPayable(s.id);
+          payable +=
+              await _dbService.businessDao.getSupplierOutstandingPayable(s.id);
         }
       }
       moneyPayableMinor.value = payable;
@@ -137,7 +142,8 @@ class DashboardController extends GetxController {
       totalAssetsMinor.value = totalAst;
 
       // 7. Recent Transactions (snapshot)
-      final allRecent = await _dbService.coreDao.getTransactionsInRange(0, DateTime.now().millisecondsSinceEpoch + 86400000);
+      final allRecent = await _dbService.coreDao.getTransactionsInRange(
+          0, DateTime.now().millisecondsSinceEpoch + 86400000);
       recentTransactions.value = allRecent.take(5).toList();
 
       // 8. Low Stock
@@ -145,7 +151,8 @@ class DashboardController extends GetxController {
       for (var b in businesses) {
         final prods = await _dbService.inventoryDao.getAllProducts(b.id);
         for (var p in prods) {
-          final stock = await _dbService.inventoryDao.getProductCurrentStock(p.id);
+          final stock =
+              await _dbService.inventoryDao.getProductCurrentStock(p.id);
           if (stock <= p.minimumStock) {
             allProducts.add(p);
           }

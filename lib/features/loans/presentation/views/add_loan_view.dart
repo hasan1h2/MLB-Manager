@@ -88,8 +88,11 @@ class AddLoanView extends GetView<LoanController> {
           side: const BorderSide(color: AppColors.borderLight),
         ),
         tileColor: Colors.white,
-        leading: const Icon(AppIcons.calendar, color: AppColors.secondaryElectric),
-        title: Text('due_date'.tr, style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight)),
+        leading:
+            const Icon(AppIcons.calendar, color: AppColors.secondaryElectric),
+        title: Text('due_date'.tr,
+            style: const TextStyle(
+                fontSize: 12, color: AppColors.textSecondaryLight)),
         subtitle: Text(
           AppDateUtils.standardDateFormat.format(controller.dueDate.value),
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),

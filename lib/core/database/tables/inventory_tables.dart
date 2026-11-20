@@ -10,7 +10,8 @@ class Products extends Table {
   TextColumn get name => text()();
   TextColumn get categoryId => text().nullable().references(Categories, #id)();
   TextColumn get unit => text()();
-  IntColumn get purchasePriceMinor => integer().withDefault(const Constant(0))();
+  IntColumn get purchasePriceMinor =>
+      integer().withDefault(const Constant(0))();
   IntColumn get sellingPriceMinor => integer().withDefault(const Constant(0))();
   RealColumn get openingQuantity => real().withDefault(const Constant(0.0))();
   RealColumn get minimumStock => real().withDefault(const Constant(0.0))();
@@ -25,7 +26,8 @@ class InventoryMovements extends Table {
   TextColumn get id => text()();
   TextColumn get productId => text().references(Products, #id)();
   TextColumn get businessId => text().references(Businesses, #id)();
-  TextColumn get movementType => text()(); // in, out, purchase, sale, return, adjustment, damage, wastage, transfer
+  TextColumn get movementType =>
+      text()(); // in, out, purchase, sale, return, adjustment, damage, wastage, transfer
   RealColumn get quantity => real()();
   IntColumn get unitCostMinor => integer().withDefault(const Constant(0))();
   TextColumn get referenceType => text().nullable()();
@@ -54,7 +56,8 @@ class PurchaseRecords extends Table {
 
 class PurchaseItems extends Table {
   TextColumn get id => text()();
-  TextColumn get purchaseId => text().references(PurchaseRecords, #id, onDelete: KeyAction.cascade)();
+  TextColumn get purchaseId =>
+      text().references(PurchaseRecords, #id, onDelete: KeyAction.cascade)();
   TextColumn get productId => text().references(Products, #id)();
   RealColumn get quantity => real()();
   IntColumn get unitCostMinor => integer()();
@@ -81,7 +84,8 @@ class SalesRecords extends Table {
 
 class SalesItems extends Table {
   TextColumn get id => text()();
-  TextColumn get saleId => text().references(SalesRecords, #id, onDelete: KeyAction.cascade)();
+  TextColumn get saleId =>
+      text().references(SalesRecords, #id, onDelete: KeyAction.cascade)();
   TextColumn get productId => text().references(Products, #id)();
   RealColumn get quantity => real()();
   IntColumn get unitPriceMinor => integer()();

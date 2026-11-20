@@ -23,7 +23,10 @@ class DocumentController extends GetxController {
   }
 
   void watchAttachments() {
-    _dbService.database.select(_dbService.database.attachments).watch().listen((list) {
+    _dbService.database
+        .select(_dbService.database.attachments)
+        .watch()
+        .listen((list) {
       attachments.value = list;
       isLoading.value = false;
     });
@@ -41,7 +44,8 @@ class DocumentController extends GetxController {
         }
 
         final fileName = result.files.single.name;
-        final savedFile = await file.copy('${docDir.path}/${_uuid.v4()}_$fileName');
+        final savedFile =
+            await file.copy('${docDir.path}/${_uuid.v4()}_$fileName');
         final now = DateTime.now().toUtc().millisecondsSinceEpoch;
 
         await _dbService.database.into(_dbService.database.attachments).insert(

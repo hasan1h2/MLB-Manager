@@ -41,12 +41,14 @@ class OcrReviewView extends GetView<AiAssistantController> {
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.info_outline_rounded, color: AppColors.warningAmberDark, size: 20),
+                    Icon(Icons.info_outline_rounded,
+                        color: AppColors.warningAmberDark, size: 20),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'অনুগ্রহ করে সেভ করার পূর্বে প্রতিটি পণ্যের নাম ও টাকার পরিমাণ যাচাই বা সংশোধন করে নিন।',
-                        style: TextStyle(fontSize: 12, color: AppColors.textPrimaryLight),
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.textPrimaryLight),
                       ),
                     ),
                   ],
@@ -65,8 +67,11 @@ class OcrReviewView extends GetView<AiAssistantController> {
                       children: [
                         const ListTile(
                           dense: true,
-                          leading: Icon(Icons.receipt_long_rounded, color: AppColors.secondaryElectric),
-                          title: Text('স্ক্যানকৃত রসিদের ছবি', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                          leading: Icon(Icons.receipt_long_rounded,
+                              color: AppColors.secondaryElectric),
+                          title: Text('স্ক্যানকৃত রসিদের ছবি',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 13)),
                         ),
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxHeight: 180),
@@ -99,7 +104,8 @@ class OcrReviewView extends GetView<AiAssistantController> {
                             flex: 3,
                             child: TextFormField(
                               initialValue: item.name,
-                              decoration: const InputDecoration(labelText: 'পণ্যের নাম', isDense: true),
+                              decoration: const InputDecoration(
+                                  labelText: 'পণ্যের নাম', isDense: true),
                               onChanged: (val) => item.name = val,
                             ),
                           ),
@@ -108,8 +114,11 @@ class OcrReviewView extends GetView<AiAssistantController> {
                             flex: 1,
                             child: TextFormField(
                               initialValue: item.quantity.toString(),
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              decoration: const InputDecoration(labelText: 'পরিমাণ', isDense: true),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              decoration: const InputDecoration(
+                                  labelText: 'পরিমাণ', isDense: true),
                               onChanged: (val) {
                                 item.quantity = double.tryParse(val) ?? 1.0;
                                 controller.extractedItems.refresh();
@@ -120,11 +129,16 @@ class OcrReviewView extends GetView<AiAssistantController> {
                           Expanded(
                             flex: 2,
                             child: TextFormField(
-                              initialValue: (item.unitPriceMinor / 100).toStringAsFixed(0),
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              decoration: const InputDecoration(labelText: 'দর/মূল্য', isDense: true),
+                              initialValue: (item.unitPriceMinor / 100)
+                                  .toStringAsFixed(0),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              decoration: const InputDecoration(
+                                  labelText: 'দর/মূল্য', isDense: true),
                               onChanged: (val) {
-                                item.unitPriceMinor = CurrencyUtils.takaToMinor(val);
+                                item.unitPriceMinor =
+                                    CurrencyUtils.takaToMinor(val);
                                 controller.extractedItems.refresh();
                               },
                             ),
@@ -142,10 +156,15 @@ class OcrReviewView extends GetView<AiAssistantController> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('সর্বমোট বিল:', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                      const Text('সর্বমোট বিল:',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 16)),
                       Text(
                         CurrencyUtils.format(totalMinor),
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: AppColors.expenseRed),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            color: AppColors.expenseRed),
                       ),
                     ],
                   ),

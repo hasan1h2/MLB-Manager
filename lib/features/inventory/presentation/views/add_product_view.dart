@@ -66,7 +66,8 @@ class AddProductView extends GetView<InventoryController> {
                   child: AppTextField(
                     label: 'প্রারম্ভিক স্টক',
                     controller: controller.openingQtyController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                   ),
                 ),
                 const SizedBox(width: AppSizes.p12),
@@ -74,7 +75,8 @@ class AddProductView extends GetView<InventoryController> {
                   child: AppTextField(
                     label: 'minimum_stock'.tr,
                     controller: controller.minStockController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                   ),
                 ),
               ],
@@ -101,7 +103,9 @@ class AddProductView extends GetView<InventoryController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('unit'.tr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('unit'.tr,
+              style:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
             value: controller.selectedUnit.value,
@@ -109,7 +113,8 @@ class AddProductView extends GetView<InventoryController> {
               DropdownMenuItem(value: 'piece', child: Text('পিস (Piece)')),
               DropdownMenuItem(value: 'kg', child: Text('কেজি (kg)')),
               DropdownMenuItem(value: 'liter', child: Text('লিটার (Liter)')),
-              DropdownMenuItem(value: 'packet', child: Text('প্যাকেট (Packet)')),
+              DropdownMenuItem(
+                  value: 'packet', child: Text('প্যাকেট (Packet)')),
               DropdownMenuItem(value: 'box', child: Text('বক্স (Box)')),
               DropdownMenuItem(value: 'bag', child: Text('বস্তা (Bag)')),
             ],

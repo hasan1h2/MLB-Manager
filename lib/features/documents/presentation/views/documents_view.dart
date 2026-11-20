@@ -37,8 +37,14 @@ class DocumentsView extends GetView<DocumentController> {
           separatorBuilder: (_, __) => const SizedBox(height: AppSizes.p8),
           itemBuilder: (context, index) {
             final doc = controller.attachments[index];
-            final ext = doc.fileName.contains('.') ? doc.fileName.split('.').last.toLowerCase() : '';
-            final isImage = ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'webp' || (doc.mimeType?.startsWith('image/') == true);
+            final ext = doc.fileName.contains('.')
+                ? doc.fileName.split('.').last.toLowerCase()
+                : '';
+            final isImage = ext == 'jpg' ||
+                ext == 'jpeg' ||
+                ext == 'png' ||
+                ext == 'webp' ||
+                (doc.mimeType?.startsWith('image/') == true);
 
             Widget leadingWidget;
             if (isImage) {
@@ -57,7 +63,8 @@ class DocumentsView extends GetView<DocumentController> {
                   color: AppColors.expenseRed.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSizes.r8),
                 ),
-                child: const Icon(Icons.picture_as_pdf_outlined, color: AppColors.expenseRed, size: 24),
+                child: const Icon(Icons.picture_as_pdf_outlined,
+                    color: AppColors.expenseRed, size: 24),
               );
             } else {
               leadingWidget = Container(
@@ -67,19 +74,24 @@ class DocumentsView extends GetView<DocumentController> {
                   color: AppColors.secondaryElectric.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSizes.r8),
                 ),
-                child: const Icon(AppIcons.documents, color: AppColors.secondaryElectric, size: 24),
+                child: const Icon(AppIcons.documents,
+                    color: AppColors.secondaryElectric, size: 24),
               );
             }
 
             return Card(
               child: ListTile(
                 leading: leadingWidget,
-                title: Text(doc.fileName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                title: Text(doc.fileName,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 14)),
                 subtitle: Text(
                   '${(doc.fileSize / 1024).toStringAsFixed(1)} KB • ${AppDateUtils.formatTimestamp(doc.createdAt)}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondaryLight),
                 ),
-                trailing: const Icon(Icons.attachment_rounded, color: AppColors.textSecondaryLight),
+                trailing: const Icon(Icons.attachment_rounded,
+                    color: AppColors.textSecondaryLight),
               ),
             );
           },

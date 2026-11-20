@@ -3,7 +3,9 @@ import 'package:mlb_manager/core/utils/currency_utils.dart';
 
 void main() {
   group('CurrencyUtils Exact Minor Unit Arithmetic', () {
-    test('Converts Taka string to exact integer Poisha without floating-point error', () {
+    test(
+        'Converts Taka string to exact integer Poisha without floating-point error',
+        () {
       expect(CurrencyUtils.takaToMinor('100'), equals(10000));
       expect(CurrencyUtils.takaToMinor('150.50'), equals(15050));
       expect(CurrencyUtils.takaToMinor('0.75'), equals(75));
@@ -11,11 +13,17 @@ void main() {
       expect(CurrencyUtils.takaToMinor(''), equals(0));
     });
 
-    test('Converts Poisha to formatted Taka string with default currency symbol', () {
-      expect(CurrencyUtils.format(10000, includeSymbol: false), equals('100.00'));
-      expect(CurrencyUtils.format(15050, includeSymbol: false), equals('150.50'));
-      expect(CurrencyUtils.format(-5025, includeSymbol: false), equals('-50.25'));
-      expect(CurrencyUtils.format(10000, includeSymbol: true), equals('৳ 100.00'));
+    test(
+        'Converts Poisha to formatted Taka string with default currency symbol',
+        () {
+      expect(
+          CurrencyUtils.format(10000, includeSymbol: false), equals('100.00'));
+      expect(
+          CurrencyUtils.format(15050, includeSymbol: false), equals('150.50'));
+      expect(
+          CurrencyUtils.format(-5025, includeSymbol: false), equals('-50.25'));
+      expect(
+          CurrencyUtils.format(10000, includeSymbol: true), equals('৳ 100.00'));
     });
 
     test('Converts numbers to Bengali numerals accurately', () {
@@ -25,7 +33,9 @@ void main() {
   });
 
   group('Financial Engine Math Rules', () {
-    test('Account Balance = Opening + Total Inflows (Credits) - Total Outflows (Debits)', () {
+    test(
+        'Account Balance = Opening + Total Inflows (Credits) - Total Outflows (Debits)',
+        () {
       const int openingBalance = 500000; // 5,000.00 BDT
       const int credits = 250000; // 2,500.00 BDT Inflow
       const int debits = 120000; // 1,200.00 BDT Outflow
@@ -34,7 +44,9 @@ void main() {
       expect(finalBalance, equals(630000)); // 6,300.00 BDT
     });
 
-    test('Internal Account Transfers do not alter Consolidated Income or Expense', () {
+    test(
+        'Internal Account Transfers do not alter Consolidated Income or Expense',
+        () {
       int consolidatedIncome = 1000000; // 10,000 BDT
       int consolidatedExpense = 400000; // 4,000 BDT
 
@@ -67,14 +79,16 @@ void main() {
       expect(netProfit, equals(3500000)); // 35,000 BDT
     });
 
-    test('Cattle Net Profit = Sale Price - (Purchase Price + Total Expenses)', () {
+    test('Cattle Net Profit = Sale Price - (Purchase Price + Total Expenses)',
+        () {
       const int purchasePrice = 8500000; // 85,000 BDT
       const int feedCost = 1800000; // 18,000 BDT
       const int medicalCost = 350000; // 3,500 BDT
       const int laborCost = 500000; // 5,000 BDT
       const int transportCost = 150000; // 1,500 BDT
 
-      const int totalCost = purchasePrice + feedCost + medicalCost + laborCost + transportCost;
+      const int totalCost =
+          purchasePrice + feedCost + medicalCost + laborCost + transportCost;
       expect(totalCost, equals(11300000)); // 113,000 BDT
 
       const int salePrice = 14500000; // 145,000 BDT
@@ -89,7 +103,8 @@ void main() {
       const double stockOut = 85.0;
       const double adjustment = -2.0; // 2 units damage
 
-      final double currentStock = openingStock + stockIn - stockOut + adjustment;
+      final double currentStock =
+          openingStock + stockIn - stockOut + adjustment;
       expect(currentStock, equals(83.0));
     });
 

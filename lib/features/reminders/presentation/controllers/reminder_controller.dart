@@ -17,7 +17,8 @@ class ReminderController extends GetxController {
   final titleController = TextEditingController();
   final descController = TextEditingController();
   final RxString selectedType = 'bill_payment'.obs;
-  final Rx<DateTime> scheduledDate = DateTime.now().add(const Duration(days: 3)).obs;
+  final Rx<DateTime> scheduledDate =
+      DateTime.now().add(const Duration(days: 3)).obs;
 
   @override
   void onInit() {

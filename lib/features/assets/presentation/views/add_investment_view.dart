@@ -60,15 +60,23 @@ class AddInvestmentView extends GetView<AssetController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('বিনিয়োগের ধরণ', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          const Text('বিনিয়োগের ধরণ',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
             value: controller.selectedInvestmentType.value,
             items: const [
-              DropdownMenuItem(value: 'business', child: Text('ব্যবসা ও মূলধন (Business)')),
-              DropdownMenuItem(value: 'shares', child: Text('শেয়ার মার্কেট (Shares/Stocks)')),
-              DropdownMenuItem(value: 'savings_cert', child: Text('সঞ্চয়পত্র (Savings Certificate)')),
-              DropdownMenuItem(value: 'agriculture', child: Text('কৃষি ও খামার বিনিয়োগ (Agri)')),
+              DropdownMenuItem(
+                  value: 'business', child: Text('ব্যবসা ও মূলধন (Business)')),
+              DropdownMenuItem(
+                  value: 'shares',
+                  child: Text('শেয়ার মার্কেট (Shares/Stocks)')),
+              DropdownMenuItem(
+                  value: 'savings_cert',
+                  child: Text('সঞ্চয়পত্র (Savings Certificate)')),
+              DropdownMenuItem(
+                  value: 'agriculture',
+                  child: Text('কৃষি ও খামার বিনিয়োগ (Agri)')),
               DropdownMenuItem(value: 'other', child: Text('অন্যান্য (Other)')),
             ],
             onChanged: (val) {

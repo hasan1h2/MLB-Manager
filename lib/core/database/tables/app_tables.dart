@@ -7,7 +7,8 @@ class AiExtractions extends Table {
   TextColumn get sourceFilePath => text().nullable()();
   TextColumn get extractedText => text()();
   TextColumn get extractedDataJson => text()();
-  TextColumn get status => text().withDefault(const Constant('pending'))(); // pending, confirmed, discarded
+  TextColumn get status => text().withDefault(
+      const Constant('pending'))(); // pending, confirmed, discarded
   IntColumn get createdAt => integer()();
 
   @override

@@ -59,7 +59,9 @@ class ReportsView extends GetView<ReportController> {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                     ),
                   ),
                   TextButton.icon(
@@ -87,6 +89,13 @@ class ReportsView extends GetView<ReportController> {
       'filter_this_year',
     ];
 
+    final selectedBg =
+        isDark ? AppColors.secondaryElectric : AppColors.primaryNavy;
+    final unselectedBg = isDark ? AppColors.surfaceDark : Colors.white;
+    final unselectedText =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -97,17 +106,15 @@ class ReportsView extends GetView<ReportController> {
             child: ChoiceChip(
               label: Text(f.tr),
               selected: isSelected,
-              selectedColor: isDark ? AppColors.secondaryElectric : AppColors.primaryNavy,
-              backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+              selectedColor: selectedBg,
+              backgroundColor: unselectedBg,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? Colors.white : unselectedText,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 fontSize: 13,
               ),
               side: BorderSide(
-                color: isSelected
-                    ? (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy)
-                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                color: isSelected ? selectedBg : borderColor,
               ),
               onSelected: (_) => controller.setFilter(f),
             ),
@@ -126,10 +133,15 @@ class ReportsView extends GetView<ReportController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('total_income'.tr, style: const TextStyle(fontSize: 14, color: AppColors.textSecondaryLight)),
+                Text('total_income'.tr,
+                    style: const TextStyle(
+                        fontSize: 14, color: AppColors.textSecondaryLight)),
                 Text(
                   CurrencyUtils.format(data.totalIncomeMinor),
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.incomeGreen),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: AppColors.incomeGreen),
                 ),
               ],
             ),
@@ -137,10 +149,15 @@ class ReportsView extends GetView<ReportController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('total_expenses'.tr, style: const TextStyle(fontSize: 14, color: AppColors.textSecondaryLight)),
+                Text('total_expenses'.tr,
+                    style: const TextStyle(
+                        fontSize: 14, color: AppColors.textSecondaryLight)),
                 Text(
                   CurrencyUtils.format(data.totalExpenseMinor),
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.expenseRed),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: AppColors.expenseRed),
                 ),
               ],
             ),
@@ -159,7 +176,9 @@ class ReportsView extends GetView<ReportController> {
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 20,
-                    color: data.netProfitMinor >= 0 ? AppColors.incomeGreen : AppColors.expenseRed,
+                    color: data.netProfitMinor >= 0
+                        ? AppColors.incomeGreen
+                        : AppColors.expenseRed,
                   ),
                 ),
               ],
@@ -183,14 +202,18 @@ class ReportsView extends GetView<ReportController> {
 
           return ListTile(
             leading: CircleAvatar(
-              backgroundColor: (isIncome ? AppColors.incomeGreen : AppColors.expenseRed).withValues(alpha: 0.12),
+              backgroundColor:
+                  (isIncome ? AppColors.incomeGreen : AppColors.expenseRed)
+                      .withValues(alpha: 0.12),
               child: Icon(
                 isIncome ? AppIcons.income : AppIcons.expense,
                 color: isIncome ? AppColors.incomeGreen : AppColors.expenseRed,
                 size: 20,
               ),
             ),
-            title: Text(tx.description?.isNotEmpty == true ? tx.description! : tx.transactionNumber),
+            title: Text(tx.description?.isNotEmpty == true
+                ? tx.description!
+                : tx.transactionNumber),
             subtitle: Text(AppDateUtils.formatTimestamp(tx.transactionDate)),
             trailing: Text(
               '${isIncome ? '+' : '-'}${CurrencyUtils.format(tx.amountMinor)}',

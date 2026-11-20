@@ -5,24 +5,30 @@ class CattleDao {
   final AppDatabase db;
   CattleDao(this.db);
 
-  Stream<List<CattleData>> watchCattleList(String businessId, {String? status}) {
-    var query = db.select(db.cattle)..where((tbl) => tbl.businessId.equals(businessId));
+  Stream<List<CattleData>> watchCattleList(String businessId,
+      {String? status}) {
+    var query = db.select(db.cattle)
+      ..where((tbl) => tbl.businessId.equals(businessId));
     if (status != null) {
       query = query..where((tbl) => tbl.status.equals(status));
     }
-    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.purchaseDate)])).watch();
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.purchaseDate)]))
+        .watch();
   }
 
   Future<List<CattleData>> getCattleList(String businessId, {String? status}) {
-    var query = db.select(db.cattle)..where((tbl) => tbl.businessId.equals(businessId));
+    var query = db.select(db.cattle)
+      ..where((tbl) => tbl.businessId.equals(businessId));
     if (status != null) {
       query = query..where((tbl) => tbl.status.equals(status));
     }
-    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.purchaseDate)])).get();
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.purchaseDate)]))
+        .get();
   }
 
   Future<CattleData?> getCattleById(String id) {
-    return (db.select(db.cattle)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (db.select(db.cattle)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
   }
 
   Future<int> insertCattle(CattleCompanion cattle) {
@@ -54,7 +60,9 @@ class CattleDao {
 
   // --- Cattle Sales ---
   Future<CattleSale?> getCattleSale(String cattleId) {
-    return (db.select(db.cattleSales)..where((tbl) => tbl.cattleId.equals(cattleId))).getSingleOrNull();
+    return (db.select(db.cattleSales)
+          ..where((tbl) => tbl.cattleId.equals(cattleId)))
+        .getSingleOrNull();
   }
 
   Future<void> recordCattleSale({
@@ -62,7 +70,8 @@ class CattleDao {
   }) async {
     await db.transaction(() async {
       await db.into(db.cattleSales).insert(sale);
-      await (db.update(db.cattle)..where((tbl) => tbl.id.equals(sale.cattleId.value)))
+      await (db.update(db.cattle)
+            ..where((tbl) => tbl.id.equals(sale.cattleId.value)))
           .write(const CattleCompanion(status: Value('sold')));
     });
   }

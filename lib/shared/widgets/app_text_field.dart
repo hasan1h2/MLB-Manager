@@ -34,15 +34,20 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final labelColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimaryLight,
+            color: labelColor,
           ),
         ),
         const SizedBox(height: AppSizes.p4),
@@ -55,9 +60,28 @@ class AppTextField extends StatelessWidget {
           readOnly: readOnly,
           onTap: onTap,
           onChanged: onChanged,
+          style: TextStyle(
+            color:
+                isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
           decoration: InputDecoration(
             hintText: hint ?? label,
-            prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20) : null,
+            hintStyle: TextStyle(
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              fontSize: 14,
+            ),
+            prefixIcon: prefixIcon != null
+                ? Icon(
+                    prefixIcon,
+                    size: 20,
+                    color: isDark
+                        ? AppColors.secondaryElectricLight
+                        : AppColors.secondaryElectric,
+                  )
+                : null,
             suffixIcon: suffixIcon,
           ),
         ),

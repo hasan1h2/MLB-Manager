@@ -43,12 +43,16 @@ class CustomerListView extends GetView<PartyController> {
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: AppColors.infoBlue.withValues(alpha: 0.12),
-                    child: const Icon(AppIcons.customers, color: AppColors.infoBlue),
+                    child: const Icon(AppIcons.customers,
+                        color: AppColors.infoBlue),
                   ),
-                  title: Text(item.customer.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  title: Text(item.customer.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(
                     item.customer.phone ?? 'ফোন নম্বর নেই',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textSecondaryLight),
                   ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -59,14 +63,18 @@ class CustomerListView extends GetView<PartyController> {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
-                          color: item.dueMinor > 0 ? AppColors.expenseRed : AppColors.incomeGreen,
+                          color: item.dueMinor > 0
+                              ? AppColors.expenseRed
+                              : AppColors.incomeGreen,
                         ),
                       ),
                       Text(
                         item.dueMinor > 0 ? 'বাকি পাওনা' : 'পরিশোধিত',
                         style: TextStyle(
                           fontSize: 10,
-                          color: item.dueMinor > 0 ? AppColors.expenseRed : AppColors.incomeGreen,
+                          color: item.dueMinor > 0
+                              ? AppColors.expenseRed
+                              : AppColors.incomeGreen,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

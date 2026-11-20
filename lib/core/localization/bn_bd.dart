@@ -53,7 +53,7 @@ final Map<String, String> bnBD = {
   'total_expenses': 'মোট ব্যয়',
   'business_profit': 'ব্যবসায়িক নিট লাভ',
   'money_receivable': 'পাওনা টাকা (বাকি)',
-  'money_payable': 'দেনা টাকা (পরিশোধযোগ্য)',
+  'money_payable': 'দেনা টাকা (পরিশোধ)',
   'total_savings': 'মোট সঞ্চয়',
   'total_assets': 'মোট সম্পদ',
   'recent_transactions': 'সাম্প্রতিক লেনদেন',
@@ -94,7 +94,8 @@ final Map<String, String> bnBD = {
   'family': 'পারিবারিক',
   'business': 'ব্যবসায়িক',
   'transaction_saved': 'লেনদেন সফলভাবে সংরক্ষিত হয়েছে',
-  'delete_transaction_confirm': 'আপনি কি নিশ্চিতভাবে এই লেনদেনটি মুছে ফেলতে চান?',
+  'delete_transaction_confirm':
+      'আপনি কি নিশ্চিতভাবে এই লেনদেনটি মুছে ফেলতে চান?',
 
   // Family
   'family_management': 'পরিবার ব্যবস্থাপনা',

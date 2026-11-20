@@ -46,15 +46,20 @@ class FamilyListView extends GetView<FamilyController> {
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: AppColors.primaryNavy.withValues(alpha: 0.1),
-                  child: const Icon(AppIcons.family, color: AppColors.primaryNavy),
+                  child:
+                      const Icon(AppIcons.family, color: AppColors.primaryNavy),
                 ),
-                title: Text(member.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                title: Text(member.name,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 15)),
                 subtitle: Text(
                   '${member.relationship ?? 'সদস্য'} • ${member.role.toUpperCase()}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondaryLight),
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.remove_circle_outline_rounded, color: AppColors.expenseRed, size: 20),
+                  icon: const Icon(Icons.remove_circle_outline_rounded,
+                      color: AppColors.expenseRed, size: 20),
                   onPressed: () => controller.deactivateMember(member),
                 ),
               ),

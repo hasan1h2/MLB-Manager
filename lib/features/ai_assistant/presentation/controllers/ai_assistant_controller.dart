@@ -96,7 +96,8 @@ class AiAssistantController extends GetxController {
           },
         );
       } else {
-        AppSnackbar.info('মাইক্রোফোন চালু করা যায়নি। ম্যানুয়ালি টেক্সট লিখুন।');
+        AppSnackbar.info(
+            'মাইক্রোফোন চালু করা যায়নি। ম্যানুয়ালি টেক্সট লিখুন।');
       }
     }
   }
@@ -158,8 +159,10 @@ class AiAssistantController extends GetxController {
       scannedImagePath.value = image.path;
       isProcessingOcr.value = true;
       final inputImage = InputImage.fromFilePath(image.path);
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-      final RecognizedText recognized = await textRecognizer.processImage(inputImage);
+      final textRecognizer =
+          TextRecognizer(script: TextRecognitionScript.latin);
+      final RecognizedText recognized =
+          await textRecognizer.processImage(inputImage);
       await textRecognizer.close();
 
       ocrRawText.value = recognized.text;
@@ -180,7 +183,8 @@ class AiAssistantController extends GetxController {
       if (trimmed.isEmpty) continue;
 
       // Match numbers at end of line as price
-      final match = RegExp(r'^(.*?)\s+([0-9]+(\.[0-9]{1,2})?)$').firstMatch(trimmed);
+      final match =
+          RegExp(r'^(.*?)\s+([0-9]+(\.[0-9]{1,2})?)$').firstMatch(trimmed);
       if (match != null) {
         final name = match.group(1) ?? 'Item';
         final priceStr = match.group(2) ?? '0';
@@ -300,8 +304,12 @@ class AiAssistantController extends GetxController {
           AiExtractionsCompanion(
             id: drift.Value(_uuid.v4()),
             extractionType: const drift.Value('voice_ocr'),
-            extractedText: drift.Value(recognizedVoiceText.value.isNotEmpty ? recognizedVoiceText.value : ocrRawText.value),
-            extractedDataJson: drift.Value(jsonEncode(extractedItems.map((e) => {'name': e.name, 'total': e.totalMinor}).toList())),
+            extractedText: drift.Value(recognizedVoiceText.value.isNotEmpty
+                ? recognizedVoiceText.value
+                : ocrRawText.value),
+            extractedDataJson: drift.Value(jsonEncode(extractedItems
+                .map((e) => {'name': e.name, 'total': e.totalMinor})
+                .toList())),
             status: const drift.Value('confirmed'),
             createdAt: drift.Value(now),
           ),
@@ -314,10 +322,14 @@ class AiAssistantController extends GetxController {
   // --- Statistical Moving-Average Expense Forecasting ---
   Future<void> calculateLocalForecast() async {
     final now = DateTime.now();
-    final startOfLastMonth = DateTime(now.year, now.month - 1, 1).toUtc().millisecondsSinceEpoch;
-    final endOfLastMonth = DateTime(now.year, now.month, 0, 23, 59, 59).toUtc().millisecondsSinceEpoch;
+    final startOfLastMonth =
+        DateTime(now.year, now.month - 1, 1).toUtc().millisecondsSinceEpoch;
+    final endOfLastMonth = DateTime(now.year, now.month, 0, 23, 59, 59)
+        .toUtc()
+        .millisecondsSinceEpoch;
 
-    final txs = await _dbService.coreDao.getTransactionsInRange(startOfLastMonth, endOfLastMonth);
+    final txs = await _dbService.coreDao
+        .getTransactionsInRange(startOfLastMonth, endOfLastMonth);
     int lastMonthExpense = 0;
     for (var t in txs) {
       if (t.transactionType == 'expense') {
@@ -330,7 +342,8 @@ class AiAssistantController extends GetxController {
       forecastedMonthlyExpenseMinor.value = (lastMonthExpense * 1.05).round();
       forecastConfidence.value = 'উচ্চ (High: ১ মাসের নির্ভরযোগ্য হিস্টোরি)';
     } else {
-      forecastedMonthlyExpenseMinor.value = 2500000; // 25,000 BDT default baseline
+      forecastedMonthlyExpenseMinor.value =
+          2500000; // 25,000 BDT default baseline
       forecastConfidence.value = 'প্রাথমিক প্রাক্কলন (বাজেট ডেটা সীমিত)';
     }
   }

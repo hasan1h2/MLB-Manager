@@ -24,14 +24,16 @@ class BudgetWithSpending {
   }
 
   bool get isOverBudget => actualSpendingMinor > budget.limitMinor;
-  bool get isWarning => (actualSpendingMinor / budget.limitMinor * 100) >= budget.alertPercentage;
+  bool get isWarning =>
+      (actualSpendingMinor / budget.limitMinor * 100) >= budget.alertPercentage;
 }
 
 class BudgetController extends GetxController {
   final DatabaseService _dbService = Get.find<DatabaseService>();
   final _uuid = const Uuid();
 
-  final RxList<BudgetWithSpending> budgetsWithSpending = <BudgetWithSpending>[].obs;
+  final RxList<BudgetWithSpending> budgetsWithSpending =
+      <BudgetWithSpending>[].obs;
   final RxBool isLoading = true.obs;
 
   // Form Fields
@@ -53,7 +55,8 @@ class BudgetController extends GetxController {
       final active = await _dbService.budgetDao.getActiveBudgets();
       final list = <BudgetWithSpending>[];
       for (var b in active) {
-        final spending = await _dbService.budgetDao.getActualSpendingForBudget(b);
+        final spending =
+            await _dbService.budgetDao.getActualSpendingForBudget(b);
         list.add(BudgetWithSpending(budget: b, actualSpendingMinor: spending));
       }
       budgetsWithSpending.value = list;
@@ -69,8 +72,11 @@ class BudgetController extends GetxController {
 
     final alert = int.tryParse(alertPercentController.text) ?? 80;
     final now = DateTime.now();
-    final start = DateTime(now.year, now.month, 1).toUtc().millisecondsSinceEpoch;
-    final end = DateTime(now.year, now.month + 1, 0, 23, 59, 59).toUtc().millisecondsSinceEpoch;
+    final start =
+        DateTime(now.year, now.month, 1).toUtc().millisecondsSinceEpoch;
+    final end = DateTime(now.year, now.month + 1, 0, 23, 59, 59)
+        .toUtc()
+        .millisecondsSinceEpoch;
 
     await _dbService.budgetDao.insertBudget(
       BudgetsCompanion(

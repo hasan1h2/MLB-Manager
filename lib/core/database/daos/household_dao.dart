@@ -12,7 +12,8 @@ class HouseholdDao {
         .watch();
   }
 
-  Future<List<ShoppingRecord>> getShoppingRecordsInRange(int startMs, int endMs) {
+  Future<List<ShoppingRecord>> getShoppingRecordsInRange(
+      int startMs, int endMs) {
     return (db.select(db.shoppingRecords)
           ..where((tbl) =>
               tbl.shoppingDate.isBiggerOrEqualValue(startMs) &
@@ -22,7 +23,9 @@ class HouseholdDao {
   }
 
   Future<List<ShoppingItem>> getItemsForRecord(String recordId) {
-    return (db.select(db.shoppingItems)..where((tbl) => tbl.shoppingRecordId.equals(recordId))).get();
+    return (db.select(db.shoppingItems)
+          ..where((tbl) => tbl.shoppingRecordId.equals(recordId)))
+        .get();
   }
 
   /// Inserts a shopping record with line items atomically.
@@ -50,15 +53,21 @@ class HouseholdDao {
 
   // --- Shopping Lists ---
   Stream<List<ShoppingList>> watchShoppingLists() {
-    return (db.select(db.shoppingLists)..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])).watch();
+    return (db.select(db.shoppingLists)
+          ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]))
+        .watch();
   }
 
   Future<List<ShoppingListItem>> getShoppingListItems(String listId) {
-    return (db.select(db.shoppingListItems)..where((tbl) => tbl.shoppingListId.equals(listId))).get();
+    return (db.select(db.shoppingListItems)
+          ..where((tbl) => tbl.shoppingListId.equals(listId)))
+        .get();
   }
 
   Stream<List<ShoppingListItem>> watchShoppingListItems(String listId) {
-    return (db.select(db.shoppingListItems)..where((tbl) => tbl.shoppingListId.equals(listId))).watch();
+    return (db.select(db.shoppingListItems)
+          ..where((tbl) => tbl.shoppingListId.equals(listId)))
+        .watch();
   }
 
   Future<int> insertShoppingList(ShoppingListsCompanion list) {
@@ -70,7 +79,9 @@ class HouseholdDao {
   }
 
   Future<void> toggleListItemPurchased(String itemId, bool isPurchased) async {
-    await (db.update(db.shoppingListItems)..where((tbl) => tbl.id.equals(itemId)))
-        .write(ShoppingListItemsCompanion(isPurchased: Value(isPurchased ? 1 : 0)));
+    await (db.update(db.shoppingListItems)
+          ..where((tbl) => tbl.id.equals(itemId)))
+        .write(ShoppingListItemsCompanion(
+            isPurchased: Value(isPurchased ? 1 : 0)));
   }
 }

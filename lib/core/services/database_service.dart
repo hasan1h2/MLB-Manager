@@ -54,7 +54,11 @@ class DatabaseService extends GetxService {
         {'bn': 'ভাড়া আয়', 'en': 'Rental Income', 'icon': 'apartment'},
         {'bn': 'কৃষি আয়', 'en': 'Agriculture Income', 'icon': 'agriculture'},
         {'bn': 'সেবামূলক আয়', 'en': 'Service Income', 'icon': 'build'},
-        {'bn': 'বিনিয়োগের মুনাফা', 'en': 'Investment Return', 'icon': 'trending_up'},
+        {
+          'bn': 'বিনিয়োগের মুনাফা',
+          'en': 'Investment Return',
+          'icon': 'trending_up'
+        },
         {'bn': 'উপহার', 'en': 'Gifts', 'icon': 'card_giftcard'},
         {'bn': 'অন্যান্য আয়', 'en': 'Other Income', 'icon': 'more_horiz'},
       ];
@@ -76,8 +80,16 @@ class DatabaseService extends GetxService {
 
       // Expense categories
       final expenseCategories = [
-        {'bn': 'ব্যক্তিগত কেনাকাটা', 'en': 'Personal Shopping', 'icon': 'shopping_bag'},
-        {'bn': 'খাবার ও রেস্তোরাঁ', 'en': 'Food & Dining', 'icon': 'restaurant'},
+        {
+          'bn': 'ব্যক্তিগত কেনাকাটা',
+          'en': 'Personal Shopping',
+          'icon': 'shopping_bag'
+        },
+        {
+          'bn': 'খাবার ও রেস্তোরাঁ',
+          'en': 'Food & Dining',
+          'icon': 'restaurant'
+        },
         {'bn': 'পোশাক', 'en': 'Clothing', 'icon': 'checkroom'},
         {'bn': 'যাতায়াত ও ভাড়া', 'en': 'Transport', 'icon': 'directions_bus'},
         {'bn': 'চিকিৎসা ও ওষুধ', 'en': 'Healthcare', 'icon': 'local_hospital'},
@@ -85,7 +97,11 @@ class DatabaseService extends GetxService {
         {'bn': 'বিনোদন', 'en': 'Entertainment', 'icon': 'sports_esports'},
         {'bn': 'মোবাইল ও ইন্টারনেট', 'en': 'Mobile & Internet', 'icon': 'wifi'},
         {'bn': 'ভ্রমণ', 'en': 'Travel', 'icon': 'flight'},
-        {'bn': 'বাজার ও গ্রোসারি', 'en': 'Household Grocery', 'icon': 'shopping_cart'},
+        {
+          'bn': 'বাজার ও গ্রোসারি',
+          'en': 'Household Grocery',
+          'icon': 'shopping_cart'
+        },
         {'bn': 'ইউটিলিটি ও বিল', 'en': 'Utilities & Bills', 'icon': 'receipt'},
         {'bn': 'অন্যান্য ব্যয়', 'en': 'Other Expenses', 'icon': 'more_horiz'},
       ];

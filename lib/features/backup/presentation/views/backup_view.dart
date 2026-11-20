@@ -32,17 +32,20 @@ class BackupView extends GetView<BackupController> {
                   padding: const EdgeInsets.all(AppSizes.p20),
                   child: Column(
                     children: [
-                      const Icon(AppIcons.backup, size: 56, color: AppColors.secondaryElectric),
+                      const Icon(AppIcons.backup,
+                          size: 56, color: AppColors.secondaryElectric),
                       const SizedBox(height: AppSizes.p16),
                       Text(
                         'create_backup'.tr,
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 18),
                       ),
                       const SizedBox(height: AppSizes.p8),
                       const Text(
                         'আপনার সম্পূর্ণ আর্থিক ডাটাবেজ, পারিবারিক খরচ ও ব্যবসার রেকর্ডসমূহ সুরক্ষিত JSON ফাইলে ব্যাকআপ নিন।',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.textSecondaryLight),
                       ),
                       const SizedBox(height: AppSizes.p20),
                       AppButton(
@@ -59,17 +62,20 @@ class BackupView extends GetView<BackupController> {
                   padding: const EdgeInsets.all(AppSizes.p20),
                   child: Column(
                     children: [
-                      const Icon(Icons.settings_backup_restore_rounded, size: 56, color: AppColors.warningAmberDark),
+                      const Icon(Icons.settings_backup_restore_rounded,
+                          size: 56, color: AppColors.warningAmberDark),
                       const SizedBox(height: AppSizes.p16),
                       Text(
                         'restore_backup'.tr,
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 18),
                       ),
                       const SizedBox(height: AppSizes.p8),
                       const Text(
                         'পূর্বে সংরক্ষিত ব্যাকআপ ফাইল সিলেক্ট করে ডাটা রিস্টোর করুন। রিস্টোর করার আগে ব্যাকআপের অখণ্ডতা যাচাই করা হবে।',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.textSecondaryLight),
                       ),
                       const SizedBox(height: AppSizes.p20),
                       AppButton(
@@ -78,7 +84,8 @@ class BackupView extends GetView<BackupController> {
                         onPressed: () {
                           AppConfirmDialog.show(
                             title: 'রিস্টোর সতর্কতা',
-                            message: 'ব্যাকআপ রিস্টোর করার সময় বর্তমান ডাটার সাথে সমন্বয় করা হবে। আপনি কি নিশ্চিত?',
+                            message:
+                                'ব্যাকআপ রিস্টোর করার সময় বর্তমান ডাটার সাথে সমন্বয় করা হবে। আপনি কি নিশ্চিত?',
                             onConfirm: () => controller.restoreBackup(),
                           );
                         },

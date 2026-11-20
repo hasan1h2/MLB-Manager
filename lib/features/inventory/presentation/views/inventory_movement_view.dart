@@ -34,10 +34,14 @@ class InventoryMovementView extends GetView<InventoryController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('বর্তমান মজুদ স্টক', style: TextStyle(fontWeight: FontWeight.w600)),
+                    const Text('বর্তমান মজুদ স্টক',
+                        style: TextStyle(fontWeight: FontWeight.w600)),
                     Text(
                       '${item.currentStock} ${item.product.unit}',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: AppColors.secondaryElectric),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                          color: AppColors.secondaryElectric),
                     ),
                   ],
                 ),
@@ -49,7 +53,8 @@ class InventoryMovementView extends GetView<InventoryController> {
             AppTextField(
               label: 'পরিমাণ (${item.product.unit})',
               controller: controller.movementQtyController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
             ),
             const SizedBox(height: AppSizes.p16),
             AppTextField(
@@ -77,16 +82,22 @@ class InventoryMovementView extends GetView<InventoryController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('সমন্বয়ের ধরণ', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          const Text('সমন্বয়ের ধরণ',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
             value: controller.selectedMovementType.value,
             items: const [
-              DropdownMenuItem(value: 'in', child: Text('স্টক বৃদ্ধি (Stock In)')),
-              DropdownMenuItem(value: 'out', child: Text('স্টক হ্রাস (Stock Out)')),
-              DropdownMenuItem(value: 'adjustment', child: Text('স্টক সংশোধন (Adjustment)')),
-              DropdownMenuItem(value: 'damage', child: Text('ক্ষতিগ্রস্থ / নষ্ট (Damage)')),
-              DropdownMenuItem(value: 'wastage', child: Text('অপচয় (Wastage)')),
+              DropdownMenuItem(
+                  value: 'in', child: Text('স্টক বৃদ্ধি (Stock In)')),
+              DropdownMenuItem(
+                  value: 'out', child: Text('স্টক হ্রাস (Stock Out)')),
+              DropdownMenuItem(
+                  value: 'adjustment', child: Text('স্টক সংশোধন (Adjustment)')),
+              DropdownMenuItem(
+                  value: 'damage', child: Text('ক্ষতিগ্রস্থ / নষ্ট (Damage)')),
+              DropdownMenuItem(
+                  value: 'wastage', child: Text('অপচয় (Wastage)')),
             ],
             onChanged: (val) {
               if (val != null) controller.selectedMovementType.value = val;

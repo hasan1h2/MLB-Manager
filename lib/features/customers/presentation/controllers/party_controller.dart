@@ -25,7 +25,8 @@ class PartyController extends GetxController {
   final _uuid = const Uuid();
 
   final RxList<CustomerWithDue> customersWithDue = <CustomerWithDue>[].obs;
-  final RxList<SupplierWithPayable> suppliersWithPayable = <SupplierWithPayable>[].obs;
+  final RxList<SupplierWithPayable> suppliersWithPayable =
+      <SupplierWithPayable>[].obs;
   final RxBool isLoading = true.obs;
   final Rx<String?> activeBusinessId = Rx<String?>(null);
 
@@ -66,7 +67,8 @@ class PartyController extends GetxController {
       final custs = await _dbService.businessDao.getAllCustomers(bizId);
       final custList = <CustomerWithDue>[];
       for (var c in custs) {
-        final due = await _dbService.businessDao.getCustomerOutstandingDue(c.id);
+        final due =
+            await _dbService.businessDao.getCustomerOutstandingDue(c.id);
         custList.add(CustomerWithDue(customer: c, dueMinor: due));
       }
       customersWithDue.value = custList;
@@ -75,7 +77,8 @@ class PartyController extends GetxController {
       final supps = await _dbService.businessDao.getAllSuppliers(bizId);
       final suppList = <SupplierWithPayable>[];
       for (var s in supps) {
-        final payable = await _dbService.businessDao.getSupplierOutstandingPayable(s.id);
+        final payable =
+            await _dbService.businessDao.getSupplierOutstandingPayable(s.id);
         suppList.add(SupplierWithPayable(supplier: s, payableMinor: payable));
       }
       suppliersWithPayable.value = suppList;
@@ -90,7 +93,8 @@ class PartyController extends GetxController {
       return false;
     }
 
-    final openingMinor = CurrencyUtils.takaToMinor(openingBalanceController.text);
+    final openingMinor =
+        CurrencyUtils.takaToMinor(openingBalanceController.text);
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
 
     try {
@@ -99,10 +103,16 @@ class PartyController extends GetxController {
           id: Value(_uuid.v4()),
           businessId: Value(activeBusinessId.value!),
           name: Value(nameController.text.trim()),
-          phone: Value(phoneController.text.trim().isNotEmpty ? phoneController.text.trim() : null),
-          address: Value(addressController.text.trim().isNotEmpty ? addressController.text.trim() : null),
+          phone: Value(phoneController.text.trim().isNotEmpty
+              ? phoneController.text.trim()
+              : null),
+          address: Value(addressController.text.trim().isNotEmpty
+              ? addressController.text.trim()
+              : null),
           openingBalanceMinor: Value(openingMinor),
-          notes: Value(notesController.text.trim().isNotEmpty ? notesController.text.trim() : null),
+          notes: Value(notesController.text.trim().isNotEmpty
+              ? notesController.text.trim()
+              : null),
           createdAt: Value(now),
         ),
       );
@@ -123,7 +133,8 @@ class PartyController extends GetxController {
       return false;
     }
 
-    final openingMinor = CurrencyUtils.takaToMinor(openingBalanceController.text);
+    final openingMinor =
+        CurrencyUtils.takaToMinor(openingBalanceController.text);
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
 
     try {
@@ -132,10 +143,16 @@ class PartyController extends GetxController {
           id: Value(_uuid.v4()),
           businessId: Value(activeBusinessId.value!),
           name: Value(nameController.text.trim()),
-          phone: Value(phoneController.text.trim().isNotEmpty ? phoneController.text.trim() : null),
-          address: Value(addressController.text.trim().isNotEmpty ? addressController.text.trim() : null),
+          phone: Value(phoneController.text.trim().isNotEmpty
+              ? phoneController.text.trim()
+              : null),
+          address: Value(addressController.text.trim().isNotEmpty
+              ? addressController.text.trim()
+              : null),
           openingBalanceMinor: Value(openingMinor),
-          notes: Value(notesController.text.trim().isNotEmpty ? notesController.text.trim() : null),
+          notes: Value(notesController.text.trim().isNotEmpty
+              ? notesController.text.trim()
+              : null),
           createdAt: Value(now),
         ),
       );
@@ -150,7 +167,8 @@ class PartyController extends GetxController {
     }
   }
 
-  Future<void> recordPayment({required String partyType, required String partyId}) async {
+  Future<void> recordPayment(
+      {required String partyType, required String partyId}) async {
     final amount = CurrencyUtils.takaToMinor(paymentAmountController.text);
     if (amount <= 0) return;
 

@@ -22,12 +22,14 @@ class Reminders extends Table {
   TextColumn get id => text()();
   TextColumn get title => text()();
   TextColumn get description => text().nullable()();
-  TextColumn get reminderType => text()(); // loan_due, supplier_payable, customer_collection, bill_payment, salary, low_stock, budget_alert, savings, custom
+  TextColumn get reminderType =>
+      text()(); // loan_due, supplier_payable, customer_collection, bill_payment, salary, low_stock, budget_alert, savings, custom
   TextColumn get referenceId => text().nullable()();
   IntColumn get scheduledAt => integer()();
   TextColumn get repeatRule => text().nullable()();
   IntColumn get isCompleted => integer().withDefault(const Constant(0))();
-  IntColumn get notificationEnabled => integer().withDefault(const Constant(1))();
+  IntColumn get notificationEnabled =>
+      integer().withDefault(const Constant(1))();
 
   @override
   Set<Column> get primaryKey => {id};

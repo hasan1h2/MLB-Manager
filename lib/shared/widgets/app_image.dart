@@ -28,9 +28,12 @@ class AppImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final defaultBg = (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy).withValues(alpha: 0.12);
+    final defaultBg =
+        (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy)
+            .withValues(alpha: 0.12);
     final bg = backgroundColor ?? defaultBg;
-    final fg = fallbackColor ?? (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy);
+    final fg = fallbackColor ??
+        (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy);
 
     Widget fallbackWidget() {
       return Container(
@@ -45,7 +48,8 @@ class AppImage extends StatelessWidget {
             fallbackIcon,
             color: fg,
             size: (width != null && height != null)
-                ? (width! < height! ? width! * 0.5 : height! * 0.5).clamp(16.0, 48.0)
+                ? (width! < height! ? width! * 0.5 : height! * 0.5)
+                    .clamp(16.0, 48.0)
                 : 24.0,
           ),
         ),

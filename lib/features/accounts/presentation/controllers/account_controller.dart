@@ -18,13 +18,15 @@ class AccountController extends GetxController {
   final DatabaseService _dbService = Get.find<DatabaseService>();
   final _uuid = const Uuid();
 
-  final RxList<AccountItemWithBalance> accountsWithBalance = <AccountItemWithBalance>[].obs;
+  final RxList<AccountItemWithBalance> accountsWithBalance =
+      <AccountItemWithBalance>[].obs;
   final RxBool isLoading = true.obs;
 
   // Form fields
   final nameController = TextEditingController();
   final openingBalanceController = TextEditingController();
-  final RxString selectedType = 'bank'.obs; // cash, bank, bkash, nagad, rocket, other_wallet, custom
+  final RxString selectedType =
+      'bank'.obs; // cash, bank, bkash, nagad, rocket, other_wallet, custom
 
   @override
   void onInit() {
@@ -53,7 +55,8 @@ class AccountController extends GetxController {
       return false;
     }
 
-    final openingMinor = CurrencyUtils.takaToMinor(openingBalanceController.text);
+    final openingMinor =
+        CurrencyUtils.takaToMinor(openingBalanceController.text);
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
 
     try {

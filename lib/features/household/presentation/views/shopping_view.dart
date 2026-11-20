@@ -50,22 +50,34 @@ class ShoppingView extends GetView<HouseholdController> {
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy).withValues(alpha: 0.15),
-                  child: Icon(AppIcons.shopping, color: isDark ? AppColors.secondaryElectric : AppColors.primaryNavy),
+                  backgroundColor: (isDark
+                          ? AppColors.secondaryElectric
+                          : AppColors.primaryNavy)
+                      .withValues(alpha: 0.15),
+                  child: Icon(AppIcons.shopping,
+                      color: isDark
+                          ? AppColors.secondaryElectric
+                          : AppColors.primaryNavy),
                 ),
                 title: Text(
-                  record.storeName?.isNotEmpty == true ? record.storeName! : 'দৈনিক বাজার',
+                  record.storeName?.isNotEmpty == true
+                      ? record.storeName!
+                      : 'দৈনিক বাজার',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
                   ),
                 ),
                 subtitle: Text(
                   AppDateUtils.formatTimestamp(record.shoppingDate),
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
                   ),
                 ),
                 trailing: Column(
@@ -74,12 +86,18 @@ class ShoppingView extends GetView<HouseholdController> {
                   children: [
                     Text(
                       CurrencyUtils.format(record.totalMinor),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.expenseRed),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.expenseRed),
                     ),
                     if (record.dueMinor > 0)
                       Text(
                         'বকেয়া: ${CurrencyUtils.format(record.dueMinor)}',
-                        style: const TextStyle(fontSize: 11, color: AppColors.warningAmberDark, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.warningAmberDark,
+                            fontWeight: FontWeight.w600),
                       ),
                   ],
                 ),

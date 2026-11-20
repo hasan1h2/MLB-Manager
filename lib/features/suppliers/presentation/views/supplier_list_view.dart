@@ -42,13 +42,18 @@ class SupplierListView extends GetView<PartyController> {
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: AppColors.warningAmber.withValues(alpha: 0.15),
-                    child: const Icon(AppIcons.suppliers, color: AppColors.warningAmberDark),
+                    backgroundColor:
+                        AppColors.warningAmber.withValues(alpha: 0.15),
+                    child: const Icon(AppIcons.suppliers,
+                        color: AppColors.warningAmberDark),
                   ),
-                  title: Text(item.supplier.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  title: Text(item.supplier.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(
                     item.supplier.phone ?? 'ফোন নম্বর নেই',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textSecondaryLight),
                   ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -59,14 +64,18 @@ class SupplierListView extends GetView<PartyController> {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
-                          color: item.payableMinor > 0 ? AppColors.warningAmberDark : AppColors.incomeGreen,
+                          color: item.payableMinor > 0
+                              ? AppColors.warningAmberDark
+                              : AppColors.incomeGreen,
                         ),
                       ),
                       Text(
                         item.payableMinor > 0 ? 'বকেয়া দেনা' : 'পরিশোধিত',
                         style: TextStyle(
                           fontSize: 10,
-                          color: item.payableMinor > 0 ? AppColors.warningAmberDark : AppColors.incomeGreen,
+                          color: item.payableMinor > 0
+                              ? AppColors.warningAmberDark
+                              : AppColors.incomeGreen,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

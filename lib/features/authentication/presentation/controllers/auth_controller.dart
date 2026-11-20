@@ -33,11 +33,13 @@ class AuthController extends GetxController {
   void onDeletePressed() {
     if (isConfirmingPin.value) {
       if (confirmPin.value.isNotEmpty) {
-        confirmPin.value = confirmPin.value.substring(0, confirmPin.value.length - 1);
+        confirmPin.value =
+            confirmPin.value.substring(0, confirmPin.value.length - 1);
       }
     } else {
       if (enteredPin.value.isNotEmpty) {
-        enteredPin.value = enteredPin.value.substring(0, enteredPin.value.length - 1);
+        enteredPin.value =
+            enteredPin.value.substring(0, enteredPin.value.length - 1);
       }
     }
   }

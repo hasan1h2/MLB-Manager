@@ -23,9 +23,12 @@ class _SplashViewState extends State<SplashView> {
 
   Future<void> _navigateToNext() async {
     await Future.delayed(const Duration(milliseconds: 600));
-    final pinService = Get.isRegistered<PinService>() ? Get.find<PinService>() : null;
+    final pinService =
+        Get.isRegistered<PinService>() ? Get.find<PinService>() : null;
 
-    if (pinService != null && pinService.hasPin.value && pinService.isLocked.value) {
+    if (pinService != null &&
+        pinService.hasPin.value &&
+        pinService.isLocked.value) {
       Get.offAllNamed(AppRoutes.pinVerify);
     } else {
       Get.offAllNamed(AppRoutes.mainNav);

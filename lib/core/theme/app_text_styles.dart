@@ -29,8 +29,7 @@ class AppTextStyles {
       );
 
   // Body Text
-  static TextStyle bodyLarge({bool isDark = false}) =>
-      GoogleFonts.hindSiliguri(
+  static TextStyle bodyLarge({bool isDark = false}) => GoogleFonts.hindSiliguri(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
@@ -41,12 +40,12 @@ class AppTextStyles {
       GoogleFonts.hindSiliguri(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+        color:
+            isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
         height: 1.4,
       );
 
-  static TextStyle bodySmall({bool isDark = false}) =>
-      GoogleFonts.hindSiliguri(
+  static TextStyle bodySmall({bool isDark = false}) => GoogleFonts.hindSiliguri(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,

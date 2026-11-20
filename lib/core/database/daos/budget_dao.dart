@@ -7,11 +7,13 @@ class BudgetDao {
 
   // --- Budgets ---
   Stream<List<Budget>> watchBudgets() {
-    return (db.select(db.budgets)..where((tbl) => tbl.status.equals('active'))).watch();
+    return (db.select(db.budgets)..where((tbl) => tbl.status.equals('active')))
+        .watch();
   }
 
   Future<List<Budget>> getActiveBudgets() {
-    return (db.select(db.budgets)..where((tbl) => tbl.status.equals('active'))).get();
+    return (db.select(db.budgets)..where((tbl) => tbl.status.equals('active')))
+        .get();
   }
 
   Future<int> insertBudget(BudgetsCompanion budget) {
@@ -24,16 +26,20 @@ class BudgetDao {
       ..addColumns([db.transactions.amountMinor.sum()])
       ..where(
         db.transactions.deletedAt.isNull() &
-        db.transactions.transactionType.equals('expense') &
-        db.transactions.transactionDate.isBiggerOrEqualValue(budget.startDate) &
-        db.transactions.transactionDate.isSmallerOrEqualValue(budget.endDate),
+            db.transactions.transactionType.equals('expense') &
+            db.transactions.transactionDate
+                .isBiggerOrEqualValue(budget.startDate) &
+            db.transactions.transactionDate
+                .isSmallerOrEqualValue(budget.endDate),
       );
 
     if (budget.categoryId != null) {
-      query = query..where(db.transactions.categoryId.equals(budget.categoryId!));
+      query = query
+        ..where(db.transactions.categoryId.equals(budget.categoryId!));
     }
     if (budget.businessId != null) {
-      query = query..where(db.transactions.businessId.equals(budget.businessId!));
+      query = query
+        ..where(db.transactions.businessId.equals(budget.businessId!));
     } else if (budget.scopeType != 'business') {
       query = query..where(db.transactions.scopeType.equals(budget.scopeType));
     }
@@ -48,7 +54,8 @@ class BudgetDao {
     if (pendingOnly) {
       query = query..where((tbl) => tbl.isCompleted.equals(0));
     }
-    return (query..orderBy([(tbl) => OrderingTerm.asc(tbl.scheduledAt)])).watch();
+    return (query..orderBy([(tbl) => OrderingTerm.asc(tbl.scheduledAt)]))
+        .watch();
   }
 
   Future<List<Reminder>> getPendingReminders() {

@@ -12,7 +12,8 @@ class LoanAccounts extends Table {
   RealColumn get interestRate => real().withDefault(const Constant(0.0))();
   IntColumn get startDate => integer()();
   IntColumn get dueDate => integer()();
-  TextColumn get status => text().withDefault(const Constant('active'))(); // active, settled, overdue
+  TextColumn get status => text()
+      .withDefault(const Constant('active'))(); // active, settled, overdue
   TextColumn get notes => text().nullable()();
 
   @override
@@ -21,8 +22,10 @@ class LoanAccounts extends Table {
 
 class LoanPayments extends Table {
   TextColumn get id => text()();
-  TextColumn get loanId => text().references(LoanAccounts, #id, onDelete: KeyAction.cascade)();
-  TextColumn get transactionId => text().nullable().references(Transactions, #id)();
+  TextColumn get loanId =>
+      text().references(LoanAccounts, #id, onDelete: KeyAction.cascade)();
+  TextColumn get transactionId =>
+      text().nullable().references(Transactions, #id)();
   IntColumn get principalPaidMinor => integer()();
   IntColumn get interestPaidMinor => integer().withDefault(const Constant(0))();
   IntColumn get paymentDate => integer()();

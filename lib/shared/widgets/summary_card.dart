@@ -25,9 +25,12 @@ class SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = backgroundColor ?? theme.cardTheme.color ?? (isDark ? AppColors.cardDark : Colors.white);
+    final cardBg = backgroundColor ??
+        theme.cardTheme.color ??
+        (isDark ? AppColors.cardDark : Colors.white);
     final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final titleColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final titleColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
     final valueColor = amountMinor < 0
         ? AppColors.expenseRed
         : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight);
@@ -43,7 +46,8 @@ class SummaryCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSizes.r12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.p14, vertical: AppSizes.p12),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.p14, vertical: AppSizes.p12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

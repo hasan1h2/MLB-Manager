@@ -39,7 +39,8 @@ class LoanListView extends GetView<LoanController> {
               return ListView.separated(
                 padding: const EdgeInsets.all(AppSizes.p16),
                 itemCount: controller.loans.length,
-                separatorBuilder: (_, __) => const SizedBox(height: AppSizes.p8),
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSizes.p8),
                 itemBuilder: (context, index) {
                   final item = controller.loans[index];
                   final isReceivable = item.loan.loanType == 'receivable';
@@ -47,16 +48,26 @@ class LoanListView extends GetView<LoanController> {
                   return Card(
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: (isReceivable ? AppColors.infoBlue : AppColors.warningAmber).withValues(alpha: 0.15),
+                        backgroundColor: (isReceivable
+                                ? AppColors.infoBlue
+                                : AppColors.warningAmber)
+                            .withValues(alpha: 0.15),
                         child: Icon(
-                          isReceivable ? Icons.call_received_rounded : Icons.call_made_rounded,
-                          color: isReceivable ? AppColors.infoBlue : AppColors.warningAmberDark,
+                          isReceivable
+                              ? Icons.call_received_rounded
+                              : Icons.call_made_rounded,
+                          color: isReceivable
+                              ? AppColors.infoBlue
+                              : AppColors.warningAmberDark,
                         ),
                       ),
-                      title: Text(item.loan.partyName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                      title: Text(item.loan.partyName,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600, fontSize: 15)),
                       subtitle: Text(
                         'মেয়াদ: ${AppDateUtils.formatTimestamp(item.loan.dueDate)}',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                        style: const TextStyle(
+                            fontSize: 12, color: AppColors.textSecondaryLight),
                       ),
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -67,14 +78,20 @@ class LoanListView extends GetView<LoanController> {
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
-                              color: isReceivable ? AppColors.infoBlue : AppColors.warningAmberDark,
+                              color: isReceivable
+                                  ? AppColors.infoBlue
+                                  : AppColors.warningAmberDark,
                             ),
                           ),
                           Text(
-                            item.loan.status == 'settled' ? 'পরিশোধিত' : 'বকেয়া আসল',
+                            item.loan.status == 'settled'
+                                ? 'পরিশোধিত'
+                                : 'বকেয়া আসল',
                             style: TextStyle(
                               fontSize: 10,
-                              color: item.loan.status == 'settled' ? AppColors.incomeGreen : AppColors.textSecondaryLight,
+                              color: item.loan.status == 'settled'
+                                  ? AppColors.incomeGreen
+                                  : AppColors.textSecondaryLight,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -104,7 +121,8 @@ class LoanListView extends GetView<LoanController> {
     return Obx(() {
       final current = controller.selectedTypeFilter.value;
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.p16, vertical: AppSizes.p8),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.p16, vertical: AppSizes.p8),
         child: Row(
           children: [
             Expanded(
@@ -112,7 +130,10 @@ class LoanListView extends GetView<LoanController> {
                 label: Center(child: Text('loan_receivable'.tr)),
                 selected: current == 'receivable',
                 selectedColor: AppColors.primaryNavy,
-                labelStyle: TextStyle(color: current == 'receivable' ? Colors.white : AppColors.textPrimaryLight),
+                labelStyle: TextStyle(
+                    color: current == 'receivable'
+                        ? Colors.white
+                        : AppColors.textPrimaryLight),
                 onSelected: (_) => controller.setTypeFilter('receivable'),
               ),
             ),
@@ -122,7 +143,10 @@ class LoanListView extends GetView<LoanController> {
                 label: Center(child: Text('loan_payable'.tr)),
                 selected: current == 'payable',
                 selectedColor: AppColors.primaryNavy,
-                labelStyle: TextStyle(color: current == 'payable' ? Colors.white : AppColors.textPrimaryLight),
+                labelStyle: TextStyle(
+                    color: current == 'payable'
+                        ? Colors.white
+                        : AppColors.textPrimaryLight),
                 onSelected: (_) => controller.setTypeFilter('payable'),
               ),
             ),

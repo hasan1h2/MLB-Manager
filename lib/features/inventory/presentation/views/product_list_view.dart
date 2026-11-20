@@ -51,15 +51,23 @@ class ProductListView extends GetView<InventoryController> {
                     height: 44,
                     borderRadius: AppSizes.r8,
                     fallbackIcon: AppIcons.inventory,
-                    fallbackColor: isLowStock ? AppColors.warningAmberDark : AppColors.secondaryElectric,
+                    fallbackColor: isLowStock
+                        ? AppColors.warningAmberDark
+                        : AppColors.secondaryElectric,
                     backgroundColor: isLowStock
                         ? AppColors.warningAmberLight
-                        : (isDark ? AppColors.surfaceDark : AppColors.secondaryElectric.withValues(alpha: 0.12)),
+                        : (isDark
+                            ? AppColors.surfaceDark
+                            : AppColors.secondaryElectric
+                                .withValues(alpha: 0.12)),
                   ),
-                  title: Text(item.product.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  title: Text(item.product.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(
                     'ক্রয়: ${CurrencyUtils.format(item.product.purchasePriceMinor)} • বিক্রয়: ${CurrencyUtils.format(item.product.sellingPriceMinor)}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textSecondaryLight),
                   ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -70,13 +78,18 @@ class ProductListView extends GetView<InventoryController> {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
-                          color: isLowStock ? AppColors.expenseRed : AppColors.primaryNavy,
+                          color: isLowStock
+                              ? AppColors.expenseRed
+                              : AppColors.primaryNavy,
                         ),
                       ),
                       if (isLowStock)
                         const Text(
                           'কম স্টক!',
-                          style: TextStyle(fontSize: 10, color: AppColors.expenseRed, fontWeight: FontWeight.w700),
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.expenseRed,
+                              fontWeight: FontWeight.w700),
                         ),
                     ],
                   ),

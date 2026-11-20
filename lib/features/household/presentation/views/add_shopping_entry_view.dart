@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -28,93 +29,232 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
         builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth >= 768;
 
-          if (isWideScreen) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Left Column: Cart Items & Add Product (flex: 6)
-                Expanded(
-                  flex: 6,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppSizes.p16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildCartHeader(context, isDark),
-                        const SizedBox(height: AppSizes.p12),
-                        _buildCartItemsList(context, isDark),
-                        const SizedBox(height: AppSizes.p16),
-                        _buildAddProductButton(context),
-                      ],
-                    ),
-                  ),
-                ),
-                // Divider
-                VerticalDivider(
-                  width: 1,
-                  thickness: 1,
-                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                ),
-                // Right Column: Store info, Date, Bill Summary, Account & Save (flex: 5)
-                Expanded(
-                  flex: 5,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppSizes.p16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildStoreAndDateCard(context, isDark),
-                        const SizedBox(height: AppSizes.p16),
-                        _buildBillSummaryCard(context, isDark),
-                        const SizedBox(height: AppSizes.p24),
-                        _buildSaveButton(),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }
+          return Obx(() {
+            final isDirectMode = controller.entryMode.value == 'direct_total';
 
-          // Mobile Layout (< 768px): Single Scrollable Column
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSizes.p16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStoreAndDateCard(context, isDark),
-                const SizedBox(height: AppSizes.p16),
-                _buildCartHeader(context, isDark),
-                const SizedBox(height: AppSizes.p12),
-                _buildCartItemsList(context, isDark),
-                const SizedBox(height: AppSizes.p12),
-                _buildAddProductButton(context),
-                const SizedBox(height: AppSizes.p20),
-                _buildBillSummaryCard(context, isDark),
-                const SizedBox(height: AppSizes.p24),
-                _buildSaveButton(),
-                const SizedBox(height: AppSizes.p32),
-              ],
-            ),
-          );
+            if (isWideScreen) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left Column (flex: 6)
+                  Expanded(
+                    flex: 6,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSizes.p16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildModeToggle(context, isDark),
+                          const SizedBox(height: AppSizes.p16),
+                          if (isDirectMode)
+                            _buildDirectTotalForm(context, isDark)
+                          else ...[
+                            _buildCartHeader(context, isDark),
+                            const SizedBox(height: AppSizes.p12),
+                            _buildCartItemsList(context, isDark),
+                            const SizedBox(height: AppSizes.p16),
+                            _buildAddProductButton(context),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Divider
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color:
+                        isDark ? AppColors.borderDark : AppColors.borderLight,
+                  ),
+                  // Right Column (flex: 5)
+                  Expanded(
+                    flex: 5,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(AppSizes.p16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildStoreAndDateCard(context, isDark),
+                          const SizedBox(height: AppSizes.p16),
+                          if (!isDirectMode) ...[
+                            _buildBillSummaryCard(context, isDark),
+                            const SizedBox(height: AppSizes.p24),
+                          ],
+                          _buildSaveButton(isDirectMode),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            // Mobile Layout (< 768px)
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSizes.p16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildModeToggle(context, isDark),
+                  const SizedBox(height: AppSizes.p16),
+                  _buildStoreAndDateCard(context, isDark),
+                  const SizedBox(height: AppSizes.p16),
+                  if (isDirectMode) ...[
+                    _buildDirectTotalForm(context, isDark),
+                    const SizedBox(height: AppSizes.p24),
+                    _buildSaveButton(true),
+                  ] else ...[
+                    _buildCartHeader(context, isDark),
+                    const SizedBox(height: AppSizes.p12),
+                    _buildCartItemsList(context, isDark),
+                    const SizedBox(height: AppSizes.p12),
+                    _buildAddProductButton(context),
+                    const SizedBox(height: AppSizes.p20),
+                    _buildBillSummaryCard(context, isDark),
+                    const SizedBox(height: AppSizes.p24),
+                    _buildSaveButton(false),
+                  ],
+                  const SizedBox(height: AppSizes.p32),
+                ],
+              ),
+            );
+          });
         },
       ),
     );
   }
 
+  Widget _buildModeToggle(BuildContext context, bool isDark) {
+    return Obx(() {
+      final currentMode = controller.entryMode.value;
+
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(AppSizes.r12),
+          border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        ),
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppSizes.r8),
+                onTap: () => controller.entryMode.value = 'itemized',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: currentMode == 'itemized'
+                        ? (isDark
+                            ? AppColors.secondaryElectric
+                            : AppColors.primaryNavy)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppSizes.r8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.list_alt_rounded,
+                        size: 18,
+                        color: currentMode == 'itemized'
+                            ? Colors.white
+                            : (isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'পণ্যের তালিকা (Itemized)',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: currentMode == 'itemized'
+                              ? Colors.white
+                              : (isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppSizes.r8),
+                onTap: () => controller.entryMode.value = 'direct_total',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: currentMode == 'direct_total'
+                        ? (isDark
+                            ? AppColors.secondaryElectric
+                            : AppColors.primaryNavy)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppSizes.r8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.payments_outlined,
+                        size: 18,
+                        color: currentMode == 'direct_total'
+                            ? Colors.white
+                            : (isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'শুধু মোট টাকা (Direct)',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: currentMode == 'direct_total'
+                              ? Colors.white
+                              : (isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
   Widget _buildStoreAndDateCard(BuildContext context, bool isDark) {
     return Card(
+      elevation: 0,
+      color: isDark ? AppColors.cardDark : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.r12),
+        side: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'দোকান ও তারিখের বিবরণ',
+              'দোকান ও সময়সূচির বিবরণ',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
               ),
             ),
             const SizedBox(height: AppSizes.p12),
@@ -125,7 +265,17 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
               prefixIcon: Icons.storefront_outlined,
             ),
             const SizedBox(height: AppSizes.p12),
-            _buildDatePicker(context, isDark),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDatePicker(context, isDark),
+                ),
+                const SizedBox(width: AppSizes.p12),
+                Expanded(
+                  child: _buildTimePicker(context, isDark),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -148,48 +298,185 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
           }
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSizes.p12, vertical: AppSizes.p10),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.p12, vertical: AppSizes.p10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.r8),
-            border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight),
             color: isDark ? AppColors.surfaceDark : Colors.white,
           ),
           child: Row(
             children: [
-              const Icon(AppIcons.calendar, color: AppColors.secondaryElectric, size: 20),
-              const SizedBox(width: AppSizes.p12),
+              const Icon(AppIcons.calendar,
+                  color: AppColors.secondaryElectric, size: 20),
+              const SizedBox(width: AppSizes.p10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'date'.tr,
+                      'তারিখ (Date)',
                       style: TextStyle(
                         fontSize: 11,
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
                       ),
                     ),
                     Text(
-                      AppDateUtils.standardDateFormat.format(controller.shoppingDate.value),
+                      AppDateUtils.standardDateFormat
+                          .format(controller.shoppingDate.value),
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight,
                       ),
                     ),
                   ],
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 14,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
               ),
             ],
           ),
         ),
       );
     });
+  }
+
+  Widget _buildTimePicker(BuildContext context, bool isDark) {
+    return Obx(() {
+      final time = controller.shoppingTime.value;
+      final timeStr = controller.formatShoppingTime(time);
+
+      return InkWell(
+        borderRadius: BorderRadius.circular(AppSizes.r8),
+        onTap: () async {
+          final picked = await showTimePicker(
+            context: context,
+            initialTime: time ?? TimeOfDay.now(),
+          );
+          if (picked != null) {
+            controller.shoppingTime.value = picked;
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.p12, vertical: AppSizes.p10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSizes.r8),
+            border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.access_time_rounded,
+                  color: AppColors.infoBlue, size: 20),
+              const SizedBox(width: AppSizes.p10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'সময় (ঐচ্ছিক)',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                    Text(
+                      timeStr ?? 'সময় নির্বাচন',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: timeStr != null
+                            ? (isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight)
+                            : (isDark
+                                ? AppColors.textMutedDark
+                                : AppColors.textMutedLight),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (time != null)
+                InkWell(
+                  onTap: () => controller.shoppingTime.value = null,
+                  child: Icon(Icons.close_rounded,
+                      size: 16,
+                      color: isDark
+                          ? AppColors.textMutedDark
+                          : AppColors.textMutedLight),
+                ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildDirectTotalForm(BuildContext context, bool isDark) {
+    return Card(
+      elevation: 0,
+      color: isDark ? AppColors.cardDark : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.r12),
+        side: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSizes.p16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.payments_rounded,
+                    color: AppColors.secondaryElectric, size: 20),
+                const SizedBox(width: AppSizes.p8),
+                Text(
+                  'মোট খরচের তথ্য',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.p16),
+            AppTextField(
+              label: 'খরচের বিবরণ / নাম',
+              hint: 'যেমন: সাপ্তাহিক বাজার, রাতের কেনাকাটা',
+              controller: controller.directTitleController,
+              prefixIcon: Icons.description_outlined,
+            ),
+            const SizedBox(height: AppSizes.p16),
+            CurrencyInputField(
+              label: 'মোট খরচের পরিমাণ (৳) *',
+              controller: controller.directAmountController,
+            ),
+            const SizedBox(height: AppSizes.p16),
+            _buildAccountDropdown(context, isDark),
+            const SizedBox(height: AppSizes.p16),
+            AppTextField(
+              label: 'মন্তব্য / নোট (ঐচ্ছিক)',
+              hint: 'অতিরিক্ত তথ্য...',
+              controller: controller.directNoteController,
+              prefixIcon: Icons.notes_rounded,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildCartHeader(BuildContext context, bool isDark) {
@@ -200,20 +487,24 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
         children: [
           Row(
             children: [
-              const Icon(AppIcons.shopping, color: AppColors.secondaryElectric, size: 20),
+              const Icon(AppIcons.shopping,
+                  color: AppColors.secondaryElectric, size: 20),
               const SizedBox(width: AppSizes.p8),
               Text(
                 'বাজারের কার্ট',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
               if (count > 0) ...[
                 const SizedBox(width: AppSizes.p8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.secondaryElectric.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(AppSizes.rFull),
@@ -232,8 +523,10 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
           ),
           if (count > 0)
             TextButton.icon(
-              icon: const Icon(Icons.delete_sweep_outlined, size: 16, color: AppColors.expenseRed),
-              label: const Text('সব মুছুন', style: TextStyle(color: AppColors.expenseRed, fontSize: 13)),
+              icon: const Icon(Icons.delete_sweep_outlined,
+                  size: 16, color: AppColors.expenseRed),
+              label: const Text('সব মুছুন',
+                  style: TextStyle(color: AppColors.expenseRed, fontSize: 13)),
               onPressed: () => controller.clearCart(),
             ),
         ],
@@ -248,11 +541,13 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
       if (items.isEmpty) {
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: AppSizes.p32, horizontal: AppSizes.p16),
+          padding: const EdgeInsets.symmetric(
+              vertical: AppSizes.p32, horizontal: AppSizes.p16),
           decoration: BoxDecoration(
             color: isDark ? AppColors.cardDark : Colors.white,
             borderRadius: BorderRadius.circular(AppSizes.r12),
-            border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            border: Border.all(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight),
           ),
           child: Column(
             children: [
@@ -260,10 +555,11 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: (isDark ? AppColors.secondaryElectric : AppColors.primaryNavy).withValues(alpha: 0.1),
+                  color: AppColors.secondaryElectric.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.shopping_cart_outlined, size: 32, color: AppColors.secondaryElectric),
+                child: const Icon(Icons.shopping_cart_outlined,
+                    size: 32, color: AppColors.secondaryElectric),
               ),
               const SizedBox(height: AppSizes.p12),
               Text(
@@ -271,7 +567,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
               const SizedBox(height: AppSizes.p4),
@@ -279,7 +577,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                 'পণ্য যোগ করতে নিচের "পণ্য যোগ করুন" বাটনে চাপ দিন',
                 style: TextStyle(
                   fontSize: 12,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -301,12 +601,15 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
     });
   }
 
-  Widget _buildCartItemCard(BuildContext context, CartItem item, int index, bool isDark) {
+  Widget _buildCartItemCard(
+      BuildContext context, CartItem item, int index, bool isDark) {
     return Card(
-      elevation: 1,
+      elevation: 0,
+      color: isDark ? AppColors.cardDark : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.r12),
-        side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        side: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p12),
@@ -317,7 +620,7 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
             _buildProductThumbnail(item, isDark),
             const SizedBox(width: AppSizes.p12),
 
-            // Product Name & Unit Price
+            // Product Name & details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,23 +630,55 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Obx(() {
-                    return Text(
-                      'দর: ${CurrencyUtils.format(item.unitPriceMinor.value)} / ${_formatUnit(item.unit)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                      ),
-                    );
+                    final unitPrice = item.unitPriceMinor.value;
+                    if (unitPrice > 0) {
+                      return Text(
+                        'দর: ${CurrencyUtils.format(unitPrice)} / ${_formatUnit(item.unit)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      );
+                    } else if (item.quantity.value > 0 && item.unit != 'none') {
+                      return Text(
+                        'পরিমাণ: ${item.quantity.value.toStringAsFixed(item.quantity.value.truncateToDouble() == item.quantity.value ? 0 : 2)} ${_formatUnit(item.unit)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
                   }),
+                  if (item.note.value != null &&
+                      item.note.value!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'নোট: ${item.note.value!}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
-                  // Quantity Stepper: [-] [qty unit] [+]
+                  // Quantity Stepper
                   _buildQuantityStepper(item, index, isDark),
                 ],
               ),
@@ -351,12 +686,13 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
 
             const SizedBox(width: AppSizes.p12),
 
-            // Subtotal & Delete Button
+            // Line Total & Delete Button
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.expenseRed, size: 20),
+                  icon: const Icon(Icons.delete_outline_rounded,
+                      color: AppColors.expenseRed, size: 20),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   tooltip: 'মুছুন',
@@ -367,7 +703,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                   'মোট',
                   style: TextStyle(
                     fontSize: 11,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
                   ),
                 ),
                 Obx(() {
@@ -392,8 +730,8 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
     return Obx(() {
       return AppImage(
         imagePath: item.imagePath.value,
-        width: 54,
-        height: 54,
+        width: 50,
+        height: 50,
         fallbackIcon: Icons.fastfood_outlined,
         fallbackColor: AppColors.secondaryElectric,
         borderRadius: AppSizes.r8,
@@ -412,28 +750,37 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+              border: Border.all(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight),
               borderRadius: BorderRadius.circular(4),
               color: isDark ? AppColors.surfaceDark : Colors.white,
             ),
             child: Icon(
               Icons.remove,
               size: 16,
-              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              color: isDark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimaryLight,
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Obx(() {
             final qty = item.quantity.value;
-            final qtyStr = qty == qty.roundToDouble() ? qty.toInt().toString() : qty.toString();
+            final qtyStr = qty == qty.roundToDouble()
+                ? qty.toInt().toString()
+                : qty.toString();
             return Text(
-              '$qtyStr ${_formatUnit(item.unit)}',
+              item.unit == 'none'
+                  ? qtyStr
+                  : '$qtyStr ${_formatUnit(item.unit)}',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                fontSize: 13,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                fontSize: 12.5,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
               ),
             );
           }),
@@ -445,14 +792,17 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+              border: Border.all(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight),
               borderRadius: BorderRadius.circular(4),
               color: isDark ? AppColors.surfaceDark : Colors.white,
             ),
             child: Icon(
               Icons.add,
               size: 16,
-              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              color: isDark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimaryLight,
             ),
           ),
         ),
@@ -465,12 +815,15 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
       width: double.infinity,
       child: OutlinedButton.icon(
         icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
-        label: const Text('পণ্য যোগ করুন (Add Product)', style: TextStyle(fontWeight: FontWeight.w600)),
+        label: const Text('পণ্য যোগ করুন (Add Product)',
+            style: TextStyle(fontWeight: FontWeight.w700)),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 12),
-          side: const BorderSide(color: AppColors.secondaryElectric, width: 1.5),
+          side:
+              const BorderSide(color: AppColors.secondaryElectric, width: 1.5),
           foregroundColor: AppColors.secondaryElectric,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.r8)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSizes.r8)),
         ),
         onPressed: () => _showAddProductDialog(context),
       ),
@@ -479,10 +832,12 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
 
   Widget _buildBillSummaryCard(BuildContext context, bool isDark) {
     return Card(
-      elevation: 2,
+      elevation: 0,
+      color: isDark ? AppColors.cardDark : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.r12),
-        side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        side: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.p16),
@@ -491,14 +846,17 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
           children: [
             Row(
               children: [
-                const Icon(Icons.receipt_long_rounded, color: AppColors.secondaryElectric, size: 20),
+                const Icon(Icons.receipt_long_rounded,
+                    color: AppColors.secondaryElectric, size: 20),
                 const SizedBox(width: AppSizes.p8),
                 Text(
                   'বিলের বিবরণ (Bill Summary)',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
                   ),
                 ),
               ],
@@ -514,7 +872,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                     'সাবটোটাল (Subtotal)',
                     style: TextStyle(
                       fontSize: 13,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
                     ),
                   ),
                   Text(
@@ -522,7 +882,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                     ),
                   ),
                 ],
@@ -543,7 +905,7 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
             const Divider(),
             const SizedBox(height: AppSizes.p8),
 
-            // Net Payable / Total Bill Row
+            // Net Payable Row
             Obx(() {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -553,7 +915,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                     ),
                   ),
                   Text(
@@ -589,7 +953,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                     'বকেয়া (Due)',
                     style: TextStyle(
                       fontSize: 13,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
                     ),
                   ),
                   Text(
@@ -597,7 +963,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: due > 0 ? AppColors.warningAmberDark : AppColors.incomeGreen,
+                      color: due > 0
+                          ? AppColors.warningAmberDark
+                          : AppColors.incomeGreen,
                     ),
                   ),
                 ],
@@ -623,8 +991,10 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
             'পরিশোধের মাধ্যম / অ্যাকাউন্ট',
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
             ),
           ),
           const SizedBox(height: 6),
@@ -632,7 +1002,8 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppSizes.r8),
-              border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+              border: Border.all(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight),
               color: isDark ? AppColors.surfaceDark : Colors.white,
             ),
             child: DropdownButtonHideUnderline(
@@ -640,11 +1011,16 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                 value: selectedId,
                 isExpanded: true,
                 dropdownColor: isDark ? AppColors.cardDark : Colors.white,
-                hint: Text('অ্যাকাউন্ট নির্বাচন করুন', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
+                hint: Text('অ্যাকাউন্ট নির্বাচন করুন',
+                    style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black54)),
                 items: const [
-                  DropdownMenuItem(value: 'acc_cash_01', child: Text('নগদ ক্যাশ (Cash)')),
-                  DropdownMenuItem(value: 'acc_bkash_01', child: Text('বিকাশ (bKash)')),
-                  DropdownMenuItem(value: 'acc_bank_01', child: Text('ব্যাংক অ্যাকাউন্ট')),
+                  DropdownMenuItem(
+                      value: 'acc_cash_01', child: Text('নগদ ক্যাশ (Cash)')),
+                  DropdownMenuItem(
+                      value: 'acc_bkash_01', child: Text('বিকাশ (bKash)')),
+                  DropdownMenuItem(
+                      value: 'acc_bank_01', child: Text('ব্যাংক অ্যাকাউন্ট')),
                 ],
                 onChanged: (val) {
                   if (val != null) controller.selectedAccountId.value = val;
@@ -657,9 +1033,11 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
     });
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(bool isDirectMode) {
     return AppButton(
-      text: 'হিসাব সংরক্ষণ করুন (Save Bill)',
+      text: isDirectMode
+          ? 'খরচ সংরক্ষণ করুন (Save Expense)'
+          : 'হিসাব সংরক্ষণ করুন (Save Bill)',
       icon: AppIcons.check,
       onPressed: () async {
         final success = await controller.saveShoppingBill();
@@ -674,17 +1052,47 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
     final nameCtrl = TextEditingController();
     final qtyCtrl = TextEditingController(text: '1');
     final priceCtrl = TextEditingController();
+    final totalCtrl = TextEditingController();
+    final noteCtrl = TextEditingController();
     final RxString unit = 'kg'.obs;
     final Rx<String?> imagePath = Rx<String?>(null);
 
-    final suggestions = ['চাল', 'ডাল', 'তেল', 'আলু', 'পেঁয়াজ', 'ডিম', 'মাছ', 'মাংস', 'সবজি', 'দুধ', 'চিনি', 'লবণ'];
+    final suggestions = [
+      'চাল',
+      'ডাল',
+      'তেল',
+      'আলু',
+      'পেঁয়াজ',
+      'পটল',
+      'ডিম',
+      'মাছ',
+      'মাংস',
+      'সবজি',
+      'দুধ',
+      'চিনি',
+      'লবণ',
+      'মরিচ',
+      'মসলা'
+    ];
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    // Helper: auto recalculate line total when qty or unit price changes
+    void recalculateLineTotal() {
+      final qty = double.tryParse(qtyCtrl.text.trim()) ?? 1.0;
+      final priceTaka = double.tryParse(priceCtrl.text.trim());
+      if (priceTaka != null && priceTaka > 0) {
+        final total = qty * priceTaka;
+        totalCtrl.text =
+            total.toStringAsFixed(total.truncateToDouble() == total ? 0 : 2);
+      }
+    }
+
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.r16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.r16)),
         backgroundColor: isDark ? AppColors.cardDark : Colors.white,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.p20),
@@ -697,27 +1105,33 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.add_shopping_cart_rounded, color: AppColors.secondaryElectric),
+                      const Icon(Icons.add_shopping_cart_rounded,
+                          color: AppColors.secondaryElectric),
                       const SizedBox(width: AppSizes.p8),
                       Text(
                         'পণ্য যোগ করুন',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
                         ),
                       ),
                     ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded),
+                    icon: Icon(Icons.close_rounded,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight),
                     onPressed: () => Get.back(),
                   ),
                 ],
               ),
               const SizedBox(height: AppSizes.p12),
 
-              // Suggestions chips
+              // Suggestions chips with bright readable text
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
@@ -735,17 +1149,26 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: (isDark ? AppColors.surfaceDark : Colors.grey.shade100),
+                        color: isDark
+                            ? AppColors.surfaceDark
+                            : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(AppSizes.rFull),
-                        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                        border: Border.all(
+                            color: isDark
+                                ? AppColors.borderDark
+                                : AppColors.borderLight),
                       ),
                       child: Text(
                         s,
                         style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
                         ),
                       ),
                     ),
@@ -754,9 +1177,9 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
               ),
               const SizedBox(height: AppSizes.p16),
 
-              // Product Name Field
+              // Product Name Field (Required)
               AppTextField(
-                label: 'product_name'.tr,
+                label: 'পণ্যের নাম (Product Name) *',
                 controller: nameCtrl,
                 hint: 'যেমন: বাসমতি চাল, সয়াবিন তেল...',
                 prefixIcon: Icons.shopping_basket_outlined,
@@ -769,26 +1192,47 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                   Expanded(
                     flex: 3,
                     child: AppTextField(
-                      label: 'quantity'.tr,
+                      label: 'পরিমাণ (Quantity)',
                       controller: qtyCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       prefixIcon: Icons.scale_outlined,
+                      onChanged: (_) => recalculateLineTotal(),
                     ),
                   ),
                   const SizedBox(width: AppSizes.p12),
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Obx(() {
                       return DropdownButtonFormField<String>(
                         value: unit.value,
-                        dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
-                        decoration: const InputDecoration(labelText: 'একক'),
+                        dropdownColor:
+                            isDark ? AppColors.cardDark : Colors.white,
+                        style: TextStyle(
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
+                          fontSize: 14,
+                        ),
+                        decoration:
+                            const InputDecoration(labelText: 'একক (Unit)'),
                         items: const [
+                          DropdownMenuItem(
+                              value: 'none', child: Text('একক নেই')),
                           DropdownMenuItem(value: 'kg', child: Text('কেজি')),
-                          DropdownMenuItem(value: 'liter', child: Text('লিটার')),
-                          DropdownMenuItem(value: 'piece', child: Text('পিস')),
-                          DropdownMenuItem(value: 'packet', child: Text('প্যাকেট')),
                           DropdownMenuItem(value: 'g', child: Text('গ্রাম')),
+                          DropdownMenuItem(
+                              value: 'liter', child: Text('লিটার')),
+                          DropdownMenuItem(value: 'ml', child: Text('মিলি')),
+                          DropdownMenuItem(value: 'piece', child: Text('পিস')),
+                          DropdownMenuItem(
+                              value: 'packet', child: Text('প্যাকেট')),
+                          DropdownMenuItem(value: 'box', child: Text('বক্স')),
+                          DropdownMenuItem(value: 'dozen', child: Text('ডজন')),
+                          DropdownMenuItem(
+                              value: 'bottle', child: Text('বোতল')),
+                          DropdownMenuItem(
+                              value: 'carton', child: Text('কার্টন')),
                         ],
                         onChanged: (v) {
                           if (v != null) unit.value = v;
@@ -800,13 +1244,35 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
               ),
               const SizedBox(height: AppSizes.p12),
 
-              // Unit Price
+              // Unit Price (OPTIONAL)
               AppTextField(
-                label: 'প্রতি একক দর (Unit Price)',
+                label: 'প্রতি একক দর (ঐচ্ছিক / Optional)',
                 controller: priceCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                hint: '0.00',
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                hint: 'দর না থাকলে খালি রাখুন',
                 prefixIcon: Icons.currency_exchange_rounded,
+                onChanged: (_) => recalculateLineTotal(),
+              ),
+              const SizedBox(height: AppSizes.p12),
+
+              // Line Total / মোট টাকা (Can be entered directly without unit price!)
+              AppTextField(
+                label: 'মোট টাকা (Line Total) *',
+                controller: totalCtrl,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                hint: 'যেমন: ১০০',
+                prefixIcon: Icons.receipt_outlined,
+              ),
+              const SizedBox(height: AppSizes.p12),
+
+              // Item Note (Optional)
+              AppTextField(
+                label: 'নোট / মন্তব্য (ঐচ্ছিক)',
+                controller: noteCtrl,
+                hint: 'যেমন: ভালো কোয়ালিটি',
+                prefixIcon: Icons.notes_outlined,
               ),
               const SizedBox(height: AppSizes.p16),
 
@@ -827,12 +1293,15 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                       child: OutlinedButton.icon(
                         icon: const Icon(Icons.add_a_photo_outlined, size: 16),
                         label: Text(
-                          path != null ? 'ছবি পরিবর্তন করুন' : 'পণ্যের ছবি যুক্ত করুন',
+                          path != null
+                              ? 'ছবি পরিবর্তন করুন'
+                              : 'পণ্যের ছবি যুক্ত করুন',
                           style: const TextStyle(fontSize: 12),
                         ),
                         onPressed: () async {
                           final picker = ImagePicker();
-                          final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+                          final image = await picker.pickImage(
+                              source: ImageSource.gallery, imageQuality: 70);
                           if (image != null) {
                             imagePath.value = image.path;
                           }
@@ -851,16 +1320,38 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
                 onPressed: () {
                   final name = nameCtrl.text.trim();
                   if (name.isEmpty) {
+                    Get.snackbar('ত্রুটি', 'অনুগ্রহ করে পণ্যের নাম লিখুন',
+                        snackPosition: SnackPosition.BOTTOM);
                     return;
                   }
+
                   final qty = double.tryParse(qtyCtrl.text.trim()) ?? 1.0;
-                  final priceMinor = CurrencyUtils.takaToMinor(priceCtrl.text.trim());
+                  final priceMinor =
+                      CurrencyUtils.takaToMinor(priceCtrl.text.trim());
+                  int lineTotalMinor =
+                      CurrencyUtils.takaToMinor(totalCtrl.text.trim());
+
+                  // If line total wasn't entered, but unit price was, compute line total
+                  if (lineTotalMinor <= 0 && priceMinor > 0) {
+                    lineTotalMinor = (qty * priceMinor).round();
+                  }
+
+                  if (lineTotalMinor <= 0) {
+                    Get.snackbar(
+                        'ত্রুটি', 'অনুগ্রহ করে মোট টাকার পরিমাণ অথবা দর লিখুন',
+                        snackPosition: SnackPosition.BOTTOM);
+                    return;
+                  }
 
                   controller.addToCart(
                     name: name,
                     quantity: qty,
                     unit: unit.value,
                     unitPriceMinor: priceMinor,
+                    lineTotalMinor: lineTotalMinor,
+                    note: noteCtrl.text.trim().isNotEmpty
+                        ? noteCtrl.text.trim()
+                        : null,
                     imagePath: imagePath.value,
                   );
 
@@ -876,6 +1367,8 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
 
   String _formatUnit(String unit) {
     switch (unit) {
+      case 'none':
+        return '';
       case 'kg':
         return 'কেজি';
       case 'liter':
@@ -886,6 +1379,16 @@ class AddShoppingEntryView extends GetView<HouseholdController> {
         return 'প্যাকেট';
       case 'g':
         return 'গ্রাম';
+      case 'ml':
+        return 'মিলি';
+      case 'dozen':
+        return 'ডজন';
+      case 'box':
+        return 'বক্স';
+      case 'bottle':
+        return 'বোতল';
+      case 'carton':
+        return 'কার্টন';
       default:
         return unit;
     }

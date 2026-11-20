@@ -43,12 +43,16 @@ class LoanDetailsView extends GetView<LoanController> {
                 children: [
                   Text(
                     item.loan.partyName,
-                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: AppSizes.p8),
                   Text(
                     isReceivable ? 'প্রদত্ত ঋণ (পাওনা)' : 'গৃহীত ঋণ (দেনা)',
-                    style: const TextStyle(color: AppColors.secondaryElectricLight, fontSize: 13),
+                    style: const TextStyle(
+                        color: AppColors.secondaryElectricLight, fontSize: 13),
                   ),
                   const SizedBox(height: AppSizes.p12),
                   Text(
@@ -60,7 +64,8 @@ class LoanDetailsView extends GetView<LoanController> {
                     ),
                   ),
                   const SizedBox(height: AppSizes.p4),
-                  const Text('অবশিষ্ট বকেয়া আসল', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  const Text('অবশিষ্ট বকেয়া আসল',
+                      style: TextStyle(color: Colors.white70, fontSize: 12)),
                 ],
               ),
             ),
@@ -73,16 +78,24 @@ class LoanDetailsView extends GetView<LoanController> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('মূল আসল টাকা', style: TextStyle(color: AppColors.textSecondaryLight)),
-                        Text(CurrencyUtils.format(item.loan.principalMinor), style: const TextStyle(fontWeight: FontWeight.w600)),
+                        const Text('মূল আসল টাকা',
+                            style:
+                                TextStyle(color: AppColors.textSecondaryLight)),
+                        Text(CurrencyUtils.format(item.loan.principalMinor),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600)),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('পরিশোধের শেষ তারিখ', style: TextStyle(color: AppColors.textSecondaryLight)),
-                        Text(AppDateUtils.formatTimestamp(item.loan.dueDate), style: const TextStyle(fontWeight: FontWeight.w600)),
+                        const Text('পরিশোধের শেষ তারিখ',
+                            style:
+                                TextStyle(color: AppColors.textSecondaryLight)),
+                        Text(AppDateUtils.formatTimestamp(item.loan.dueDate),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ],
@@ -97,7 +110,9 @@ class LoanDetailsView extends GetView<LoanController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('কিস্তি / পরিশোধ এন্ট্রি', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      const Text('কিস্তি / পরিশোধ এন্ট্রি',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w700)),
                       const SizedBox(height: AppSizes.p12),
                       CurrencyInputField(
                         label: 'পরিশোধিত টাকার পরিমাণ',
@@ -118,7 +133,9 @@ class LoanDetailsView extends GetView<LoanController> {
               ),
               const SizedBox(height: AppSizes.p20),
             ],
-            Text('পরিশোধের ইতিহাস', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            Text('পরিশোধের ইতিহাস',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             const SizedBox(height: AppSizes.p8),
             Obx(() {
               final payments = controller.selectedLoanPayments;
@@ -126,7 +143,10 @@ class LoanDetailsView extends GetView<LoanController> {
                 return const Card(
                   child: Padding(
                     padding: EdgeInsets.all(AppSizes.p16),
-                    child: Center(child: Text('এখনও কোন কিস্তি পরিশোধ করা হয়নি', style: TextStyle(color: AppColors.textSecondaryLight))),
+                    child: Center(
+                        child: Text('এখনও কোন কিস্তি পরিশোধ করা হয়নি',
+                            style: TextStyle(
+                                color: AppColors.textSecondaryLight))),
                   ),
                 );
               }
@@ -143,7 +163,9 @@ class LoanDetailsView extends GetView<LoanController> {
                       title: Text(AppDateUtils.formatTimestamp(p.paymentDate)),
                       trailing: Text(
                         CurrencyUtils.format(p.principalPaidMinor),
-                        style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.incomeGreen),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.incomeGreen),
                       ),
                     ),
                   );

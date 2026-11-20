@@ -66,6 +66,7 @@ import '../../features/suppliers/presentation/views/supplier_list_view.dart';
 import '../../features/transactions/presentation/bindings/transaction_binding.dart';
 import '../../features/transactions/presentation/views/add_transaction_view.dart';
 import '../../features/transactions/presentation/views/categories_view.dart';
+import '../../features/transactions/presentation/views/transaction_details_view.dart';
 import '../../features/transactions/presentation/views/transaction_list_view.dart';
 import 'app_routes.dart';
 
@@ -100,6 +101,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.transactionList,
       page: () => const TransactionListView(),
+      binding: TransactionBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.transactionDetails,
+      page: () => const TransactionDetailsView(),
       binding: TransactionBinding(),
     ),
     GetPage(

@@ -43,7 +43,10 @@ class RemindersView extends GetView<ReminderController> {
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: (isDone ? AppColors.textMutedLight : AppColors.warningAmber).withValues(alpha: 0.15),
+                  backgroundColor: (isDone
+                          ? AppColors.textMutedLight
+                          : AppColors.warningAmber)
+                      .withValues(alpha: 0.15),
                   child: Icon(
                     AppIcons.notifications,
                     color: isDone ? Colors.grey : AppColors.warningAmberDark,
@@ -58,12 +61,15 @@ class RemindersView extends GetView<ReminderController> {
                 ),
                 subtitle: Text(
                   'নির্ধারিত তারিখ: ${AppDateUtils.formatTimestamp(r.scheduledAt)}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondaryLight),
                 ),
                 trailing: isDone
-                    ? const Icon(Icons.check_circle_rounded, color: AppColors.incomeGreen)
+                    ? const Icon(Icons.check_circle_rounded,
+                        color: AppColors.incomeGreen)
                     : IconButton(
-                        icon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.secondaryElectric),
+                        icon: const Icon(Icons.check_circle_outline_rounded,
+                            color: AppColors.secondaryElectric),
                         onPressed: () => controller.markCompleted(r.id),
                       ),
               ),
@@ -82,18 +88,25 @@ class RemindersView extends GetView<ReminderController> {
   void _showAddReminderDialog(BuildContext context) {
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.r12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.r12)),
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.p20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('নতুন রিমাইন্ডার যোগ করুন', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+              const Text('নতুন রিমাইন্ডার যোগ করুন',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
               const SizedBox(height: 16),
-              AppTextField(label: 'শিরোনাম / বিষয়', controller: controller.titleController, hint: 'যেমন: বিদ্যুৎ বিল, ঋণের কিস্তি'),
+              AppTextField(
+                  label: 'শিরোনাম / বিষয়',
+                  controller: controller.titleController,
+                  hint: 'যেমন: বিদ্যুৎ বিল, ঋণের কিস্তি'),
               const SizedBox(height: 12),
-              AppTextField(label: 'বিবরণ (ঐচ্ছিক)', controller: controller.descController),
+              AppTextField(
+                  label: 'বিবরণ (ঐচ্ছিক)',
+                  controller: controller.descController),
               const SizedBox(height: 24),
               AppButton(
                 text: 'save'.tr,

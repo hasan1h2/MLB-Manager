@@ -65,10 +65,14 @@ class AddSavingsGoalView extends GetView<AssetController> {
           side: const BorderSide(color: AppColors.borderLight),
         ),
         tileColor: Colors.white,
-        leading: const Icon(AppIcons.calendar, color: AppColors.secondaryElectric),
-        title: const Text('টার্গেট সমাপ্তির তারিখ', style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight)),
+        leading:
+            const Icon(AppIcons.calendar, color: AppColors.secondaryElectric),
+        title: const Text('টার্গেট সমাপ্তির তারিখ',
+            style:
+                TextStyle(fontSize: 12, color: AppColors.textSecondaryLight)),
         subtitle: Text(
-          AppDateUtils.standardDateFormat.format(controller.goalTargetDate.value),
+          AppDateUtils.standardDateFormat
+              .format(controller.goalTargetDate.value),
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),

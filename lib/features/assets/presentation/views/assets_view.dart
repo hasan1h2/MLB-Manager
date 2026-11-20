@@ -41,16 +41,23 @@ class AssetsView extends GetView<AssetController> {
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: AppColors.primaryNavy.withValues(alpha: 0.1),
-                  child: const Icon(AppIcons.assets, color: AppColors.primaryNavy),
+                  child:
+                      const Icon(AppIcons.assets, color: AppColors.primaryNavy),
                 ),
-                title: Text(a.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                title: Text(a.name,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 15)),
                 subtitle: Text(
                   'ক্যাটাগরি: ${a.category.toUpperCase()}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondaryLight),
                 ),
                 trailing: Text(
                   CurrencyUtils.format(a.currentValueMinor),
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.primaryNavy),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: AppColors.primaryNavy),
                 ),
               ),
             );

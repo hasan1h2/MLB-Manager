@@ -38,7 +38,8 @@ class BackupController extends GetxController {
 
       final jsonStr = jsonEncode(backupData);
       final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/mlb_backup_${DateTime.now().millisecondsSinceEpoch}.json');
+      final file = File(
+          '${dir.path}/mlb_backup_${DateTime.now().millisecondsSinceEpoch}.json');
       await file.writeAsString(jsonStr);
 
       lastBackupPath.value = file.path;

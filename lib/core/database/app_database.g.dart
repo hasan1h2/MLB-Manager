@@ -2174,6 +2174,12 @@ class $TransactionsTable extends Transactions
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('paid'));
+  static const VerificationMeta _purchaseTimeMeta =
+      const VerificationMeta('purchaseTime');
+  @override
+  late final GeneratedColumn<String> purchaseTime = GeneratedColumn<String>(
+      'purchase_time', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _sourceTypeMeta =
       const VerificationMeta('sourceType');
   @override
@@ -2227,6 +2233,7 @@ class $TransactionsTable extends Transactions
         transactionDate,
         description,
         paymentStatus,
+        purchaseTime,
         sourceType,
         sourceId,
         createdByMemberId,
@@ -2321,6 +2328,12 @@ class $TransactionsTable extends Transactions
           paymentStatus.isAcceptableOrUnknown(
               data['payment_status']!, _paymentStatusMeta));
     }
+    if (data.containsKey('purchase_time')) {
+      context.handle(
+          _purchaseTimeMeta,
+          purchaseTime.isAcceptableOrUnknown(
+              data['purchase_time']!, _purchaseTimeMeta));
+    }
     if (data.containsKey('source_type')) {
       context.handle(
           _sourceTypeMeta,
@@ -2386,6 +2399,8 @@ class $TransactionsTable extends Transactions
           .read(DriftSqlType.string, data['${effectivePrefix}description']),
       paymentStatus: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}payment_status'])!,
+      purchaseTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}purchase_time']),
       sourceType: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}source_type']),
       sourceId: attachedDatabase.typeMapping
@@ -2420,6 +2435,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final int transactionDate;
   final String? description;
   final String paymentStatus;
+  final String? purchaseTime;
   final String? sourceType;
   final String? sourceId;
   final String? createdByMemberId;
@@ -2439,6 +2455,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       required this.transactionDate,
       this.description,
       required this.paymentStatus,
+      this.purchaseTime,
       this.sourceType,
       this.sourceId,
       this.createdByMemberId,
@@ -2470,6 +2487,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       map['description'] = Variable<String>(description);
     }
     map['payment_status'] = Variable<String>(paymentStatus);
+    if (!nullToAbsent || purchaseTime != null) {
+      map['purchase_time'] = Variable<String>(purchaseTime);
+    }
     if (!nullToAbsent || sourceType != null) {
       map['source_type'] = Variable<String>(sourceType);
     }
@@ -2511,6 +2531,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ? const Value.absent()
           : Value(description),
       paymentStatus: Value(paymentStatus),
+      purchaseTime: purchaseTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(purchaseTime),
       sourceType: sourceType == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceType),
@@ -2544,6 +2567,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       transactionDate: serializer.fromJson<int>(json['transactionDate']),
       description: serializer.fromJson<String?>(json['description']),
       paymentStatus: serializer.fromJson<String>(json['paymentStatus']),
+      purchaseTime: serializer.fromJson<String?>(json['purchaseTime']),
       sourceType: serializer.fromJson<String?>(json['sourceType']),
       sourceId: serializer.fromJson<String?>(json['sourceId']),
       createdByMemberId:
@@ -2569,6 +2593,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'transactionDate': serializer.toJson<int>(transactionDate),
       'description': serializer.toJson<String?>(description),
       'paymentStatus': serializer.toJson<String>(paymentStatus),
+      'purchaseTime': serializer.toJson<String?>(purchaseTime),
       'sourceType': serializer.toJson<String?>(sourceType),
       'sourceId': serializer.toJson<String?>(sourceId),
       'createdByMemberId': serializer.toJson<String?>(createdByMemberId),
@@ -2591,6 +2616,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           int? transactionDate,
           Value<String?> description = const Value.absent(),
           String? paymentStatus,
+          Value<String?> purchaseTime = const Value.absent(),
           Value<String?> sourceType = const Value.absent(),
           Value<String?> sourceId = const Value.absent(),
           Value<String?> createdByMemberId = const Value.absent(),
@@ -2611,6 +2637,8 @@ class Transaction extends DataClass implements Insertable<Transaction> {
         transactionDate: transactionDate ?? this.transactionDate,
         description: description.present ? description.value : this.description,
         paymentStatus: paymentStatus ?? this.paymentStatus,
+        purchaseTime:
+            purchaseTime.present ? purchaseTime.value : this.purchaseTime,
         sourceType: sourceType.present ? sourceType.value : this.sourceType,
         sourceId: sourceId.present ? sourceId.value : this.sourceId,
         createdByMemberId: createdByMemberId.present
@@ -2648,6 +2676,9 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       paymentStatus: data.paymentStatus.present
           ? data.paymentStatus.value
           : this.paymentStatus,
+      purchaseTime: data.purchaseTime.present
+          ? data.purchaseTime.value
+          : this.purchaseTime,
       sourceType:
           data.sourceType.present ? data.sourceType.value : this.sourceType,
       sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
@@ -2675,6 +2706,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('transactionDate: $transactionDate, ')
           ..write('description: $description, ')
           ..write('paymentStatus: $paymentStatus, ')
+          ..write('purchaseTime: $purchaseTime, ')
           ..write('sourceType: $sourceType, ')
           ..write('sourceId: $sourceId, ')
           ..write('createdByMemberId: $createdByMemberId, ')
@@ -2699,6 +2731,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       transactionDate,
       description,
       paymentStatus,
+      purchaseTime,
       sourceType,
       sourceId,
       createdByMemberId,
@@ -2721,6 +2754,7 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.transactionDate == this.transactionDate &&
           other.description == this.description &&
           other.paymentStatus == this.paymentStatus &&
+          other.purchaseTime == this.purchaseTime &&
           other.sourceType == this.sourceType &&
           other.sourceId == this.sourceId &&
           other.createdByMemberId == this.createdByMemberId &&
@@ -2742,6 +2776,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int> transactionDate;
   final Value<String?> description;
   final Value<String> paymentStatus;
+  final Value<String?> purchaseTime;
   final Value<String?> sourceType;
   final Value<String?> sourceId;
   final Value<String?> createdByMemberId;
@@ -2762,6 +2797,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.transactionDate = const Value.absent(),
     this.description = const Value.absent(),
     this.paymentStatus = const Value.absent(),
+    this.purchaseTime = const Value.absent(),
     this.sourceType = const Value.absent(),
     this.sourceId = const Value.absent(),
     this.createdByMemberId = const Value.absent(),
@@ -2783,6 +2819,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     required int transactionDate,
     this.description = const Value.absent(),
     this.paymentStatus = const Value.absent(),
+    this.purchaseTime = const Value.absent(),
     this.sourceType = const Value.absent(),
     this.sourceId = const Value.absent(),
     this.createdByMemberId = const Value.absent(),
@@ -2811,6 +2848,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<int>? transactionDate,
     Expression<String>? description,
     Expression<String>? paymentStatus,
+    Expression<String>? purchaseTime,
     Expression<String>? sourceType,
     Expression<String>? sourceId,
     Expression<String>? createdByMemberId,
@@ -2832,6 +2870,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (transactionDate != null) 'transaction_date': transactionDate,
       if (description != null) 'description': description,
       if (paymentStatus != null) 'payment_status': paymentStatus,
+      if (purchaseTime != null) 'purchase_time': purchaseTime,
       if (sourceType != null) 'source_type': sourceType,
       if (sourceId != null) 'source_id': sourceId,
       if (createdByMemberId != null) 'created_by_member_id': createdByMemberId,
@@ -2855,6 +2894,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       Value<int>? transactionDate,
       Value<String?>? description,
       Value<String>? paymentStatus,
+      Value<String?>? purchaseTime,
       Value<String?>? sourceType,
       Value<String?>? sourceId,
       Value<String?>? createdByMemberId,
@@ -2875,6 +2915,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       transactionDate: transactionDate ?? this.transactionDate,
       description: description ?? this.description,
       paymentStatus: paymentStatus ?? this.paymentStatus,
+      purchaseTime: purchaseTime ?? this.purchaseTime,
       sourceType: sourceType ?? this.sourceType,
       sourceId: sourceId ?? this.sourceId,
       createdByMemberId: createdByMemberId ?? this.createdByMemberId,
@@ -2924,6 +2965,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (paymentStatus.present) {
       map['payment_status'] = Variable<String>(paymentStatus.value);
     }
+    if (purchaseTime.present) {
+      map['purchase_time'] = Variable<String>(purchaseTime.value);
+    }
     if (sourceType.present) {
       map['source_type'] = Variable<String>(sourceType.value);
     }
@@ -2963,6 +3007,7 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('transactionDate: $transactionDate, ')
           ..write('description: $description, ')
           ..write('paymentStatus: $paymentStatus, ')
+          ..write('purchaseTime: $purchaseTime, ')
           ..write('sourceType: $sourceType, ')
           ..write('sourceId: $sourceId, ')
           ..write('createdByMemberId: $createdByMemberId, ')
@@ -3736,6 +3781,20 @@ class $ShoppingRecordsTable extends ShoppingRecords
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
       'notes', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _purchaseTimeMeta =
+      const VerificationMeta('purchaseTime');
+  @override
+  late final GeneratedColumn<String> purchaseTime = GeneratedColumn<String>(
+      'purchase_time', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _entryModeMeta =
+      const VerificationMeta('entryMode');
+  @override
+  late final GeneratedColumn<String> entryMode = GeneratedColumn<String>(
+      'entry_mode', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('itemized'));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -3754,6 +3813,8 @@ class $ShoppingRecordsTable extends ShoppingRecords
         paidMinor,
         dueMinor,
         notes,
+        purchaseTime,
+        entryMode,
         createdAt
       ];
   @override
@@ -3819,6 +3880,16 @@ class $ShoppingRecordsTable extends ShoppingRecords
       context.handle(
           _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
     }
+    if (data.containsKey('purchase_time')) {
+      context.handle(
+          _purchaseTimeMeta,
+          purchaseTime.isAcceptableOrUnknown(
+              data['purchase_time']!, _purchaseTimeMeta));
+    }
+    if (data.containsKey('entry_mode')) {
+      context.handle(_entryModeMeta,
+          entryMode.isAcceptableOrUnknown(data['entry_mode']!, _entryModeMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -3855,6 +3926,10 @@ class $ShoppingRecordsTable extends ShoppingRecords
           .read(DriftSqlType.int, data['${effectivePrefix}due_minor'])!,
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      purchaseTime: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}purchase_time']),
+      entryMode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}entry_mode'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
     );
@@ -3877,6 +3952,8 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
   final int paidMinor;
   final int dueMinor;
   final String? notes;
+  final String? purchaseTime;
+  final String entryMode;
   final int createdAt;
   const ShoppingRecord(
       {required this.id,
@@ -3889,6 +3966,8 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
       required this.paidMinor,
       required this.dueMinor,
       this.notes,
+      this.purchaseTime,
+      required this.entryMode,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3909,6 +3988,10 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
+    if (!nullToAbsent || purchaseTime != null) {
+      map['purchase_time'] = Variable<String>(purchaseTime);
+    }
+    map['entry_mode'] = Variable<String>(entryMode);
     map['created_at'] = Variable<int>(createdAt);
     return map;
   }
@@ -3930,6 +4013,10 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
       dueMinor: Value(dueMinor),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      purchaseTime: purchaseTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(purchaseTime),
+      entryMode: Value(entryMode),
       createdAt: Value(createdAt),
     );
   }
@@ -3949,6 +4036,8 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
       paidMinor: serializer.fromJson<int>(json['paidMinor']),
       dueMinor: serializer.fromJson<int>(json['dueMinor']),
       notes: serializer.fromJson<String?>(json['notes']),
+      purchaseTime: serializer.fromJson<String?>(json['purchaseTime']),
+      entryMode: serializer.fromJson<String>(json['entryMode']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
     );
   }
@@ -3966,6 +4055,8 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
       'paidMinor': serializer.toJson<int>(paidMinor),
       'dueMinor': serializer.toJson<int>(dueMinor),
       'notes': serializer.toJson<String?>(notes),
+      'purchaseTime': serializer.toJson<String?>(purchaseTime),
+      'entryMode': serializer.toJson<String>(entryMode),
       'createdAt': serializer.toJson<int>(createdAt),
     };
   }
@@ -3981,6 +4072,8 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
           int? paidMinor,
           int? dueMinor,
           Value<String?> notes = const Value.absent(),
+          Value<String?> purchaseTime = const Value.absent(),
+          String? entryMode,
           int? createdAt}) =>
       ShoppingRecord(
         id: id ?? this.id,
@@ -3995,6 +4088,9 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
         paidMinor: paidMinor ?? this.paidMinor,
         dueMinor: dueMinor ?? this.dueMinor,
         notes: notes.present ? notes.value : this.notes,
+        purchaseTime:
+            purchaseTime.present ? purchaseTime.value : this.purchaseTime,
+        entryMode: entryMode ?? this.entryMode,
         createdAt: createdAt ?? this.createdAt,
       );
   ShoppingRecord copyWithCompanion(ShoppingRecordsCompanion data) {
@@ -4018,6 +4114,10 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
       paidMinor: data.paidMinor.present ? data.paidMinor.value : this.paidMinor,
       dueMinor: data.dueMinor.present ? data.dueMinor.value : this.dueMinor,
       notes: data.notes.present ? data.notes.value : this.notes,
+      purchaseTime: data.purchaseTime.present
+          ? data.purchaseTime.value
+          : this.purchaseTime,
+      entryMode: data.entryMode.present ? data.entryMode.value : this.entryMode,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -4035,6 +4135,8 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
           ..write('paidMinor: $paidMinor, ')
           ..write('dueMinor: $dueMinor, ')
           ..write('notes: $notes, ')
+          ..write('purchaseTime: $purchaseTime, ')
+          ..write('entryMode: $entryMode, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -4052,6 +4154,8 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
       paidMinor,
       dueMinor,
       notes,
+      purchaseTime,
+      entryMode,
       createdAt);
   @override
   bool operator ==(Object other) =>
@@ -4067,6 +4171,8 @@ class ShoppingRecord extends DataClass implements Insertable<ShoppingRecord> {
           other.paidMinor == this.paidMinor &&
           other.dueMinor == this.dueMinor &&
           other.notes == this.notes &&
+          other.purchaseTime == this.purchaseTime &&
+          other.entryMode == this.entryMode &&
           other.createdAt == this.createdAt);
 }
 
@@ -4081,6 +4187,8 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
   final Value<int> paidMinor;
   final Value<int> dueMinor;
   final Value<String?> notes;
+  final Value<String?> purchaseTime;
+  final Value<String> entryMode;
   final Value<int> createdAt;
   final Value<int> rowid;
   const ShoppingRecordsCompanion({
@@ -4094,6 +4202,8 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
     this.paidMinor = const Value.absent(),
     this.dueMinor = const Value.absent(),
     this.notes = const Value.absent(),
+    this.purchaseTime = const Value.absent(),
+    this.entryMode = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -4108,6 +4218,8 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
     this.paidMinor = const Value.absent(),
     this.dueMinor = const Value.absent(),
     this.notes = const Value.absent(),
+    this.purchaseTime = const Value.absent(),
+    this.entryMode = const Value.absent(),
     required int createdAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -4124,6 +4236,8 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
     Expression<int>? paidMinor,
     Expression<int>? dueMinor,
     Expression<String>? notes,
+    Expression<String>? purchaseTime,
+    Expression<String>? entryMode,
     Expression<int>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -4139,6 +4253,8 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
       if (paidMinor != null) 'paid_minor': paidMinor,
       if (dueMinor != null) 'due_minor': dueMinor,
       if (notes != null) 'notes': notes,
+      if (purchaseTime != null) 'purchase_time': purchaseTime,
+      if (entryMode != null) 'entry_mode': entryMode,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -4155,6 +4271,8 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
       Value<int>? paidMinor,
       Value<int>? dueMinor,
       Value<String?>? notes,
+      Value<String?>? purchaseTime,
+      Value<String>? entryMode,
       Value<int>? createdAt,
       Value<int>? rowid}) {
     return ShoppingRecordsCompanion(
@@ -4168,6 +4286,8 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
       paidMinor: paidMinor ?? this.paidMinor,
       dueMinor: dueMinor ?? this.dueMinor,
       notes: notes ?? this.notes,
+      purchaseTime: purchaseTime ?? this.purchaseTime,
+      entryMode: entryMode ?? this.entryMode,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -4207,6 +4327,12 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (purchaseTime.present) {
+      map['purchase_time'] = Variable<String>(purchaseTime.value);
+    }
+    if (entryMode.present) {
+      map['entry_mode'] = Variable<String>(entryMode.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
@@ -4229,6 +4355,8 @@ class ShoppingRecordsCompanion extends UpdateCompanion<ShoppingRecord> {
           ..write('paidMinor: $paidMinor, ')
           ..write('dueMinor: $dueMinor, ')
           ..write('notes: $notes, ')
+          ..write('purchaseTime: $purchaseTime, ')
+          ..write('entryMode: $entryMode, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -4285,6 +4413,17 @@ class $ShoppingItemsTable extends ShoppingItems
   late final GeneratedColumn<int> totalMinor = GeneratedColumn<int>(
       'total_minor', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+      'note', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _imagePathMeta =
+      const VerificationMeta('imagePath');
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+      'image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _categoryIdMeta =
       const VerificationMeta('categoryId');
   @override
@@ -4303,6 +4442,8 @@ class $ShoppingItemsTable extends ShoppingItems
         unit,
         unitPriceMinor,
         totalMinor,
+        note,
+        imagePath,
         categoryId
       ];
   @override
@@ -4364,6 +4505,14 @@ class $ShoppingItemsTable extends ShoppingItems
     } else if (isInserting) {
       context.missing(_totalMinorMeta);
     }
+    if (data.containsKey('note')) {
+      context.handle(
+          _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(_imagePathMeta,
+          imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
+    }
     if (data.containsKey('category_id')) {
       context.handle(
           _categoryIdMeta,
@@ -4393,6 +4542,10 @@ class $ShoppingItemsTable extends ShoppingItems
           .read(DriftSqlType.int, data['${effectivePrefix}unit_price_minor'])!,
       totalMinor: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}total_minor'])!,
+      note: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}note']),
+      imagePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
       categoryId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}category_id']),
     );
@@ -4412,6 +4565,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
   final String unit;
   final int unitPriceMinor;
   final int totalMinor;
+  final String? note;
+  final String? imagePath;
   final String? categoryId;
   const ShoppingItem(
       {required this.id,
@@ -4421,6 +4576,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
       required this.unit,
       required this.unitPriceMinor,
       required this.totalMinor,
+      this.note,
+      this.imagePath,
       this.categoryId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4432,6 +4589,12 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
     map['unit'] = Variable<String>(unit);
     map['unit_price_minor'] = Variable<int>(unitPriceMinor);
     map['total_minor'] = Variable<int>(totalMinor);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
     if (!nullToAbsent || categoryId != null) {
       map['category_id'] = Variable<String>(categoryId);
     }
@@ -4447,6 +4610,10 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
       unit: Value(unit),
       unitPriceMinor: Value(unitPriceMinor),
       totalMinor: Value(totalMinor),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       categoryId: categoryId == null && nullToAbsent
           ? const Value.absent()
           : Value(categoryId),
@@ -4464,6 +4631,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
       unit: serializer.fromJson<String>(json['unit']),
       unitPriceMinor: serializer.fromJson<int>(json['unitPriceMinor']),
       totalMinor: serializer.fromJson<int>(json['totalMinor']),
+      note: serializer.fromJson<String?>(json['note']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       categoryId: serializer.fromJson<String?>(json['categoryId']),
     );
   }
@@ -4478,6 +4647,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
       'unit': serializer.toJson<String>(unit),
       'unitPriceMinor': serializer.toJson<int>(unitPriceMinor),
       'totalMinor': serializer.toJson<int>(totalMinor),
+      'note': serializer.toJson<String?>(note),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'categoryId': serializer.toJson<String?>(categoryId),
     };
   }
@@ -4490,6 +4661,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
           String? unit,
           int? unitPriceMinor,
           int? totalMinor,
+          Value<String?> note = const Value.absent(),
+          Value<String?> imagePath = const Value.absent(),
           Value<String?> categoryId = const Value.absent()}) =>
       ShoppingItem(
         id: id ?? this.id,
@@ -4499,6 +4672,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
         unit: unit ?? this.unit,
         unitPriceMinor: unitPriceMinor ?? this.unitPriceMinor,
         totalMinor: totalMinor ?? this.totalMinor,
+        note: note.present ? note.value : this.note,
+        imagePath: imagePath.present ? imagePath.value : this.imagePath,
         categoryId: categoryId.present ? categoryId.value : this.categoryId,
       );
   ShoppingItem copyWithCompanion(ShoppingItemsCompanion data) {
@@ -4516,6 +4691,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
           : this.unitPriceMinor,
       totalMinor:
           data.totalMinor.present ? data.totalMinor.value : this.totalMinor,
+      note: data.note.present ? data.note.value : this.note,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       categoryId:
           data.categoryId.present ? data.categoryId.value : this.categoryId,
     );
@@ -4531,6 +4708,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
           ..write('unit: $unit, ')
           ..write('unitPriceMinor: $unitPriceMinor, ')
           ..write('totalMinor: $totalMinor, ')
+          ..write('note: $note, ')
+          ..write('imagePath: $imagePath, ')
           ..write('categoryId: $categoryId')
           ..write(')'))
         .toString();
@@ -4538,7 +4717,7 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
 
   @override
   int get hashCode => Object.hash(id, shoppingRecordId, productName, quantity,
-      unit, unitPriceMinor, totalMinor, categoryId);
+      unit, unitPriceMinor, totalMinor, note, imagePath, categoryId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4550,6 +4729,8 @@ class ShoppingItem extends DataClass implements Insertable<ShoppingItem> {
           other.unit == this.unit &&
           other.unitPriceMinor == this.unitPriceMinor &&
           other.totalMinor == this.totalMinor &&
+          other.note == this.note &&
+          other.imagePath == this.imagePath &&
           other.categoryId == this.categoryId);
 }
 
@@ -4561,6 +4742,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
   final Value<String> unit;
   final Value<int> unitPriceMinor;
   final Value<int> totalMinor;
+  final Value<String?> note;
+  final Value<String?> imagePath;
   final Value<String?> categoryId;
   final Value<int> rowid;
   const ShoppingItemsCompanion({
@@ -4571,6 +4754,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
     this.unit = const Value.absent(),
     this.unitPriceMinor = const Value.absent(),
     this.totalMinor = const Value.absent(),
+    this.note = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -4582,6 +4767,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
     required String unit,
     required int unitPriceMinor,
     required int totalMinor,
+    this.note = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
@@ -4599,6 +4786,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
     Expression<String>? unit,
     Expression<int>? unitPriceMinor,
     Expression<int>? totalMinor,
+    Expression<String>? note,
+    Expression<String>? imagePath,
     Expression<String>? categoryId,
     Expression<int>? rowid,
   }) {
@@ -4610,6 +4799,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
       if (unit != null) 'unit': unit,
       if (unitPriceMinor != null) 'unit_price_minor': unitPriceMinor,
       if (totalMinor != null) 'total_minor': totalMinor,
+      if (note != null) 'note': note,
+      if (imagePath != null) 'image_path': imagePath,
       if (categoryId != null) 'category_id': categoryId,
       if (rowid != null) 'rowid': rowid,
     });
@@ -4623,6 +4814,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
       Value<String>? unit,
       Value<int>? unitPriceMinor,
       Value<int>? totalMinor,
+      Value<String?>? note,
+      Value<String?>? imagePath,
       Value<String?>? categoryId,
       Value<int>? rowid}) {
     return ShoppingItemsCompanion(
@@ -4633,6 +4826,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
       unit: unit ?? this.unit,
       unitPriceMinor: unitPriceMinor ?? this.unitPriceMinor,
       totalMinor: totalMinor ?? this.totalMinor,
+      note: note ?? this.note,
+      imagePath: imagePath ?? this.imagePath,
       categoryId: categoryId ?? this.categoryId,
       rowid: rowid ?? this.rowid,
     );
@@ -4662,6 +4857,12 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
     if (totalMinor.present) {
       map['total_minor'] = Variable<int>(totalMinor.value);
     }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
     if (categoryId.present) {
       map['category_id'] = Variable<String>(categoryId.value);
     }
@@ -4681,6 +4882,8 @@ class ShoppingItemsCompanion extends UpdateCompanion<ShoppingItem> {
           ..write('unit: $unit, ')
           ..write('unitPriceMinor: $unitPriceMinor, ')
           ..write('totalMinor: $totalMinor, ')
+          ..write('note: $note, ')
+          ..write('imagePath: $imagePath, ')
           ..write('categoryId: $categoryId, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -16352,7 +16555,8 @@ final class $$FamilyMembersTableReferences
   static MultiTypedResultKey<$AccountsTable, List<Account>> _accountsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.accounts,
-          aliasName: 'family_members__id__accounts__owner_member_id');
+          aliasName: $_aliasNameGenerator(
+              db.familyMembers.id, db.accounts.ownerMemberId));
 
   $$AccountsTableProcessedTableManager get accountsRefs {
     final manager = $$AccountsTableTableManager($_db, $_db.accounts).filter(
@@ -16363,12 +16567,11 @@ final class $$FamilyMembersTableReferences
         manager.$state.copyWith(prefetchedData: cache));
   }
 
-  static MultiTypedResultKey<$ShoppingRecordsTable,
-      List<ShoppingRecord>> _shoppingRecordsRefsTable(
-          _$AppDatabase db) =>
-      MultiTypedResultKey.fromTable(db.shoppingRecords,
-          aliasName:
-              'family_members__id__shopping_records__purchased_by_member_id');
+  static MultiTypedResultKey<$ShoppingRecordsTable, List<ShoppingRecord>>
+      _shoppingRecordsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.shoppingRecords,
+              aliasName: $_aliasNameGenerator(
+                  db.familyMembers.id, db.shoppingRecords.purchasedByMemberId));
 
   $$ShoppingRecordsTableProcessedTableManager get shoppingRecordsRefs {
     final manager = $$ShoppingRecordsTableTableManager(
@@ -16385,8 +16588,8 @@ final class $$FamilyMembersTableReferences
   static MultiTypedResultKey<$ShoppingListsTable, List<ShoppingList>>
       _shoppingListsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.shoppingLists,
-              aliasName:
-                  'family_members__id__shopping_lists__created_by_member_id');
+              aliasName: $_aliasNameGenerator(
+                  db.familyMembers.id, db.shoppingLists.createdByMemberId));
 
   $$ShoppingListsTableProcessedTableManager get shoppingListsRefs {
     final manager = $$ShoppingListsTableTableManager($_db, $_db.shoppingLists)
@@ -16401,7 +16604,8 @@ final class $$FamilyMembersTableReferences
   static MultiTypedResultKey<$AssetsTable, List<Asset>> _assetsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.assets,
-          aliasName: 'family_members__id__assets__owner_member_id');
+          aliasName: $_aliasNameGenerator(
+              db.familyMembers.id, db.assets.ownerMemberId));
 
   $$AssetsTableProcessedTableManager get assetsRefs {
     final manager = $$AssetsTableTableManager($_db, $_db.assets).filter(
@@ -16413,9 +16617,10 @@ final class $$FamilyMembersTableReferences
   }
 
   static MultiTypedResultKey<$AuditLogsTable, List<AuditLog>>
-      _auditLogsRefsTable(_$AppDatabase db) =>
-          MultiTypedResultKey.fromTable(db.auditLogs,
-              aliasName: 'family_members__id__audit_logs__member_id');
+      _auditLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.auditLogs,
+          aliasName:
+              $_aliasNameGenerator(db.familyMembers.id, db.auditLogs.memberId));
 
   $$AuditLogsTableProcessedTableManager get auditLogsRefs {
     final manager = $$AuditLogsTableTableManager($_db, $_db.auditLogs)
@@ -16972,7 +17177,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$AccountsTable, List<Account>> _accountsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.accounts,
-          aliasName: 'businesses__id__accounts__business_id');
+          aliasName:
+              $_aliasNameGenerator(db.businesses.id, db.accounts.businessId));
 
   $$AccountsTableProcessedTableManager get accountsRefs {
     final manager = $$AccountsTableTableManager($_db, $_db.accounts)
@@ -16986,7 +17192,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
       _transactionsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactions,
-              aliasName: 'businesses__id__transactions__business_id');
+              aliasName: $_aliasNameGenerator(
+                  db.businesses.id, db.transactions.businessId));
 
   $$TransactionsTableProcessedTableManager get transactionsRefs {
     final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
@@ -16998,9 +17205,10 @@ final class $$BusinessesTableReferences
   }
 
   static MultiTypedResultKey<$CustomersTable, List<Customer>>
-      _customersRefsTable(_$AppDatabase db) =>
-          MultiTypedResultKey.fromTable(db.customers,
-              aliasName: 'businesses__id__customers__business_id');
+      _customersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.customers,
+          aliasName:
+              $_aliasNameGenerator(db.businesses.id, db.customers.businessId));
 
   $$CustomersTableProcessedTableManager get customersRefs {
     final manager = $$CustomersTableTableManager($_db, $_db.customers)
@@ -17012,9 +17220,10 @@ final class $$BusinessesTableReferences
   }
 
   static MultiTypedResultKey<$SuppliersTable, List<Supplier>>
-      _suppliersRefsTable(_$AppDatabase db) =>
-          MultiTypedResultKey.fromTable(db.suppliers,
-              aliasName: 'businesses__id__suppliers__business_id');
+      _suppliersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.suppliers,
+          aliasName:
+              $_aliasNameGenerator(db.businesses.id, db.suppliers.businessId));
 
   $$SuppliersTableProcessedTableManager get suppliersRefs {
     final manager = $$SuppliersTableTableManager($_db, $_db.suppliers)
@@ -17028,7 +17237,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$PartyPaymentsTable, List<PartyPayment>>
       _partyPaymentsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.partyPayments,
-              aliasName: 'businesses__id__party_payments__business_id');
+              aliasName: $_aliasNameGenerator(
+                  db.businesses.id, db.partyPayments.businessId));
 
   $$PartyPaymentsTableProcessedTableManager get partyPaymentsRefs {
     final manager = $$PartyPaymentsTableTableManager($_db, $_db.partyPayments)
@@ -17042,7 +17252,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$ProductsTable, List<Product>> _productsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.products,
-          aliasName: 'businesses__id__products__business_id');
+          aliasName:
+              $_aliasNameGenerator(db.businesses.id, db.products.businessId));
 
   $$ProductsTableProcessedTableManager get productsRefs {
     final manager = $$ProductsTableTableManager($_db, $_db.products)
@@ -17056,7 +17267,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$InventoryMovementsTable, List<InventoryMovement>>
       _inventoryMovementsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.inventoryMovements,
-              aliasName: 'businesses__id__inventory_movements__business_id');
+              aliasName: $_aliasNameGenerator(
+                  db.businesses.id, db.inventoryMovements.businessId));
 
   $$InventoryMovementsTableProcessedTableManager get inventoryMovementsRefs {
     final manager = $$InventoryMovementsTableTableManager(
@@ -17072,7 +17284,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$PurchaseRecordsTable, List<PurchaseRecord>>
       _purchaseRecordsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.purchaseRecords,
-              aliasName: 'businesses__id__purchase_records__business_id');
+              aliasName: $_aliasNameGenerator(
+                  db.businesses.id, db.purchaseRecords.businessId));
 
   $$PurchaseRecordsTableProcessedTableManager get purchaseRecordsRefs {
     final manager = $$PurchaseRecordsTableTableManager(
@@ -17088,7 +17301,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$SalesRecordsTable, List<SalesRecord>>
       _salesRecordsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.salesRecords,
-              aliasName: 'businesses__id__sales_records__business_id');
+              aliasName: $_aliasNameGenerator(
+                  db.businesses.id, db.salesRecords.businessId));
 
   $$SalesRecordsTableProcessedTableManager get salesRecordsRefs {
     final manager = $$SalesRecordsTableTableManager($_db, $_db.salesRecords)
@@ -17102,7 +17316,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$CattleTable, List<CattleData>> _cattleRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.cattle,
-          aliasName: 'businesses__id__cattle__business_id');
+          aliasName:
+              $_aliasNameGenerator(db.businesses.id, db.cattle.businessId));
 
   $$CattleTableProcessedTableManager get cattleRefs {
     final manager = $$CattleTableTableManager($_db, $_db.cattle)
@@ -17116,7 +17331,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$LoanAccountsTable, List<LoanAccount>>
       _loanAccountsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.loanAccounts,
-              aliasName: 'businesses__id__loan_accounts__business_id');
+              aliasName: $_aliasNameGenerator(
+                  db.businesses.id, db.loanAccounts.businessId));
 
   $$LoanAccountsTableProcessedTableManager get loanAccountsRefs {
     final manager = $$LoanAccountsTableTableManager($_db, $_db.loanAccounts)
@@ -17130,7 +17346,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$AssetsTable, List<Asset>> _assetsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.assets,
-          aliasName: 'businesses__id__assets__business_id');
+          aliasName:
+              $_aliasNameGenerator(db.businesses.id, db.assets.businessId));
 
   $$AssetsTableProcessedTableManager get assetsRefs {
     final manager = $$AssetsTableTableManager($_db, $_db.assets)
@@ -17144,7 +17361,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$InvestmentsTable, List<Investment>>
       _investmentsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.investments,
-              aliasName: 'businesses__id__investments__business_id');
+              aliasName: $_aliasNameGenerator(
+                  db.businesses.id, db.investments.businessId));
 
   $$InvestmentsTableProcessedTableManager get investmentsRefs {
     final manager = $$InvestmentsTableTableManager($_db, $_db.investments)
@@ -17158,7 +17376,8 @@ final class $$BusinessesTableReferences
   static MultiTypedResultKey<$BudgetsTable, List<Budget>> _budgetsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.budgets,
-          aliasName: 'businesses__id__budgets__business_id');
+          aliasName:
+              $_aliasNameGenerator(db.businesses.id, db.budgets.businessId));
 
   $$BudgetsTableProcessedTableManager get budgetsRefs {
     final manager = $$BudgetsTableTableManager($_db, $_db.budgets)
@@ -18272,8 +18491,8 @@ final class $$AccountsTableReferences
   $$AccountsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $FamilyMembersTable _ownerMemberIdTable(_$AppDatabase db) =>
-      db.familyMembers
-          .createAlias('accounts__owner_member_id__family_members__id');
+      db.familyMembers.createAlias(
+          $_aliasNameGenerator(db.accounts.ownerMemberId, db.familyMembers.id));
 
   $$FamilyMembersTableProcessedTableManager? get ownerMemberId {
     final $_column = $_itemColumn<String>('owner_member_id');
@@ -18287,7 +18506,8 @@ final class $$AccountsTableReferences
   }
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('accounts__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.accounts.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager? get businessId {
     final $_column = $_itemColumn<String>('business_id');
@@ -18301,9 +18521,10 @@ final class $$AccountsTableReferences
   }
 
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
-      _transactionsRefsTable(_$AppDatabase db) =>
-          MultiTypedResultKey.fromTable(db.transactions,
-              aliasName: 'accounts__id__transactions__account_id');
+      _transactionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.transactions,
+          aliasName:
+              $_aliasNameGenerator(db.accounts.id, db.transactions.accountId));
 
   $$TransactionsTableProcessedTableManager get transactionsRefs {
     final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
@@ -18317,7 +18538,8 @@ final class $$AccountsTableReferences
   static MultiTypedResultKey<$TransactionEntriesTable, List<TransactionEntry>>
       _transactionEntriesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactionEntries,
-              aliasName: 'accounts__id__transaction_entries__account_id');
+              aliasName: $_aliasNameGenerator(
+                  db.accounts.id, db.transactionEntries.accountId));
 
   $$TransactionEntriesTableProcessedTableManager get transactionEntriesRefs {
     final manager = $$TransactionEntriesTableTableManager(
@@ -18333,7 +18555,8 @@ final class $$AccountsTableReferences
   static MultiTypedResultKey<$SavingsGoalsTable, List<SavingsGoal>>
       _savingsGoalsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.savingsGoals,
-              aliasName: 'accounts__id__savings_goals__linked_account_id');
+              aliasName: $_aliasNameGenerator(
+                  db.accounts.id, db.savingsGoals.linkedAccountId));
 
   $$SavingsGoalsTableProcessedTableManager get savingsGoalsRefs {
     final manager = $$SavingsGoalsTableTableManager($_db, $_db.savingsGoals)
@@ -18927,7 +19150,8 @@ final class $$CategoriesTableReferences
   $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $CategoriesTable _parentIdTable(_$AppDatabase db) =>
-      db.categories.createAlias('categories__parent_id__categories__id');
+      db.categories.createAlias(
+          $_aliasNameGenerator(db.categories.parentId, db.categories.id));
 
   $$CategoriesTableProcessedTableManager? get parentId {
     final $_column = $_itemColumn<String>('parent_id');
@@ -18943,7 +19167,8 @@ final class $$CategoriesTableReferences
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
       _transactionsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactions,
-              aliasName: 'categories__id__transactions__category_id');
+              aliasName: $_aliasNameGenerator(
+                  db.categories.id, db.transactions.categoryId));
 
   $$TransactionsTableProcessedTableManager get transactionsRefs {
     final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
@@ -18957,7 +19182,8 @@ final class $$CategoriesTableReferences
   static MultiTypedResultKey<$ShoppingItemsTable, List<ShoppingItem>>
       _shoppingItemsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.shoppingItems,
-              aliasName: 'categories__id__shopping_items__category_id');
+              aliasName: $_aliasNameGenerator(
+                  db.categories.id, db.shoppingItems.categoryId));
 
   $$ShoppingItemsTableProcessedTableManager get shoppingItemsRefs {
     final manager = $$ShoppingItemsTableTableManager($_db, $_db.shoppingItems)
@@ -18971,7 +19197,8 @@ final class $$CategoriesTableReferences
   static MultiTypedResultKey<$ProductsTable, List<Product>> _productsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.products,
-          aliasName: 'categories__id__products__category_id');
+          aliasName:
+              $_aliasNameGenerator(db.categories.id, db.products.categoryId));
 
   $$ProductsTableProcessedTableManager get productsRefs {
     final manager = $$ProductsTableTableManager($_db, $_db.products)
@@ -18985,7 +19212,8 @@ final class $$CategoriesTableReferences
   static MultiTypedResultKey<$BudgetsTable, List<Budget>> _budgetsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.budgets,
-          aliasName: 'categories__id__budgets__category_id');
+          aliasName:
+              $_aliasNameGenerator(db.categories.id, db.budgets.categoryId));
 
   $$BudgetsTableProcessedTableManager get budgetsRefs {
     final manager = $$BudgetsTableTableManager($_db, $_db.budgets)
@@ -19554,6 +19782,7 @@ typedef $$TransactionsTableCreateCompanionBuilder = TransactionsCompanion
   required int transactionDate,
   Value<String?> description,
   Value<String> paymentStatus,
+  Value<String?> purchaseTime,
   Value<String?> sourceType,
   Value<String?> sourceId,
   Value<String?> createdByMemberId,
@@ -19576,6 +19805,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder = TransactionsCompanion
   Value<int> transactionDate,
   Value<String?> description,
   Value<String> paymentStatus,
+  Value<String?> purchaseTime,
   Value<String?> sourceType,
   Value<String?> sourceId,
   Value<String?> createdByMemberId,
@@ -19590,8 +19820,8 @@ final class $$TransactionsTableReferences
   $$TransactionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $FamilyMembersTable _familyMemberIdTable(_$AppDatabase db) =>
-      db.familyMembers
-          .createAlias('transactions__family_member_id__family_members__id');
+      db.familyMembers.createAlias($_aliasNameGenerator(
+          db.transactions.familyMemberId, db.familyMembers.id));
 
   $$FamilyMembersTableProcessedTableManager? get familyMemberId {
     final $_column = $_itemColumn<String>('family_member_id');
@@ -19605,7 +19835,8 @@ final class $$TransactionsTableReferences
   }
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('transactions__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.transactions.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager? get businessId {
     final $_column = $_itemColumn<String>('business_id');
@@ -19619,7 +19850,8 @@ final class $$TransactionsTableReferences
   }
 
   static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias('transactions__category_id__categories__id');
+      db.categories.createAlias(
+          $_aliasNameGenerator(db.transactions.categoryId, db.categories.id));
 
   $$CategoriesTableProcessedTableManager? get categoryId {
     final $_column = $_itemColumn<String>('category_id');
@@ -19633,7 +19865,8 @@ final class $$TransactionsTableReferences
   }
 
   static $AccountsTable _accountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias('transactions__account_id__accounts__id');
+      db.accounts.createAlias(
+          $_aliasNameGenerator(db.transactions.accountId, db.accounts.id));
 
   $$AccountsTableProcessedTableManager? get accountId {
     final $_column = $_itemColumn<String>('account_id');
@@ -19646,9 +19879,9 @@ final class $$TransactionsTableReferences
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $FamilyMembersTable _createdByMemberIdTable(_$AppDatabase db) => db
-      .familyMembers
-      .createAlias('transactions__created_by_member_id__family_members__id');
+  static $FamilyMembersTable _createdByMemberIdTable(_$AppDatabase db) =>
+      db.familyMembers.createAlias($_aliasNameGenerator(
+          db.transactions.createdByMemberId, db.familyMembers.id));
 
   $$FamilyMembersTableProcessedTableManager? get createdByMemberId {
     final $_column = $_itemColumn<String>('created_by_member_id');
@@ -19664,8 +19897,8 @@ final class $$TransactionsTableReferences
   static MultiTypedResultKey<$TransactionEntriesTable, List<TransactionEntry>>
       _transactionEntriesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactionEntries,
-              aliasName:
-                  'transactions__id__transaction_entries__transaction_id');
+              aliasName: $_aliasNameGenerator(
+                  db.transactions.id, db.transactionEntries.transactionId));
 
   $$TransactionEntriesTableProcessedTableManager get transactionEntriesRefs {
     final manager = $$TransactionEntriesTableTableManager(
@@ -19683,8 +19916,8 @@ final class $$TransactionsTableReferences
       List<TransactionAttachment>> _transactionAttachmentsRefsTable(
           _$AppDatabase db) =>
       MultiTypedResultKey.fromTable(db.transactionAttachments,
-          aliasName:
-              'transactions__id__transaction_attachments__transaction_id');
+          aliasName: $_aliasNameGenerator(
+              db.transactions.id, db.transactionAttachments.transactionId));
 
   $$TransactionAttachmentsTableProcessedTableManager
       get transactionAttachmentsRefs {
@@ -19702,7 +19935,8 @@ final class $$TransactionsTableReferences
   static MultiTypedResultKey<$PartyPaymentsTable, List<PartyPayment>>
       _partyPaymentsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.partyPayments,
-              aliasName: 'transactions__id__party_payments__transaction_id');
+              aliasName: $_aliasNameGenerator(
+                  db.transactions.id, db.partyPayments.transactionId));
 
   $$PartyPaymentsTableProcessedTableManager get partyPaymentsRefs {
     final manager = $$PartyPaymentsTableTableManager($_db, $_db.partyPayments)
@@ -19717,7 +19951,8 @@ final class $$TransactionsTableReferences
   static MultiTypedResultKey<$CattleExpensesTable, List<CattleExpense>>
       _cattleExpensesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.cattleExpenses,
-              aliasName: 'transactions__id__cattle_expenses__transaction_id');
+              aliasName: $_aliasNameGenerator(
+                  db.transactions.id, db.cattleExpenses.transactionId));
 
   $$CattleExpensesTableProcessedTableManager get cattleExpensesRefs {
     final manager = $$CattleExpensesTableTableManager($_db, $_db.cattleExpenses)
@@ -19732,7 +19967,8 @@ final class $$TransactionsTableReferences
   static MultiTypedResultKey<$LoanPaymentsTable, List<LoanPayment>>
       _loanPaymentsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.loanPayments,
-              aliasName: 'transactions__id__loan_payments__transaction_id');
+              aliasName: $_aliasNameGenerator(
+                  db.transactions.id, db.loanPayments.transactionId));
 
   $$LoanPaymentsTableProcessedTableManager get loanPaymentsRefs {
     final manager = $$LoanPaymentsTableTableManager($_db, $_db.loanPayments)
@@ -19780,6 +20016,9 @@ class $$TransactionsTableFilterComposer
 
   ColumnFilters<String> get paymentStatus => $composableBuilder(
       column: $table.paymentStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get purchaseTime => $composableBuilder(
+      column: $table.purchaseTime, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get sourceType => $composableBuilder(
       column: $table.sourceType, builder: (column) => ColumnFilters(column));
@@ -20041,6 +20280,10 @@ class $$TransactionsTableOrderingComposer
       column: $table.paymentStatus,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get purchaseTime => $composableBuilder(
+      column: $table.purchaseTime,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get sourceType => $composableBuilder(
       column: $table.sourceType, builder: (column) => ColumnOrderings(column));
 
@@ -20189,6 +20432,9 @@ class $$TransactionsTableAnnotationComposer
 
   GeneratedColumn<String> get paymentStatus => $composableBuilder(
       column: $table.paymentStatus, builder: (column) => column);
+
+  GeneratedColumn<String> get purchaseTime => $composableBuilder(
+      column: $table.purchaseTime, builder: (column) => column);
 
   GeneratedColumn<String> get sourceType => $composableBuilder(
       column: $table.sourceType, builder: (column) => column);
@@ -20459,6 +20705,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             Value<int> transactionDate = const Value.absent(),
             Value<String?> description = const Value.absent(),
             Value<String> paymentStatus = const Value.absent(),
+            Value<String?> purchaseTime = const Value.absent(),
             Value<String?> sourceType = const Value.absent(),
             Value<String?> sourceId = const Value.absent(),
             Value<String?> createdByMemberId = const Value.absent(),
@@ -20480,6 +20727,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             transactionDate: transactionDate,
             description: description,
             paymentStatus: paymentStatus,
+            purchaseTime: purchaseTime,
             sourceType: sourceType,
             sourceId: sourceId,
             createdByMemberId: createdByMemberId,
@@ -20501,6 +20749,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             required int transactionDate,
             Value<String?> description = const Value.absent(),
             Value<String> paymentStatus = const Value.absent(),
+            Value<String?> purchaseTime = const Value.absent(),
             Value<String?> sourceType = const Value.absent(),
             Value<String?> sourceId = const Value.absent(),
             Value<String?> createdByMemberId = const Value.absent(),
@@ -20522,6 +20771,7 @@ class $$TransactionsTableTableManager extends RootTableManager<
             transactionDate: transactionDate,
             description: description,
             paymentStatus: paymentStatus,
+            purchaseTime: purchaseTime,
             sourceType: sourceType,
             sourceId: sourceId,
             createdByMemberId: createdByMemberId,
@@ -20746,8 +20996,8 @@ final class $$TransactionEntriesTableReferences extends BaseReferences<
       super.$_db, super.$_table, super.$_typedResult);
 
   static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
-      db.transactions
-          .createAlias('transaction_entries__transaction_id__transactions__id');
+      db.transactions.createAlias($_aliasNameGenerator(
+          db.transactionEntries.transactionId, db.transactions.id));
 
   $$TransactionsTableProcessedTableManager get transactionId {
     final $_column = $_itemColumn<String>('transaction_id')!;
@@ -20761,7 +21011,8 @@ final class $$TransactionEntriesTableReferences extends BaseReferences<
   }
 
   static $AccountsTable _accountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias('transaction_entries__account_id__accounts__id');
+      db.accounts.createAlias($_aliasNameGenerator(
+          db.transactionEntries.accountId, db.accounts.id));
 
   $$AccountsTableProcessedTableManager get accountId {
     final $_column = $_itemColumn<String>('account_id')!;
@@ -21113,9 +21364,9 @@ final class $$TransactionAttachmentsTableReferences extends BaseReferences<
   $$TransactionAttachmentsTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $TransactionsTable _transactionIdTable(_$AppDatabase db) => db
-      .transactions
-      .createAlias('transaction_attachments__transaction_id__transactions__id');
+  static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
+      db.transactions.createAlias($_aliasNameGenerator(
+          db.transactionAttachments.transactionId, db.transactions.id));
 
   $$TransactionsTableProcessedTableManager get transactionId {
     final $_column = $_itemColumn<String>('transaction_id')!;
@@ -21383,6 +21634,8 @@ typedef $$ShoppingRecordsTableCreateCompanionBuilder = ShoppingRecordsCompanion
   Value<int> paidMinor,
   Value<int> dueMinor,
   Value<String?> notes,
+  Value<String?> purchaseTime,
+  Value<String> entryMode,
   required int createdAt,
   Value<int> rowid,
 });
@@ -21398,6 +21651,8 @@ typedef $$ShoppingRecordsTableUpdateCompanionBuilder = ShoppingRecordsCompanion
   Value<int> paidMinor,
   Value<int> dueMinor,
   Value<String?> notes,
+  Value<String?> purchaseTime,
+  Value<String> entryMode,
   Value<int> createdAt,
   Value<int> rowid,
 });
@@ -21408,8 +21663,8 @@ final class $$ShoppingRecordsTableReferences extends BaseReferences<
       super.$_db, super.$_table, super.$_typedResult);
 
   static $FamilyMembersTable _purchasedByMemberIdTable(_$AppDatabase db) =>
-      db.familyMembers.createAlias(
-          'shopping_records__purchased_by_member_id__family_members__id');
+      db.familyMembers.createAlias($_aliasNameGenerator(
+          db.shoppingRecords.purchasedByMemberId, db.familyMembers.id));
 
   $$FamilyMembersTableProcessedTableManager? get purchasedByMemberId {
     final $_column = $_itemColumn<String>('purchased_by_member_id');
@@ -21425,8 +21680,8 @@ final class $$ShoppingRecordsTableReferences extends BaseReferences<
   static MultiTypedResultKey<$ShoppingItemsTable, List<ShoppingItem>>
       _shoppingItemsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.shoppingItems,
-              aliasName:
-                  'shopping_records__id__shopping_items__shopping_record_id');
+              aliasName: $_aliasNameGenerator(
+                  db.shoppingRecords.id, db.shoppingItems.shoppingRecordId));
 
   $$ShoppingItemsTableProcessedTableManager get shoppingItemsRefs {
     final manager = $$ShoppingItemsTableTableManager($_db, $_db.shoppingItems)
@@ -21474,6 +21729,12 @@ class $$ShoppingRecordsTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get purchaseTime => $composableBuilder(
+      column: $table.purchaseTime, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get entryMode => $composableBuilder(
+      column: $table.entryMode, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -21559,6 +21820,13 @@ class $$ShoppingRecordsTableOrderingComposer
   ColumnOrderings<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get purchaseTime => $composableBuilder(
+      column: $table.purchaseTime,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get entryMode => $composableBuilder(
+      column: $table.entryMode, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -21618,6 +21886,12 @@ class $$ShoppingRecordsTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get purchaseTime => $composableBuilder(
+      column: $table.purchaseTime, builder: (column) => column);
+
+  GeneratedColumn<String> get entryMode =>
+      $composableBuilder(column: $table.entryMode, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -21699,6 +21973,8 @@ class $$ShoppingRecordsTableTableManager extends RootTableManager<
             Value<int> paidMinor = const Value.absent(),
             Value<int> dueMinor = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<String?> purchaseTime = const Value.absent(),
+            Value<String> entryMode = const Value.absent(),
             Value<int> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -21713,6 +21989,8 @@ class $$ShoppingRecordsTableTableManager extends RootTableManager<
             paidMinor: paidMinor,
             dueMinor: dueMinor,
             notes: notes,
+            purchaseTime: purchaseTime,
+            entryMode: entryMode,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -21727,6 +22005,8 @@ class $$ShoppingRecordsTableTableManager extends RootTableManager<
             Value<int> paidMinor = const Value.absent(),
             Value<int> dueMinor = const Value.absent(),
             Value<String?> notes = const Value.absent(),
+            Value<String?> purchaseTime = const Value.absent(),
+            Value<String> entryMode = const Value.absent(),
             required int createdAt,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -21741,6 +22021,8 @@ class $$ShoppingRecordsTableTableManager extends RootTableManager<
             paidMinor: paidMinor,
             dueMinor: dueMinor,
             notes: notes,
+            purchaseTime: purchaseTime,
+            entryMode: entryMode,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -21827,6 +22109,8 @@ typedef $$ShoppingItemsTableCreateCompanionBuilder = ShoppingItemsCompanion
   required String unit,
   required int unitPriceMinor,
   required int totalMinor,
+  Value<String?> note,
+  Value<String?> imagePath,
   Value<String?> categoryId,
   Value<int> rowid,
 });
@@ -21839,6 +22123,8 @@ typedef $$ShoppingItemsTableUpdateCompanionBuilder = ShoppingItemsCompanion
   Value<String> unit,
   Value<int> unitPriceMinor,
   Value<int> totalMinor,
+  Value<String?> note,
+  Value<String?> imagePath,
   Value<String?> categoryId,
   Value<int> rowid,
 });
@@ -21848,9 +22134,9 @@ final class $$ShoppingItemsTableReferences
   $$ShoppingItemsTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $ShoppingRecordsTable _shoppingRecordIdTable(_$AppDatabase db) => db
-      .shoppingRecords
-      .createAlias('shopping_items__shopping_record_id__shopping_records__id');
+  static $ShoppingRecordsTable _shoppingRecordIdTable(_$AppDatabase db) =>
+      db.shoppingRecords.createAlias($_aliasNameGenerator(
+          db.shoppingItems.shoppingRecordId, db.shoppingRecords.id));
 
   $$ShoppingRecordsTableProcessedTableManager get shoppingRecordId {
     final $_column = $_itemColumn<String>('shopping_record_id')!;
@@ -21865,7 +22151,8 @@ final class $$ShoppingItemsTableReferences
   }
 
   static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias('shopping_items__category_id__categories__id');
+      db.categories.createAlias(
+          $_aliasNameGenerator(db.shoppingItems.categoryId, db.categories.id));
 
   $$CategoriesTableProcessedTableManager? get categoryId {
     final $_column = $_itemColumn<String>('category_id');
@@ -21906,6 +22193,12 @@ class $$ShoppingItemsTableFilterComposer
 
   ColumnFilters<int> get totalMinor => $composableBuilder(
       column: $table.totalMinor, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get note => $composableBuilder(
+      column: $table.note, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnFilters(column));
 
   $$ShoppingRecordsTableFilterComposer get shoppingRecordId {
     final $$ShoppingRecordsTableFilterComposer composer = $composerBuilder(
@@ -21976,6 +22269,12 @@ class $$ShoppingItemsTableOrderingComposer
   ColumnOrderings<int> get totalMinor => $composableBuilder(
       column: $table.totalMinor, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get note => $composableBuilder(
+      column: $table.note, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnOrderings(column));
+
   $$ShoppingRecordsTableOrderingComposer get shoppingRecordId {
     final $$ShoppingRecordsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -22043,6 +22342,12 @@ class $$ShoppingItemsTableAnnotationComposer
 
   GeneratedColumn<int> get totalMinor => $composableBuilder(
       column: $table.totalMinor, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
   $$ShoppingRecordsTableAnnotationComposer get shoppingRecordId {
     final $$ShoppingRecordsTableAnnotationComposer composer = $composerBuilder(
@@ -22115,6 +22420,8 @@ class $$ShoppingItemsTableTableManager extends RootTableManager<
             Value<String> unit = const Value.absent(),
             Value<int> unitPriceMinor = const Value.absent(),
             Value<int> totalMinor = const Value.absent(),
+            Value<String?> note = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
             Value<String?> categoryId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -22126,6 +22433,8 @@ class $$ShoppingItemsTableTableManager extends RootTableManager<
             unit: unit,
             unitPriceMinor: unitPriceMinor,
             totalMinor: totalMinor,
+            note: note,
+            imagePath: imagePath,
             categoryId: categoryId,
             rowid: rowid,
           ),
@@ -22137,6 +22446,8 @@ class $$ShoppingItemsTableTableManager extends RootTableManager<
             required String unit,
             required int unitPriceMinor,
             required int totalMinor,
+            Value<String?> note = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
             Value<String?> categoryId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -22148,6 +22459,8 @@ class $$ShoppingItemsTableTableManager extends RootTableManager<
             unit: unit,
             unitPriceMinor: unitPriceMinor,
             totalMinor: totalMinor,
+            note: note,
+            imagePath: imagePath,
             categoryId: categoryId,
             rowid: rowid,
           ),
@@ -22243,9 +22556,9 @@ final class $$ShoppingListsTableReferences
   $$ShoppingListsTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $FamilyMembersTable _createdByMemberIdTable(_$AppDatabase db) => db
-      .familyMembers
-      .createAlias('shopping_lists__created_by_member_id__family_members__id');
+  static $FamilyMembersTable _createdByMemberIdTable(_$AppDatabase db) =>
+      db.familyMembers.createAlias($_aliasNameGenerator(
+          db.shoppingLists.createdByMemberId, db.familyMembers.id));
 
   $$FamilyMembersTableProcessedTableManager? get createdByMemberId {
     final $_column = $_itemColumn<String>('created_by_member_id');
@@ -22261,8 +22574,8 @@ final class $$ShoppingListsTableReferences
   static MultiTypedResultKey<$ShoppingListItemsTable, List<ShoppingListItem>>
       _shoppingListItemsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.shoppingListItems,
-              aliasName:
-                  'shopping_lists__id__shopping_list_items__shopping_list_id');
+              aliasName: $_aliasNameGenerator(
+                  db.shoppingLists.id, db.shoppingListItems.shoppingListId));
 
   $$ShoppingListItemsTableProcessedTableManager get shoppingListItemsRefs {
     final manager = $$ShoppingListItemsTableTableManager(
@@ -22602,9 +22915,9 @@ final class $$ShoppingListItemsTableReferences extends BaseReferences<
   $$ShoppingListItemsTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $ShoppingListsTable _shoppingListIdTable(_$AppDatabase db) => db
-      .shoppingLists
-      .createAlias('shopping_list_items__shopping_list_id__shopping_lists__id');
+  static $ShoppingListsTable _shoppingListIdTable(_$AppDatabase db) =>
+      db.shoppingLists.createAlias($_aliasNameGenerator(
+          db.shoppingListItems.shoppingListId, db.shoppingLists.id));
 
   $$ShoppingListsTableProcessedTableManager get shoppingListId {
     final $_column = $_itemColumn<String>('shopping_list_id')!;
@@ -22898,7 +23211,8 @@ final class $$CustomersTableReferences
   $$CustomersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('customers__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.customers.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -22914,7 +23228,8 @@ final class $$CustomersTableReferences
   static MultiTypedResultKey<$SalesRecordsTable, List<SalesRecord>>
       _salesRecordsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.salesRecords,
-              aliasName: 'customers__id__sales_records__customer_id');
+              aliasName: $_aliasNameGenerator(
+                  db.customers.id, db.salesRecords.customerId));
 
   $$SalesRecordsTableProcessedTableManager get salesRecordsRefs {
     final manager = $$SalesRecordsTableTableManager($_db, $_db.salesRecords)
@@ -23288,7 +23603,8 @@ final class $$SuppliersTableReferences
   $$SuppliersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('suppliers__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.suppliers.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -23304,7 +23620,8 @@ final class $$SuppliersTableReferences
   static MultiTypedResultKey<$PurchaseRecordsTable, List<PurchaseRecord>>
       _purchaseRecordsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.purchaseRecords,
-              aliasName: 'suppliers__id__purchase_records__supplier_id');
+              aliasName: $_aliasNameGenerator(
+                  db.suppliers.id, db.purchaseRecords.supplierId));
 
   $$PurchaseRecordsTableProcessedTableManager get purchaseRecordsRefs {
     final manager = $$PurchaseRecordsTableTableManager(
@@ -23687,7 +24004,8 @@ final class $$PartyPaymentsTableReferences
       super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('party_payments__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.partyPayments.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -23701,8 +24019,8 @@ final class $$PartyPaymentsTableReferences
   }
 
   static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
-      db.transactions
-          .createAlias('party_payments__transaction_id__transactions__id');
+      db.transactions.createAlias($_aliasNameGenerator(
+          db.partyPayments.transactionId, db.transactions.id));
 
   $$TransactionsTableProcessedTableManager? get transactionId {
     final $_column = $_itemColumn<String>('transaction_id');
@@ -24105,7 +24423,8 @@ final class $$ProductsTableReferences
   $$ProductsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('products__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.products.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -24119,7 +24438,8 @@ final class $$ProductsTableReferences
   }
 
   static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias('products__category_id__categories__id');
+      db.categories.createAlias(
+          $_aliasNameGenerator(db.products.categoryId, db.categories.id));
 
   $$CategoriesTableProcessedTableManager? get categoryId {
     final $_column = $_itemColumn<String>('category_id');
@@ -24135,7 +24455,8 @@ final class $$ProductsTableReferences
   static MultiTypedResultKey<$InventoryMovementsTable, List<InventoryMovement>>
       _inventoryMovementsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.inventoryMovements,
-              aliasName: 'products__id__inventory_movements__product_id');
+              aliasName: $_aliasNameGenerator(
+                  db.products.id, db.inventoryMovements.productId));
 
   $$InventoryMovementsTableProcessedTableManager get inventoryMovementsRefs {
     final manager = $$InventoryMovementsTableTableManager(
@@ -24151,7 +24472,8 @@ final class $$ProductsTableReferences
   static MultiTypedResultKey<$PurchaseItemsTable, List<PurchaseItem>>
       _purchaseItemsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.purchaseItems,
-              aliasName: 'products__id__purchase_items__product_id');
+              aliasName: $_aliasNameGenerator(
+                  db.products.id, db.purchaseItems.productId));
 
   $$PurchaseItemsTableProcessedTableManager get purchaseItemsRefs {
     final manager = $$PurchaseItemsTableTableManager($_db, $_db.purchaseItems)
@@ -24163,9 +24485,10 @@ final class $$ProductsTableReferences
   }
 
   static MultiTypedResultKey<$SalesItemsTable, List<SalesItem>>
-      _salesItemsRefsTable(_$AppDatabase db) =>
-          MultiTypedResultKey.fromTable(db.salesItems,
-              aliasName: 'products__id__sales_items__product_id');
+      _salesItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.salesItems,
+          aliasName:
+              $_aliasNameGenerator(db.products.id, db.salesItems.productId));
 
   $$SalesItemsTableProcessedTableManager get salesItemsRefs {
     final manager = $$SalesItemsTableTableManager($_db, $_db.salesItems)
@@ -24804,7 +25127,8 @@ final class $$InventoryMovementsTableReferences extends BaseReferences<
       super.$_db, super.$_table, super.$_typedResult);
 
   static $ProductsTable _productIdTable(_$AppDatabase db) =>
-      db.products.createAlias('inventory_movements__product_id__products__id');
+      db.products.createAlias($_aliasNameGenerator(
+          db.inventoryMovements.productId, db.products.id));
 
   $$ProductsTableProcessedTableManager get productId {
     final $_column = $_itemColumn<String>('product_id')!;
@@ -24817,8 +25141,9 @@ final class $$InventoryMovementsTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $BusinessesTable _businessIdTable(_$AppDatabase db) => db.businesses
-      .createAlias('inventory_movements__business_id__businesses__id');
+  static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
+      db.businesses.createAlias($_aliasNameGenerator(
+          db.inventoryMovements.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -25234,8 +25559,9 @@ final class $$PurchaseRecordsTableReferences extends BaseReferences<
   $$PurchaseRecordsTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $BusinessesTable _businessIdTable(_$AppDatabase db) => db.businesses
-      .createAlias('purchase_records__business_id__businesses__id');
+  static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
+      db.businesses.createAlias($_aliasNameGenerator(
+          db.purchaseRecords.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -25249,7 +25575,8 @@ final class $$PurchaseRecordsTableReferences extends BaseReferences<
   }
 
   static $SuppliersTable _supplierIdTable(_$AppDatabase db) =>
-      db.suppliers.createAlias('purchase_records__supplier_id__suppliers__id');
+      db.suppliers.createAlias(
+          $_aliasNameGenerator(db.purchaseRecords.supplierId, db.suppliers.id));
 
   $$SuppliersTableProcessedTableManager? get supplierId {
     final $_column = $_itemColumn<String>('supplier_id');
@@ -25265,7 +25592,8 @@ final class $$PurchaseRecordsTableReferences extends BaseReferences<
   static MultiTypedResultKey<$PurchaseItemsTable, List<PurchaseItem>>
       _purchaseItemsRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.purchaseItems,
-              aliasName: 'purchase_records__id__purchase_items__purchase_id');
+              aliasName: $_aliasNameGenerator(
+                  db.purchaseRecords.id, db.purchaseItems.purchaseId));
 
   $$PurchaseItemsTableProcessedTableManager get purchaseItemsRefs {
     final manager = $$PurchaseItemsTableTableManager($_db, $_db.purchaseItems)
@@ -25722,8 +26050,8 @@ final class $$PurchaseItemsTableReferences
       super.$_db, super.$_table, super.$_typedResult);
 
   static $PurchaseRecordsTable _purchaseIdTable(_$AppDatabase db) =>
-      db.purchaseRecords
-          .createAlias('purchase_items__purchase_id__purchase_records__id');
+      db.purchaseRecords.createAlias($_aliasNameGenerator(
+          db.purchaseItems.purchaseId, db.purchaseRecords.id));
 
   $$PurchaseRecordsTableProcessedTableManager get purchaseId {
     final $_column = $_itemColumn<String>('purchase_id')!;
@@ -25738,7 +26066,8 @@ final class $$PurchaseItemsTableReferences
   }
 
   static $ProductsTable _productIdTable(_$AppDatabase db) =>
-      db.products.createAlias('purchase_items__product_id__products__id');
+      db.products.createAlias(
+          $_aliasNameGenerator(db.purchaseItems.productId, db.products.id));
 
   $$ProductsTableProcessedTableManager get productId {
     final $_column = $_itemColumn<String>('product_id')!;
@@ -26095,7 +26424,8 @@ final class $$SalesRecordsTableReferences
   $$SalesRecordsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('sales_records__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.salesRecords.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -26109,7 +26439,8 @@ final class $$SalesRecordsTableReferences
   }
 
   static $CustomersTable _customerIdTable(_$AppDatabase db) =>
-      db.customers.createAlias('sales_records__customer_id__customers__id');
+      db.customers.createAlias(
+          $_aliasNameGenerator(db.salesRecords.customerId, db.customers.id));
 
   $$CustomersTableProcessedTableManager? get customerId {
     final $_column = $_itemColumn<String>('customer_id');
@@ -26123,9 +26454,10 @@ final class $$SalesRecordsTableReferences
   }
 
   static MultiTypedResultKey<$SalesItemsTable, List<SalesItem>>
-      _salesItemsRefsTable(_$AppDatabase db) =>
-          MultiTypedResultKey.fromTable(db.salesItems,
-              aliasName: 'sales_records__id__sales_items__sale_id');
+      _salesItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.salesItems,
+          aliasName:
+              $_aliasNameGenerator(db.salesRecords.id, db.salesItems.saleId));
 
   $$SalesItemsTableProcessedTableManager get salesItemsRefs {
     final manager = $$SalesItemsTableTableManager($_db, $_db.salesItems)
@@ -26575,7 +26907,8 @@ final class $$SalesItemsTableReferences
   $$SalesItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $SalesRecordsTable _saleIdTable(_$AppDatabase db) =>
-      db.salesRecords.createAlias('sales_items__sale_id__sales_records__id');
+      db.salesRecords.createAlias(
+          $_aliasNameGenerator(db.salesItems.saleId, db.salesRecords.id));
 
   $$SalesRecordsTableProcessedTableManager get saleId {
     final $_column = $_itemColumn<String>('sale_id')!;
@@ -26589,7 +26922,8 @@ final class $$SalesItemsTableReferences
   }
 
   static $ProductsTable _productIdTable(_$AppDatabase db) =>
-      db.products.createAlias('sales_items__product_id__products__id');
+      db.products.createAlias(
+          $_aliasNameGenerator(db.salesItems.productId, db.products.id));
 
   $$ProductsTableProcessedTableManager get productId {
     final $_column = $_itemColumn<String>('product_id')!;
@@ -26971,7 +27305,8 @@ final class $$CattleTableReferences
   $$CattleTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('cattle__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.cattle.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager get businessId {
     final $_column = $_itemColumn<String>('business_id')!;
@@ -26987,7 +27322,8 @@ final class $$CattleTableReferences
   static MultiTypedResultKey<$CattleExpensesTable, List<CattleExpense>>
       _cattleExpensesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.cattleExpenses,
-              aliasName: 'cattle__id__cattle_expenses__cattle_id');
+              aliasName: $_aliasNameGenerator(
+                  db.cattle.id, db.cattleExpenses.cattleId));
 
   $$CattleExpensesTableProcessedTableManager get cattleExpensesRefs {
     final manager = $$CattleExpensesTableTableManager($_db, $_db.cattleExpenses)
@@ -27001,7 +27337,8 @@ final class $$CattleTableReferences
   static MultiTypedResultKey<$CattleSalesTable, List<CattleSale>>
       _cattleSalesRefsTable(_$AppDatabase db) =>
           MultiTypedResultKey.fromTable(db.cattleSales,
-              aliasName: 'cattle__id__cattle_sales__cattle_id');
+              aliasName:
+                  $_aliasNameGenerator(db.cattle.id, db.cattleSales.cattleId));
 
   $$CattleSalesTableProcessedTableManager get cattleSalesRefs {
     final manager = $$CattleSalesTableTableManager($_db, $_db.cattleSales)
@@ -27528,8 +27865,8 @@ final class $$CattleExpensesTableReferences
   $$CattleExpensesTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $CattleTable _cattleIdTable(_$AppDatabase db) =>
-      db.cattle.createAlias('cattle_expenses__cattle_id__cattle__id');
+  static $CattleTable _cattleIdTable(_$AppDatabase db) => db.cattle.createAlias(
+      $_aliasNameGenerator(db.cattleExpenses.cattleId, db.cattle.id));
 
   $$CattleTableProcessedTableManager get cattleId {
     final $_column = $_itemColumn<String>('cattle_id')!;
@@ -27543,8 +27880,8 @@ final class $$CattleExpensesTableReferences
   }
 
   static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
-      db.transactions
-          .createAlias('cattle_expenses__transaction_id__transactions__id');
+      db.transactions.createAlias($_aliasNameGenerator(
+          db.cattleExpenses.transactionId, db.transactions.id));
 
   $$TransactionsTableProcessedTableManager? get transactionId {
     final $_column = $_itemColumn<String>('transaction_id');
@@ -27912,8 +28249,8 @@ final class $$CattleSalesTableReferences
     extends BaseReferences<_$AppDatabase, $CattleSalesTable, CattleSale> {
   $$CattleSalesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $CattleTable _cattleIdTable(_$AppDatabase db) =>
-      db.cattle.createAlias('cattle_sales__cattle_id__cattle__id');
+  static $CattleTable _cattleIdTable(_$AppDatabase db) => db.cattle
+      .createAlias($_aliasNameGenerator(db.cattleSales.cattleId, db.cattle.id));
 
   $$CattleTableProcessedTableManager get cattleId {
     final $_column = $_itemColumn<String>('cattle_id')!;
@@ -28242,7 +28579,8 @@ final class $$LoanAccountsTableReferences
   $$LoanAccountsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('loan_accounts__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.loanAccounts.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager? get businessId {
     final $_column = $_itemColumn<String>('business_id');
@@ -28256,9 +28594,10 @@ final class $$LoanAccountsTableReferences
   }
 
   static MultiTypedResultKey<$LoanPaymentsTable, List<LoanPayment>>
-      _loanPaymentsRefsTable(_$AppDatabase db) =>
-          MultiTypedResultKey.fromTable(db.loanPayments,
-              aliasName: 'loan_accounts__id__loan_payments__loan_id');
+      _loanPaymentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.loanPayments,
+          aliasName:
+              $_aliasNameGenerator(db.loanAccounts.id, db.loanPayments.loanId));
 
   $$LoanPaymentsTableProcessedTableManager get loanPaymentsRefs {
     final manager = $$LoanPaymentsTableTableManager($_db, $_db.loanPayments)
@@ -28686,7 +29025,8 @@ final class $$LoanPaymentsTableReferences
   $$LoanPaymentsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $LoanAccountsTable _loanIdTable(_$AppDatabase db) =>
-      db.loanAccounts.createAlias('loan_payments__loan_id__loan_accounts__id');
+      db.loanAccounts.createAlias(
+          $_aliasNameGenerator(db.loanPayments.loanId, db.loanAccounts.id));
 
   $$LoanAccountsTableProcessedTableManager get loanId {
     final $_column = $_itemColumn<String>('loan_id')!;
@@ -28700,8 +29040,8 @@ final class $$LoanPaymentsTableReferences
   }
 
   static $TransactionsTable _transactionIdTable(_$AppDatabase db) =>
-      db.transactions
-          .createAlias('loan_payments__transaction_id__transactions__id');
+      db.transactions.createAlias($_aliasNameGenerator(
+          db.loanPayments.transactionId, db.transactions.id));
 
   $$TransactionsTableProcessedTableManager? get transactionId {
     final $_column = $_itemColumn<String>('transaction_id');
@@ -29075,8 +29415,8 @@ final class $$AssetsTableReferences
   $$AssetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $FamilyMembersTable _ownerMemberIdTable(_$AppDatabase db) =>
-      db.familyMembers
-          .createAlias('assets__owner_member_id__family_members__id');
+      db.familyMembers.createAlias(
+          $_aliasNameGenerator(db.assets.ownerMemberId, db.familyMembers.id));
 
   $$FamilyMembersTableProcessedTableManager get ownerMemberId {
     final $_column = $_itemColumn<String>('owner_member_id')!;
@@ -29090,7 +29430,8 @@ final class $$AssetsTableReferences
   }
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('assets__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.assets.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager? get businessId {
     final $_column = $_itemColumn<String>('business_id');
@@ -29499,7 +29840,8 @@ final class $$SavingsGoalsTableReferences
   $$SavingsGoalsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AccountsTable _linkedAccountIdTable(_$AppDatabase db) =>
-      db.accounts.createAlias('savings_goals__linked_account_id__accounts__id');
+      db.accounts.createAlias($_aliasNameGenerator(
+          db.savingsGoals.linkedAccountId, db.accounts.id));
 
   $$AccountsTableProcessedTableManager? get linkedAccountId {
     final $_column = $_itemColumn<String>('linked_account_id');
@@ -29823,7 +30165,8 @@ final class $$InvestmentsTableReferences
   $$InvestmentsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('investments__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.investments.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager? get businessId {
     final $_column = $_itemColumn<String>('business_id');
@@ -30154,7 +30497,8 @@ final class $$BudgetsTableReferences
   $$BudgetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $BusinessesTable _businessIdTable(_$AppDatabase db) =>
-      db.businesses.createAlias('budgets__business_id__businesses__id');
+      db.businesses.createAlias(
+          $_aliasNameGenerator(db.budgets.businessId, db.businesses.id));
 
   $$BusinessesTableProcessedTableManager? get businessId {
     final $_column = $_itemColumn<String>('business_id');
@@ -30168,7 +30512,8 @@ final class $$BudgetsTableReferences
   }
 
   static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
-      db.categories.createAlias('budgets__category_id__categories__id');
+      db.categories.createAlias(
+          $_aliasNameGenerator(db.budgets.categoryId, db.categories.id));
 
   $$CategoriesTableProcessedTableManager? get categoryId {
     final $_column = $_itemColumn<String>('category_id');
@@ -31174,7 +31519,8 @@ final class $$AuditLogsTableReferences
   $$AuditLogsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $FamilyMembersTable _memberIdTable(_$AppDatabase db) =>
-      db.familyMembers.createAlias('audit_logs__member_id__family_members__id');
+      db.familyMembers.createAlias(
+          $_aliasNameGenerator(db.auditLogs.memberId, db.familyMembers.id));
 
   $$FamilyMembersTableProcessedTableManager? get memberId {
     final $_column = $_itemColumn<String>('member_id');

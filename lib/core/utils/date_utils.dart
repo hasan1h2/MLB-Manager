@@ -15,11 +15,14 @@ class AppDateUtils {
   static String formatTimestamp(int? timestampMs, {bool includeTime = false}) {
     if (timestampMs == null || timestampMs == 0) return '-';
     final dt = DateTime.fromMillisecondsSinceEpoch(timestampMs).toLocal();
-    return includeTime ? dateTimeFormat.format(dt) : standardDateFormat.format(dt);
+    return includeTime
+        ? dateTimeFormat.format(dt)
+        : standardDateFormat.format(dt);
   }
 
   /// Start and End timestamps for standard date filters
-  static DateTimeRange getFilterRange(String filterType, {DateTime? customStart, DateTime? customEnd}) {
+  static DateTimeRange getFilterRange(String filterType,
+      {DateTime? customStart, DateTime? customEnd}) {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
     final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
@@ -29,7 +32,8 @@ class AppDateUtils {
         return DateTimeRange(start: todayStart, end: todayEnd);
       case 'filter_yesterday':
         final yesterdayStart = todayStart.subtract(const Duration(days: 1));
-        final yesterdayEnd = DateTime(yesterdayStart.year, yesterdayStart.month, yesterdayStart.day, 23, 59, 59, 999);
+        final yesterdayEnd = DateTime(yesterdayStart.year, yesterdayStart.month,
+            yesterdayStart.day, 23, 59, 59, 999);
         return DateTimeRange(start: yesterdayStart, end: yesterdayEnd);
       case 'filter_last_7_days':
         final start7 = todayStart.subtract(const Duration(days: 6));
@@ -52,7 +56,8 @@ class AppDateUtils {
           end: customEnd ?? todayEnd,
         );
       default:
-        return DateTimeRange(start: DateTime(now.year, now.month, 1), end: todayEnd);
+        return DateTimeRange(
+            start: DateTime(now.year, now.month, 1), end: todayEnd);
     }
   }
 }

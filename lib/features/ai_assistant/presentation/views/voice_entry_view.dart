@@ -34,19 +34,28 @@ class VoiceEntryView extends GetView<AiAssistantController> {
                 child: const Text(
                   '"আজ বাজার থেকে ২ কেজি চাল ১৪০ টাকা এবং ১ লিটার তেল ১৮০ টাকা কিনেছি।"',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontStyle: FontStyle.italic, color: AppColors.primaryNavy),
+                  style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: AppColors.primaryNavy),
                 ),
               ),
               const Spacer(),
               Obx(() {
                 final text = controller.recognizedVoiceText.value;
                 return Text(
-                  text.isNotEmpty ? text : (controller.isListening.value ? 'listening'.tr : 'tap_to_speak'.tr),
+                  text.isNotEmpty
+                      ? text
+                      : (controller.isListening.value
+                          ? 'listening'.tr
+                          : 'tap_to_speak'.tr),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: text.isNotEmpty ? FontWeight.w600 : FontWeight.w400,
-                    color: controller.isListening.value ? AppColors.secondaryElectric : AppColors.textSecondaryLight,
+                    fontWeight:
+                        text.isNotEmpty ? FontWeight.w600 : FontWeight.w400,
+                    color: controller.isListening.value
+                        ? AppColors.secondaryElectric
+                        : AppColors.textSecondaryLight,
                   ),
                 );
               }),
@@ -59,11 +68,16 @@ class VoiceEntryView extends GetView<AiAssistantController> {
                     duration: const Duration(milliseconds: 300),
                     padding: EdgeInsets.all(isRec ? 28 : 24),
                     decoration: BoxDecoration(
-                      color: isRec ? AppColors.expenseRed : AppColors.secondaryElectric,
+                      color: isRec
+                          ? AppColors.expenseRed
+                          : AppColors.secondaryElectric,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: (isRec ? AppColors.expenseRed : AppColors.secondaryElectric).withValues(alpha: 0.35),
+                          color: (isRec
+                                  ? AppColors.expenseRed
+                                  : AppColors.secondaryElectric)
+                              .withValues(alpha: 0.35),
                           blurRadius: 20,
                           spreadRadius: isRec ? 8 : 2,
                         ),
@@ -95,13 +109,15 @@ class VoiceEntryView extends GetView<AiAssistantController> {
     final textCtrl = TextEditingController();
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.r12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.r12)),
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.p20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('টেক্সট লিখে স্বয়ংক্রিয় পার্স করুন', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+              const Text('টেক্সট লিখে স্বয়ংক্রিয় পার্স করুন',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
               const SizedBox(height: 12),
               TextField(
                 controller: textCtrl,

@@ -14,25 +14,120 @@ class MoreMenuView extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final menuItems = [
-      {'title': 'family_management'.tr, 'icon': AppIcons.family, 'color': Colors.blue, 'route': AppRoutes.familyList},
-      {'title': 'household_shopping'.tr, 'icon': AppIcons.shopping, 'color': Colors.teal, 'route': AppRoutes.householdShopping},
-      {'title': 'cattle_management'.tr, 'icon': AppIcons.cattle, 'color': Colors.brown, 'route': AppRoutes.cattleList},
-      {'title': 'inventory_management'.tr, 'icon': AppIcons.inventory, 'color': Colors.indigo, 'route': AppRoutes.productList},
-      {'title': 'customers'.tr, 'icon': AppIcons.customers, 'color': Colors.cyan, 'route': AppRoutes.customerList},
-      {'title': 'suppliers'.tr, 'icon': AppIcons.suppliers, 'color': Colors.deepOrange, 'route': AppRoutes.supplierList},
-      {'title': 'loan_management'.tr, 'icon': AppIcons.loans, 'color': Colors.amber.shade800, 'route': AppRoutes.loanList},
-      {'title': 'accounts_wallets'.tr, 'icon': AppIcons.accounts, 'color': Colors.green, 'route': AppRoutes.accountList},
-      {'title': 'assets'.tr, 'icon': AppIcons.assets, 'color': Colors.deepPurple, 'route': AppRoutes.assetsList},
-      {'title': 'savings_goals'.tr, 'icon': AppIcons.savings, 'color': Colors.pink, 'route': AppRoutes.savingsGoals},
-      {'title': 'investments'.tr, 'icon': AppIcons.investments, 'color': Colors.blueGrey, 'route': AppRoutes.investmentsList},
-      {'title': 'budget_management'.tr, 'icon': AppIcons.budgets, 'color': Colors.orange, 'route': AppRoutes.budgetList},
-      {'title': 'ai_assistant'.tr, 'icon': AppIcons.ai, 'color': AppColors.secondaryElectric, 'route': AppRoutes.aiAssistant},
-      {'title': 'voice_entry'.tr, 'icon': AppIcons.mic, 'color': Colors.redAccent, 'route': AppRoutes.voiceEntry},
-      {'title': 'ocr_receipt_scanner'.tr, 'icon': AppIcons.ocr, 'color': Colors.purple, 'route': AppRoutes.receiptScanner},
-      {'title': 'upcoming_payments'.tr, 'icon': AppIcons.notifications, 'color': Colors.blue, 'route': AppRoutes.reminders},
-      {'title': 'documents'.tr, 'icon': AppIcons.documents, 'color': Colors.blueGrey, 'route': AppRoutes.documents},
-      {'title': 'backup_restore'.tr, 'icon': AppIcons.backup, 'color': Colors.teal, 'route': AppRoutes.backup},
-      {'title': 'settings'.tr, 'icon': AppIcons.settings, 'color': Colors.grey.shade600, 'route': AppRoutes.settings},
+      {
+        'title': 'family_management'.tr,
+        'icon': AppIcons.family,
+        'color': Colors.blue,
+        'route': AppRoutes.familyList
+      },
+      {
+        'title': 'household_shopping'.tr,
+        'icon': AppIcons.shopping,
+        'color': Colors.teal,
+        'route': AppRoutes.householdShopping
+      },
+      {
+        'title': 'cattle_management'.tr,
+        'icon': AppIcons.cattle,
+        'color': Colors.brown,
+        'route': AppRoutes.cattleList
+      },
+      {
+        'title': 'inventory_management'.tr,
+        'icon': AppIcons.inventory,
+        'color': Colors.indigo,
+        'route': AppRoutes.productList
+      },
+      {
+        'title': 'customers'.tr,
+        'icon': AppIcons.customers,
+        'color': Colors.cyan,
+        'route': AppRoutes.customerList
+      },
+      {
+        'title': 'suppliers'.tr,
+        'icon': AppIcons.suppliers,
+        'color': Colors.deepOrange,
+        'route': AppRoutes.supplierList
+      },
+      {
+        'title': 'loan_management'.tr,
+        'icon': AppIcons.loans,
+        'color': Colors.amber.shade800,
+        'route': AppRoutes.loanList
+      },
+      {
+        'title': 'accounts_wallets'.tr,
+        'icon': AppIcons.accounts,
+        'color': Colors.green,
+        'route': AppRoutes.accountList
+      },
+      {
+        'title': 'assets'.tr,
+        'icon': AppIcons.assets,
+        'color': Colors.deepPurple,
+        'route': AppRoutes.assetsList
+      },
+      {
+        'title': 'savings_goals'.tr,
+        'icon': AppIcons.savings,
+        'color': Colors.pink,
+        'route': AppRoutes.savingsGoals
+      },
+      {
+        'title': 'investments'.tr,
+        'icon': AppIcons.investments,
+        'color': Colors.blueGrey,
+        'route': AppRoutes.investmentsList
+      },
+      {
+        'title': 'budget_management'.tr,
+        'icon': AppIcons.budgets,
+        'color': Colors.orange,
+        'route': AppRoutes.budgetList
+      },
+      {
+        'title': 'ai_assistant'.tr,
+        'icon': AppIcons.ai,
+        'color': AppColors.secondaryElectric,
+        'route': AppRoutes.aiAssistant
+      },
+      {
+        'title': 'voice_entry'.tr,
+        'icon': AppIcons.mic,
+        'color': Colors.redAccent,
+        'route': AppRoutes.voiceEntry
+      },
+      {
+        'title': 'ocr_receipt_scanner'.tr,
+        'icon': AppIcons.ocr,
+        'color': Colors.purple,
+        'route': AppRoutes.receiptScanner
+      },
+      {
+        'title': 'upcoming_payments'.tr,
+        'icon': AppIcons.notifications,
+        'color': Colors.blue,
+        'route': AppRoutes.reminders
+      },
+      {
+        'title': 'documents'.tr,
+        'icon': AppIcons.documents,
+        'color': Colors.blueGrey,
+        'route': AppRoutes.documents
+      },
+      {
+        'title': 'backup_restore'.tr,
+        'icon': AppIcons.backup,
+        'color': Colors.teal,
+        'route': AppRoutes.backup
+      },
+      {
+        'title': 'settings'.tr,
+        'icon': AppIcons.settings,
+        'color': Colors.grey.shade600,
+        'route': AppRoutes.settings
+      },
     ];
 
     return Scaffold(
@@ -70,27 +165,32 @@ class MoreMenuView extends StatelessWidget {
 
               return Card(
                 elevation: 0,
+                color: isDark ? AppColors.cardDark : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSizes.r12),
                   side: BorderSide(
-                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                    color:
+                        isDark ? AppColors.borderDark : AppColors.borderLight,
                   ),
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(AppSizes.r12),
                   onTap: () => Get.toNamed(item['route'] as String),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.p8, vertical: AppSizes.p10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.p8, vertical: AppSizes.p10),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
                           padding: const EdgeInsets.all(AppSizes.p10),
                           decoration: BoxDecoration(
-                            color: color.withValues(alpha: isDark ? 0.22 : 0.12),
+                            color:
+                                color.withValues(alpha: isDark ? 0.22 : 0.12),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(item['icon'] as IconData, color: color, size: 26),
+                          child: Icon(item['icon'] as IconData,
+                              color: color, size: 26),
                         ),
                         const SizedBox(height: AppSizes.p8),
                         Text(
@@ -101,7 +201,9 @@ class MoreMenuView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
                             height: 1.25,
                           ),
                         ),

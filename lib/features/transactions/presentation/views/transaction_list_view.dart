@@ -16,6 +16,9 @@ class TransactionListView extends GetView<TransactionController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('nav_transactions'.tr),
@@ -63,34 +66,116 @@ class TransactionListView extends GetView<TransactionController> {
               icon = AppIcons.transfer;
             }
 
+            final dateStr = AppDateUtils.standardDateFormat.format(
+                DateTime.fromMillisecondsSinceEpoch(tx.transactionDate));
+            final timeStr =
+                tx.purchaseTime != null && tx.purchaseTime!.isNotEmpty
+                    ? ' • ${tx.purchaseTime}'
+                    : '';
+
             return Card(
+              elevation: 0,
+              color: isDark ? AppColors.cardDark : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r12),
+                side: BorderSide(
+                    color:
+                        isDark ? AppColors.borderDark : AppColors.borderLight),
+              ),
               child: ListTile(
+                onTap: () =>
+                    Get.toNamed(AppRoutes.transactionDetails, arguments: tx),
                 leading: CircleAvatar(
                   backgroundColor: color.withValues(alpha: 0.12),
                   child: Icon(icon, color: color, size: 20),
                 ),
                 title: Text(
-                  tx.description?.isNotEmpty == true ? tx.description! : tx.transactionNumber,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  tx.description?.isNotEmpty == true
+                      ? tx.description!
+                      : tx.transactionNumber,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14.5,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
+                  ),
                 ),
-                subtitle: Row(
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      AppDateUtils.formatTimestamp(tx.transactionDate),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Text(
+                          '$dateStr$timeStr',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        const SizedBox(width: AppSizes.p8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.surfaceDark
+                                : AppColors.dividerLight,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                                color: isDark
+                                    ? AppColors.borderDark
+                                    : AppColors.borderLight),
+                          ),
+                          child: Text(
+                            tx.scopeType.tr,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: AppSizes.p8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.dividerLight,
-                        borderRadius: BorderRadius.circular(4),
+                    if (tx.sourceType == 'shopping' && tx.sourceId != null) ...[
+                      const SizedBox(height: 4),
+                      FutureBuilder<String?>(
+                        future: controller.getShoppingSummary(tx.sourceId),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData &&
+                              snapshot.data != null &&
+                              snapshot.data!.isNotEmpty) {
+                            return Row(
+                              children: [
+                                const Icon(Icons.shopping_bag_outlined,
+                                    size: 12,
+                                    color: AppColors.secondaryElectric),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    snapshot.data!,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.secondaryElectric,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
-                      child: Text(
-                        tx.scopeType.tr,
-                        style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryLight),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
                 trailing: Row(
@@ -105,7 +190,13 @@ class TransactionListView extends GetView<TransactionController> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(AppIcons.delete, size: 18, color: AppColors.textMutedLight),
+                      icon: Icon(
+                        AppIcons.delete,
+                        size: 18,
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                      ),
                       onPressed: () {
                         AppConfirmDialog.show(
                           title: 'delete'.tr,
@@ -136,15 +227,19 @@ class TransactionListView extends GetView<TransactionController> {
         padding: const EdgeInsets.all(AppSizes.p20),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.r16)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(AppSizes.r16)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('filter'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Text('filter'.tr,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: AppSizes.p16),
-            const Text('Transaction Type', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const Text('Transaction Type',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
             const SizedBox(height: AppSizes.p8),
             Obx(() => Wrap(
                   spacing: 8,
@@ -156,7 +251,8 @@ class TransactionListView extends GetView<TransactionController> {
                   ],
                 )),
             const SizedBox(height: AppSizes.p16),
-            const Text('Scope', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const Text('Scope',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
             const SizedBox(height: AppSizes.p8),
             Obx(() => Wrap(
                   spacing: 8,

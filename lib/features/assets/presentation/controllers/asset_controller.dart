@@ -23,19 +23,22 @@ class AssetController extends GetxController {
   final assetCurrentValueController = TextEditingController();
   final assetLocationController = TextEditingController();
   final assetNotesController = TextEditingController();
-  final RxString selectedAssetCategory = 'land'.obs; // land, house, gold, vehicle, cattle, equipment, other
+  final RxString selectedAssetCategory =
+      'land'.obs; // land, house, gold, vehicle, cattle, equipment, other
 
   // Form Fields - Savings
   final goalNameController = TextEditingController();
   final goalTargetAmountController = TextEditingController();
   final goalCurrentAmountController = TextEditingController(text: '0');
-  final Rx<DateTime> goalTargetDate = DateTime.now().add(const Duration(days: 365)).obs;
+  final Rx<DateTime> goalTargetDate =
+      DateTime.now().add(const Duration(days: 365)).obs;
 
   // Form Fields - Investment
   final investmentNameController = TextEditingController();
   final investmentAmountController = TextEditingController();
   final investmentValueController = TextEditingController();
-  final RxString selectedInvestmentType = 'business'.obs; // business, shares, savings_cert, agriculture, other
+  final RxString selectedInvestmentType =
+      'business'.obs; // business, shares, savings_cert, agriculture, other
 
   @override
   void onInit() {
@@ -45,7 +48,9 @@ class AssetController extends GetxController {
 
   void loadAll() {
     _dbService.assetDao.watchAssets().listen((list) => assets.value = list);
-    _dbService.assetDao.watchSavingsGoals().listen((list) => savingsGoals.value = list);
+    _dbService.assetDao
+        .watchSavingsGoals()
+        .listen((list) => savingsGoals.value = list);
     _dbService.assetDao.watchInvestments().listen((list) {
       investments.value = list;
       isLoading.value = false;
@@ -54,7 +59,8 @@ class AssetController extends GetxController {
 
   Future<bool> saveAsset() async {
     if (assetNameController.text.trim().isEmpty) return false;
-    final purchaseVal = CurrencyUtils.takaToMinor(assetPurchaseValueController.text);
+    final purchaseVal =
+        CurrencyUtils.takaToMinor(assetPurchaseValueController.text);
     final currentVal = assetCurrentValueController.text.trim().isNotEmpty
         ? CurrencyUtils.takaToMinor(assetCurrentValueController.text)
         : purchaseVal;

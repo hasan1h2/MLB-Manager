@@ -7,18 +7,21 @@ class InventoryDao {
 
   Stream<List<Product>> watchProducts(String businessId) {
     return (db.select(db.products)
-          ..where((tbl) => tbl.businessId.equals(businessId) & tbl.isActive.equals(1)))
+          ..where((tbl) =>
+              tbl.businessId.equals(businessId) & tbl.isActive.equals(1)))
         .watch();
   }
 
   Future<List<Product>> getAllProducts(String businessId) {
     return (db.select(db.products)
-          ..where((tbl) => tbl.businessId.equals(businessId) & tbl.isActive.equals(1)))
+          ..where((tbl) =>
+              tbl.businessId.equals(businessId) & tbl.isActive.equals(1)))
         .get();
   }
 
   Future<Product?> getProductById(String id) {
-    return (db.select(db.products)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    return (db.select(db.products)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
   }
 
   Future<int> insertProduct(ProductsCompanion product) {
@@ -35,12 +38,19 @@ class InventoryDao {
     final product = await getProductById(productId);
     if (product == null) return 0.0;
 
-    final movements = await (db.select(db.inventoryMovements)..where((tbl) => tbl.productId.equals(productId))).get();
+    final movements = await (db.select(db.inventoryMovements)
+          ..where((tbl) => tbl.productId.equals(productId)))
+        .get();
     double netMovements = 0.0;
     for (var m in movements) {
-      if (m.movementType == 'in' || m.movementType == 'purchase' || m.movementType == 'return') {
+      if (m.movementType == 'in' ||
+          m.movementType == 'purchase' ||
+          m.movementType == 'return') {
         netMovements += m.quantity;
-      } else if (m.movementType == 'out' || m.movementType == 'sale' || m.movementType == 'damage' || m.movementType == 'wastage') {
+      } else if (m.movementType == 'out' ||
+          m.movementType == 'sale' ||
+          m.movementType == 'damage' ||
+          m.movementType == 'wastage') {
         netMovements -= m.quantity;
       } else if (m.movementType == 'adjustment') {
         netMovements += m.quantity; // positive or negative

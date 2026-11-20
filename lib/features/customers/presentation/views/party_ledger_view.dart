@@ -14,12 +14,20 @@ class PartyLedgerView extends GetView<PartyController> {
 
   @override
   Widget build(BuildContext context) {
-    final customerItem = isCustomer ? (Get.arguments as CustomerWithDue?) : null;
-    final supplierItem = !isCustomer ? (Get.arguments as SupplierWithPayable?) : null;
+    final customerItem =
+        isCustomer ? (Get.arguments as CustomerWithDue?) : null;
+    final supplierItem =
+        !isCustomer ? (Get.arguments as SupplierWithPayable?) : null;
 
-    final name = isCustomer ? (customerItem?.customer.name ?? '') : (supplierItem?.supplier.name ?? '');
-    final balanceMinor = isCustomer ? (customerItem?.dueMinor ?? 0) : (supplierItem?.payableMinor ?? 0);
-    final partyId = isCustomer ? (customerItem?.customer.id ?? '') : (supplierItem?.supplier.id ?? '');
+    final name = isCustomer
+        ? (customerItem?.customer.name ?? '')
+        : (supplierItem?.supplier.name ?? '');
+    final balanceMinor = isCustomer
+        ? (customerItem?.dueMinor ?? 0)
+        : (supplierItem?.payableMinor ?? 0);
+    final partyId = isCustomer
+        ? (customerItem?.customer.id ?? '')
+        : (supplierItem?.supplier.id ?? '');
 
     return Scaffold(
       appBar: AppBar(
@@ -38,7 +46,11 @@ class PartyLedgerView extends GetView<PartyController> {
               ),
               child: Column(
                 children: [
-                  Text(name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(name,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700)),
                   const SizedBox(height: AppSizes.p12),
                   Text(
                     isCustomer ? 'মোট বাকি পাওনা' : 'মোট প্রদেয় দেনা',
@@ -48,7 +60,9 @@ class PartyLedgerView extends GetView<PartyController> {
                   Text(
                     CurrencyUtils.format(balanceMinor),
                     style: TextStyle(
-                      color: balanceMinor > 0 ? (isCustomer ? Colors.white : AppColors.warningAmber) : AppColors.incomeGreen,
+                      color: balanceMinor > 0
+                          ? (isCustomer ? Colors.white : AppColors.warningAmber)
+                          : AppColors.incomeGreen,
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
                     ),
@@ -64,8 +78,11 @@ class PartyLedgerView extends GetView<PartyController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isCustomer ? 'টাকা আদায় / জমা গ্রহণ' : 'টাকা পরিশোধ এন্ট্রি',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                      isCustomer
+                          ? 'টাকা আদায় / জমা গ্রহণ'
+                          : 'টাকা পরিশোধ এন্ট্রি',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: AppSizes.p12),
                     CurrencyInputField(

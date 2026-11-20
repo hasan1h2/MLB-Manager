@@ -35,7 +35,8 @@ class InventoryController extends GetxController {
   // Stock Movement Fields
   final movementQtyController = TextEditingController();
   final movementNotesController = TextEditingController();
-  final RxString selectedMovementType = 'in'.obs; // in, out, adjustment, damage, wastage
+  final RxString selectedMovementType =
+      'in'.obs; // in, out, adjustment, damage, wastage
 
   @override
   void onInit() {
@@ -57,10 +58,12 @@ class InventoryController extends GetxController {
     if (activeBusinessId.value == null) return;
     try {
       isLoading.value = true;
-      final prods = await _dbService.inventoryDao.getAllProducts(activeBusinessId.value!);
+      final prods =
+          await _dbService.inventoryDao.getAllProducts(activeBusinessId.value!);
       final list = <ProductWithStock>[];
       for (var p in prods) {
-        final stock = await _dbService.inventoryDao.getProductCurrentStock(p.id);
+        final stock =
+            await _dbService.inventoryDao.getProductCurrentStock(p.id);
         list.add(ProductWithStock(product: p, currentStock: stock));
       }
       productsWithStock.value = list;
@@ -75,7 +78,8 @@ class InventoryController extends GetxController {
       return false;
     }
 
-    final purchasePrice = CurrencyUtils.takaToMinor(purchasePriceController.text);
+    final purchasePrice =
+        CurrencyUtils.takaToMinor(purchasePriceController.text);
     final sellingPrice = CurrencyUtils.takaToMinor(sellingPriceController.text);
     final openingQty = double.tryParse(openingQtyController.text) ?? 0.0;
     final minStock = double.tryParse(minStockController.text) ?? 0.0;
@@ -87,8 +91,12 @@ class InventoryController extends GetxController {
           id: Value(_uuid.v4()),
           businessId: Value(activeBusinessId.value!),
           name: Value(nameController.text.trim()),
-          sku: Value(skuController.text.trim().isNotEmpty ? skuController.text.trim() : null),
-          barcode: Value(barcodeController.text.trim().isNotEmpty ? barcodeController.text.trim() : null),
+          sku: Value(skuController.text.trim().isNotEmpty
+              ? skuController.text.trim()
+              : null),
+          barcode: Value(barcodeController.text.trim().isNotEmpty
+              ? barcodeController.text.trim()
+              : null),
           unit: Value(selectedUnit.value),
           purchasePriceMinor: Value(purchasePrice),
           sellingPriceMinor: Value(sellingPrice),
