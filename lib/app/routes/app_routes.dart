@@ -35,6 +35,12 @@ abstract class AppRoutes {
   static const businessList = '/business';
   static const addBusiness = '/business/add';
   static const businessDashboard = '/business/dashboard';
+  static const businessSale = '/business/sale';
+  static const businessPurchase = '/business/purchase';
+  static const businessSettings = '/business/settings';
+  static const cashbook = '/business/cashbook';
+  static const productImport = '/business/import';
+  static const businessTransactionDetails = '/business/transaction-details';
 
   // Cattle
   static const cattleList = '/cattle';

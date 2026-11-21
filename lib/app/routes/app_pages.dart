@@ -28,6 +28,12 @@ import '../../features/business/presentation/bindings/business_binding.dart';
 import '../../features/business/presentation/views/add_business_view.dart';
 import '../../features/business/presentation/views/business_dashboard_view.dart';
 import '../../features/business/presentation/views/business_list_view.dart';
+import '../../features/business/presentation/views/business_purchase_view.dart';
+import '../../features/business/presentation/views/business_sale_view.dart';
+import '../../features/business/presentation/views/business_settings_view.dart';
+import '../../features/business/presentation/views/business_transaction_details_view.dart';
+import '../../features/business/presentation/views/cashbook_view.dart';
+import '../../features/business/presentation/views/product_import_view.dart';
 import '../../features/cattle/presentation/bindings/cattle_binding.dart';
 import '../../features/cattle/presentation/views/add_cattle_view.dart';
 import '../../features/cattle/presentation/views/cattle_details_view.dart';
@@ -170,6 +176,36 @@ class AppPages {
     GetPage(
       name: AppRoutes.businessDashboard,
       page: () => const BusinessDashboardView(),
+      binding: BusinessBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.businessSale,
+      page: () => const BusinessSaleView(),
+      binding: BusinessBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.businessPurchase,
+      page: () => const BusinessPurchaseView(),
+      binding: BusinessBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.businessSettings,
+      page: () => const BusinessSettingsView(),
+      binding: BusinessBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.cashbook,
+      page: () => const CashbookView(),
+      binding: BusinessBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.productImport,
+      page: () => const ProductImportView(),
+      binding: BusinessBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.businessTransactionDetails,
+      page: () => const BusinessTransactionDetailsView(),
       binding: BusinessBinding(),
     ),
     GetPage(

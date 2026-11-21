@@ -25,11 +25,40 @@ class AddPartyView extends GetView<PartyController> {
               label: 'নাম',
               hint: isCustomer
                   ? 'গ্রাহকের পুরো নাম'
-                  : 'সাপ্লায়ার বা প্রতিষ্ঠানের নাম',
+                  : 'সাপ্লায়ার ব্যক্তির নাম',
               controller: controller.nameController,
               prefixIcon: Icons.person_outline_rounded,
             ),
             const SizedBox(height: AppSizes.p16),
+            AppTextField(
+              label: 'প্রতিষ্ঠান / দোকানের নাম (ঐচ্ছিক)',
+              hint: 'যেমন: মেসার্স রহিম স্টোর',
+              controller: controller.companyController,
+              prefixIcon: Icons.storefront_outlined,
+            ),
+            const SizedBox(height: AppSizes.p16),
+            if (isCustomer) ...[
+              Obx(() {
+                return DropdownButtonFormField<String>(
+                  value: controller.selectedCustomerType.value,
+                  decoration: const InputDecoration(
+                    labelText: 'গ্রাহকের ধরণ (Customer Type)',
+                    prefixIcon: Icon(Icons.category_outlined),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                        value: 'retail', child: Text('খুচরা গ্রাহক (Retail)')),
+                    DropdownMenuItem(
+                        value: 'wholesale',
+                        child: Text('পাইকারি গ্রাহক (Wholesale)')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) controller.selectedCustomerType.value = val;
+                  },
+                );
+              }),
+              const SizedBox(height: AppSizes.p16),
+            ],
             AppTextField(
               label: 'মোবাইল নম্বর',
               controller: controller.phoneController,
@@ -43,9 +72,24 @@ class AddPartyView extends GetView<PartyController> {
               prefixIcon: Icons.location_on_outlined,
             ),
             const SizedBox(height: AppSizes.p16),
-            CurrencyInputField(
-              label: 'opening_balance'.tr,
-              controller: controller.openingBalanceController,
+            Row(
+              children: [
+                Expanded(
+                  child: CurrencyInputField(
+                    label: 'opening_balance'.tr,
+                    controller: controller.openingBalanceController,
+                  ),
+                ),
+                if (isCustomer) ...[
+                  const SizedBox(width: AppSizes.p12),
+                  Expanded(
+                    child: CurrencyInputField(
+                      label: 'সর্বোচ্চ বাকি সীমা (Credit Limit)',
+                      controller: controller.creditLimitController,
+                    ),
+                  ),
+                ],
+              ],
             ),
             const SizedBox(height: AppSizes.p16),
             AppTextField(

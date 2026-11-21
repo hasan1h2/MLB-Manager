@@ -32,10 +32,13 @@ class PartyController extends GetxController {
 
   // Form Fields for Add Customer / Supplier
   final nameController = TextEditingController();
+  final companyController = TextEditingController();
   final phoneController = TextEditingController();
   final addressController = TextEditingController();
   final openingBalanceController = TextEditingController(text: '0');
+  final creditLimitController = TextEditingController(text: '0');
   final notesController = TextEditingController();
+  final RxString selectedCustomerType = 'retail'.obs; // retail, wholesale
 
   // Payment Recording
   final paymentAmountController = TextEditingController();
@@ -95,6 +98,8 @@ class PartyController extends GetxController {
 
     final openingMinor =
         CurrencyUtils.takaToMinor(openingBalanceController.text);
+    final creditLimitMinor =
+        CurrencyUtils.takaToMinor(creditLimitController.text);
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
 
     try {
@@ -103,6 +108,10 @@ class PartyController extends GetxController {
           id: Value(_uuid.v4()),
           businessId: Value(activeBusinessId.value!),
           name: Value(nameController.text.trim()),
+          company: Value(companyController.text.trim().isNotEmpty
+              ? companyController.text.trim()
+              : null),
+          customerType: Value(selectedCustomerType.value),
           phone: Value(phoneController.text.trim().isNotEmpty
               ? phoneController.text.trim()
               : null),
@@ -110,6 +119,7 @@ class PartyController extends GetxController {
               ? addressController.text.trim()
               : null),
           openingBalanceMinor: Value(openingMinor),
+          creditLimitMinor: Value(creditLimitMinor),
           notes: Value(notesController.text.trim().isNotEmpty
               ? notesController.text.trim()
               : null),
@@ -143,6 +153,9 @@ class PartyController extends GetxController {
           id: Value(_uuid.v4()),
           businessId: Value(activeBusinessId.value!),
           name: Value(nameController.text.trim()),
+          company: Value(companyController.text.trim().isNotEmpty
+              ? companyController.text.trim()
+              : null),
           phone: Value(phoneController.text.trim().isNotEmpty
               ? phoneController.text.trim()
               : null),
@@ -193,18 +206,23 @@ class PartyController extends GetxController {
 
   void _clearForm() {
     nameController.clear();
+    companyController.clear();
     phoneController.clear();
     addressController.clear();
     openingBalanceController.text = '0';
+    creditLimitController.text = '0';
     notesController.clear();
+    selectedCustomerType.value = 'retail';
   }
 
   @override
   void onClose() {
     nameController.dispose();
+    companyController.dispose();
     phoneController.dispose();
     addressController.dispose();
     openingBalanceController.dispose();
+    creditLimitController.dispose();
     notesController.dispose();
     paymentAmountController.dispose();
     paymentNotesController.dispose();

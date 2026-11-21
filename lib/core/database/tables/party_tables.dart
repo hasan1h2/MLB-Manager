@@ -5,9 +5,14 @@ class Customers extends Table {
   TextColumn get id => text()();
   TextColumn get businessId => text().references(Businesses, #id)();
   TextColumn get name => text()();
+  TextColumn get company => text().nullable()();
+  TextColumn get customerType =>
+      text().withDefault(const Constant('retail'))(); // retail, wholesale, regular, walk_in
   TextColumn get phone => text().nullable()();
   TextColumn get address => text().nullable()();
   IntColumn get openingBalanceMinor =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get creditLimitMinor =>
       integer().withDefault(const Constant(0))();
   TextColumn get notes => text().nullable()();
   IntColumn get createdAt => integer()();
@@ -20,6 +25,7 @@ class Suppliers extends Table {
   TextColumn get id => text()();
   TextColumn get businessId => text().references(Businesses, #id)();
   TextColumn get name => text()();
+  TextColumn get company => text().nullable()();
   TextColumn get phone => text().nullable()();
   TextColumn get address => text().nullable()();
   IntColumn get openingBalanceMinor =>

@@ -19,16 +19,43 @@ class Businesses extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get businessType =>
-      text()(); // cattle, grocery, wholesale, retail, etc.
+      text()(); // cattle, grocery, wholesale, retail, hybrid, etc.
   TextColumn get description => text().nullable()();
   IntColumn get openingDate => integer()();
   IntColumn get initialCapitalMinor =>
       integer().withDefault(const Constant(0))();
   TextColumn get location => text().nullable()();
   TextColumn get phone => text().nullable()();
+  TextColumn get currency => text().withDefault(const Constant('BDT'))();
+  TextColumn get timeFormat =>
+      text().withDefault(const Constant('12h'))(); // 12h, 24h
+  IntColumn get allowNegativeStock =>
+      integer().withDefault(const Constant(0))();
+  TextColumn get costingMethod =>
+      text().withDefault(const Constant('fifo'))(); // fifo, weighted_avg
   TextColumn get status => text().withDefault(const Constant('active'))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class CashSessions extends Table {
+  TextColumn get id => text()();
+  TextColumn get businessId => text().references(Businesses, #id)();
+  IntColumn get sessionDate => integer()();
+  IntColumn get openingCashMinor =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get expectedClosingMinor =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get actualClosingMinor => integer().nullable()();
+  IntColumn get differenceMinor => integer().nullable()();
+  TextColumn get status =>
+      text().withDefault(const Constant('open'))(); // open, closed
+  TextColumn get notes => text().nullable()();
+  IntColumn get openedAt => integer()();
+  IntColumn get closedAt => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

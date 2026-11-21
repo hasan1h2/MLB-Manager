@@ -31,11 +31,13 @@ part 'app_database.g.dart';
     Suppliers,
     PartyPayments,
     Products,
+    ProductPriceTiers,
     InventoryMovements,
     PurchaseRecords,
     PurchaseItems,
     SalesRecords,
     SalesItems,
+    CashSessions,
     Cattle,
     CattleExpenses,
     CattleSales,
@@ -75,6 +77,54 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(shoppingRecords, shoppingRecords.entryMode);
             await m.addColumn(shoppingItems, shoppingItems.note);
             await m.addColumn(shoppingItems, shoppingItems.imagePath);
+          }
+          if (from < 3) {
+            await m.createTable(productPriceTiers);
+            await m.createTable(cashSessions);
+
+            await m.addColumn(products, products.nameBn);
+            await m.addColumn(products, products.nameEn);
+            await m.addColumn(products, products.wholesalePriceMinor);
+            await m.addColumn(products, products.brand);
+            await m.addColumn(products, products.imagePath);
+            await m.addColumn(products, products.description);
+            await m.addColumn(products, products.expiryDate);
+            await m.addColumn(products, products.batchNumber);
+            await m.addColumn(products, products.defaultSupplierId);
+
+            await m.addColumn(purchaseRecords, purchaseRecords.purchaseTime);
+            await m.addColumn(purchaseRecords, purchaseRecords.isCustomDateTime);
+            await m.addColumn(purchaseRecords, purchaseRecords.invoiceNumber);
+            await m.addColumn(purchaseRecords, purchaseRecords.paymentMethod);
+            await m.addColumn(purchaseRecords, purchaseRecords.notes);
+            await m.addColumn(purchaseRecords, purchaseRecords.createdAt);
+            await m.addColumn(purchaseRecords, purchaseRecords.updatedAt);
+
+            await m.addColumn(purchaseItems, purchaseItems.productName);
+            await m.addColumn(purchaseItems, purchaseItems.unit);
+
+            await m.addColumn(salesRecords, salesRecords.saleTime);
+            await m.addColumn(salesRecords, salesRecords.isCustomDateTime);
+            await m.addColumn(salesRecords, salesRecords.invoiceNumber);
+            await m.addColumn(salesRecords, salesRecords.saleType);
+            await m.addColumn(salesRecords, salesRecords.paymentMethod);
+            await m.addColumn(salesRecords, salesRecords.notes);
+            await m.addColumn(salesRecords, salesRecords.createdAt);
+            await m.addColumn(salesRecords, salesRecords.updatedAt);
+
+            await m.addColumn(salesItems, salesItems.productName);
+            await m.addColumn(salesItems, salesItems.unit);
+
+            await m.addColumn(businesses, businesses.currency);
+            await m.addColumn(businesses, businesses.timeFormat);
+            await m.addColumn(businesses, businesses.allowNegativeStock);
+            await m.addColumn(businesses, businesses.costingMethod);
+
+            await m.addColumn(customers, customers.company);
+            await m.addColumn(customers, customers.customerType);
+            await m.addColumn(customers, customers.creditLimitMinor);
+
+            await m.addColumn(suppliers, suppliers.company);
           }
         },
       );

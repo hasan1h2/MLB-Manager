@@ -20,6 +20,11 @@ class CurrencyUtils {
     return (major * AppConstants.minorUnitMultiplier) + minor;
   }
 
+  /// Converts integer Poisha to double Taka (e.g. 15050 -> 150.50)
+  static double minorToTaka(int minorUnits) {
+    return minorUnits / AppConstants.minorUnitMultiplier;
+  }
+
   /// Converts Poisha (minor units) to decimal string e.g. 15050 -> "150.50"
   static String minorToTakaString(int minorUnits,
       {bool includeSymbol = true, bool useBengaliDigits = false}) {
