@@ -138,13 +138,20 @@ class AddTransactionView extends GetView<TransactionController> {
   }
 
   Widget _buildScopeSelector(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Obx(() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'scope'.tr,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            ),
           ),
           const SizedBox(height: AppSizes.p4),
           SingleChildScrollView(

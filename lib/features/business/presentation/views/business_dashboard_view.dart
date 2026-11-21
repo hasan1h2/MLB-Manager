@@ -3,12 +3,16 @@ import 'package:get/get.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/database/app_database.dart';
+import '../../../../core/database/daos/business_dao.dart';
+import '../../../../core/services/active_business_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
 import '../../../../shared/widgets/app_empty_state.dart';
 import '../../../../shared/widgets/app_loading_indicator.dart';
 import '../../../../shared/widgets/summary_card.dart';
 import '../controllers/business_controller.dart';
+import 'category_management_sheet.dart';
 
 class BusinessDashboardView extends GetView<BusinessController> {
   const BusinessDashboardView({super.key});
@@ -19,11 +23,36 @@ class BusinessDashboardView extends GetView<BusinessController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Obx(() => Text(
-              controller.selectedBusiness.value?.name ?? 'ব্যবসা ব্যবস্থাপনা',
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            )),
+        title: Obx(() {
+          final biz = controller.selectedBusiness.value;
+          return InkWell(
+            onTap: () => _showBusinessSwitcher(context),
+            borderRadius: BorderRadius.circular(AppSizes.r8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      biz?.name ?? 'ব্যবসা ব্যবস্থাপনা',
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+                ],
+              ),
+            ),
+          );
+        }),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.swap_horiz_rounded),
+            tooltip: 'ব্যবসা পরিবর্তন করুন',
+            onPressed: () => _showBusinessSwitcher(context),
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: 'ব্যবসার সেটিংস',
@@ -63,13 +92,17 @@ class BusinessDashboardView extends GetView<BusinessController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildBusinessSelectorAndBanner(b, isDark),
+                _buildBusinessSelectorAndBanner(context, b, isDark),
                 const SizedBox(height: AppSizes.p16),
                 _buildPeriodFilterChips(),
                 const SizedBox(height: AppSizes.p16),
                 _buildCashSessionBanner(isDark),
                 const SizedBox(height: AppSizes.p16),
                 if (m != null) _buildMetricsSection(m, isDark),
+                const SizedBox(height: AppSizes.p16),
+                _buildCategoryWiseSalesSection(isDark),
+                const SizedBox(height: AppSizes.p16),
+                _buildTopSellingProductsSection(isDark),
                 const SizedBox(height: AppSizes.p24),
                 _buildQuickActionGrid(context),
                 const SizedBox(height: AppSizes.p24),
@@ -83,7 +116,8 @@ class BusinessDashboardView extends GetView<BusinessController> {
     );
   }
 
-  Widget _buildBusinessSelectorAndBanner(dynamic b, bool isDark) {
+  Widget _buildBusinessSelectorAndBanner(
+      BuildContext context, BusinessesData b, bool isDark) {
     String typeLabel;
     Color typeBadgeBg;
     switch (b.businessType) {
@@ -179,6 +213,28 @@ class BusinessDashboardView extends GetView<BusinessController> {
               ],
             ],
           ),
+          const SizedBox(height: AppSizes.p10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white38),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.r8)),
+                ),
+                icon: const Icon(Icons.swap_horiz, size: 14, color: Colors.white),
+                label: const Text('ব্যবসা পরিবর্তন',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                onPressed: () => _showBusinessSwitcher(context),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -187,9 +243,12 @@ class BusinessDashboardView extends GetView<BusinessController> {
   Widget _buildPeriodFilterChips() {
     final periods = [
       {'key': 'today', 'label': 'আজ'},
+      {'key': 'yesterday', 'label': 'গতকাল'},
       {'key': 'last_7_days', 'label': 'গত ৭ দিন'},
       {'key': 'this_month', 'label': 'চলতি মাস'},
+      {'key': 'last_month', 'label': 'গত মাস'},
       {'key': 'this_year', 'label': 'চলতি বছর'},
+      {'key': 'custom', 'label': 'কাস্টম রেঞ্জ'},
       {'key': 'all', 'label': 'সব সময়'},
     ];
 
@@ -210,12 +269,157 @@ class BusinessDashboardView extends GetView<BusinessController> {
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   fontSize: 12,
                 ),
-                onSelected: (val) {
-                  if (val) controller.setFilterPeriod(p['key']!);
+                onSelected: (val) async {
+                  if (val) {
+                    if (p['key'] == 'custom') {
+                      final range = await showDateRangePicker(
+                        context: Get.context!,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2035),
+                      );
+                      if (range != null) {
+                        controller.customDateRange.value = range;
+                        controller.setFilterPeriod('custom');
+                      }
+                    } else {
+                      controller.setFilterPeriod(p['key']!);
+                    }
+                  }
                 },
               ),
             );
           }).toList(),
+        ),
+      );
+    });
+  }
+
+  Widget _buildCategoryWiseSalesSection(bool isDark) {
+    return Obx(() {
+      final list = controller.categorySales;
+      if (list.isEmpty) return const SizedBox.shrink();
+
+      final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+      final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+
+      return Container(
+        padding: const EdgeInsets.all(AppSizes.p16),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(AppSizes.r12),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.pie_chart_outline_rounded,
+                    color: AppColors.secondaryElectric, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'ক্যাটাগরি-ভিত্তিক বিক্রয় (Category Sales)',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                ),
+              ],
+            ),
+            const Divider(height: 20),
+            ...list.take(6).map((item) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      item.categoryName,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                    Text(
+                      CurrencyUtils.format(item.totalSalesMinor),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: AppColors.incomeGreen),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildTopSellingProductsSection(bool isDark) {
+    return Obx(() {
+      final list = controller.topProducts;
+      if (list.isEmpty) return const SizedBox.shrink();
+
+      final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+      final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+
+      return Container(
+        padding: const EdgeInsets.all(AppSizes.p16),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(AppSizes.r12),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.star_outline_rounded,
+                    color: AppColors.warningAmberDark, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'সর্বোচ্চ বিক্রিত পণ্য (Top Selling Products)',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                ),
+              ],
+            ),
+            const Divider(height: 20),
+            ...list.map((item) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        item.productName,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        '${item.quantitySold % 1 == 0 ? item.quantitySold.toInt() : item.quantitySold} ${item.unit}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Text(
+                        CurrencyUtils.format(item.totalSalesMinor),
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: AppColors.incomeGreen),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         ),
       );
     });
@@ -256,8 +460,11 @@ class BusinessDashboardView extends GetView<BusinessController> {
                     isOpen
                         ? 'আজকের ক্যাশ খাতা চালু আছে'
                         : 'আজকের ক্যাশ খাতা এখনও চালু হয়নি',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 13),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    ),
                   ),
                   Text(
                     isOpen
@@ -280,16 +487,23 @@ class BusinessDashboardView extends GetView<BusinessController> {
     );
   }
 
-  Widget _buildMetricsSection(dynamic m, bool isDark) {
+  Widget _buildMetricsSection(BusinessMetricsResult m, bool isDark) {
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'আর্থিক পরিসংখ্যান (Financials)',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              ),
             ),
             Text(
               'গ্রস প্রফিট = বিক্রয় - COGS',
@@ -365,6 +579,37 @@ class BusinessDashboardView extends GetView<BusinessController> {
             ),
           ],
         ),
+        if (m.lowStockCount > 0 || m.outOfStockCount > 0) ...[
+          const SizedBox(height: AppSizes.p12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(AppSizes.r12),
+              border: Border.all(color: borderColor),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: AppColors.warningAmber, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'মজুদ সতর্কতা: ${m.lowStockCount} টি পণ্যের স্টক কম, ${m.outOfStockCount} টি পণ্যের স্টক শেষ।',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Get.toNamed(AppRoutes.productList),
+                  child: const Text('স্টক দেখুন', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -435,18 +680,32 @@ class BusinessDashboardView extends GetView<BusinessController> {
         'route': AppRoutes.productImport,
         'arg': null,
       },
+      {
+        'title': 'ক্যাটাগরি ম্যানেজমেন্ট',
+        'subtitle': 'ক্যাটাগরি ও সাবক্যাটাগরি',
+        'icon': Icons.category_rounded,
+        'color': AppColors.secondaryElectric,
+        'route': null,
+        'action': 'categories',
+      },
     ];
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final primaryTextColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final secondaryTextColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'কার্যক্রম (Quick Actions)',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: primaryTextColor,
+          ),
         ),
         const SizedBox(height: AppSizes.p12),
         GridView.builder(
@@ -470,9 +729,12 @@ class BusinessDashboardView extends GetView<BusinessController> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(AppSizes.r12),
                 onTap: () {
-                  if (a['arg'] != null && a['route'] == AppRoutes.businessSale) {
+                  if (a['action'] == 'categories') {
+                    CategoryManagementSheet.show(context);
+                  } else if (a['arg'] != null &&
+                      a['route'] == AppRoutes.businessSale) {
                     Get.toNamed(a['route'] as String, arguments: a['arg']);
-                  } else {
+                  } else if (a['route'] != null) {
                     Get.toNamed(a['route'] as String);
                   }
                 },
@@ -498,8 +760,11 @@ class BusinessDashboardView extends GetView<BusinessController> {
                               a['title'] as String,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 13),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                color: primaryTextColor,
+                              ),
                             ),
                             Text(
                               a['subtitle'] as String,
@@ -507,9 +772,7 @@ class BusinessDashboardView extends GetView<BusinessController> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 10,
-                                color: isDark
-                                    ? AppColors.textSecondaryDark
-                                    : AppColors.textSecondaryLight,
+                                color: secondaryTextColor,
                               ),
                             ),
                           ],
@@ -533,9 +796,13 @@ class BusinessDashboardView extends GetView<BusinessController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'সাম্প্রতিক বিক্রয় (Recent Sales)',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              ),
             ),
             TextButton(
               onPressed: () => Get.toNamed(AppRoutes.businessSale),
@@ -626,6 +893,77 @@ class BusinessDashboardView extends GetView<BusinessController> {
           );
         }),
       ],
+    );
+  }
+
+  void _showBusinessSwitcher(BuildContext context) {
+    final activeBizService = Get.find<ActiveBusinessService>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(AppSizes.p16),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.r16)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('ব্যবসা নির্বাচন করুন',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                TextButton.icon(
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('নতুন ব্যবসা'),
+                  onPressed: () {
+                    Get.back();
+                    Get.toNamed(AppRoutes.addBusiness);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Obx(() {
+              final bizList = activeBizService.allBusinesses;
+              final currentId = activeBizService.activeBusinessId;
+
+              return ListView.separated(
+                shrinkWrap: true,
+                itemCount: bizList.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, idx) {
+                  final b = bizList[idx];
+                  final isSelected = b.id == currentId;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isSelected
+                          ? AppColors.secondaryElectric
+                          : AppColors.secondaryElectric.withValues(alpha: 0.1),
+                      child: Icon(
+                        Icons.store_mall_directory_outlined,
+                        color: isSelected ? Colors.white : AppColors.secondaryElectric,
+                      ),
+                    ),
+                    title: Text(b.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    subtitle: Text('${b.businessType.toUpperCase()} • ${b.location ?? ''}'),
+                    trailing: isSelected
+                        ? const Icon(Icons.check_circle, color: AppColors.incomeGreen)
+                        : null,
+                    onTap: () {
+                      activeBizService.switchBusiness(b);
+                      Get.back();
+                    },
+                  );
+                },
+              );
+            }),
+          ],
+        ),
+      ),
     );
   }
 }

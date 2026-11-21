@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
+import '../../../../core/services/active_business_service.dart';
 import '../../../../core/services/database_service.dart';
 import '../../../../core/utils/currency_utils.dart';
 import 'package:mlb_manager/shared/widgets/app_snackbar.dart';
@@ -56,25 +57,13 @@ class ImportProductCandidate {
 
 class ProductImportController extends GetxController {
   final DatabaseService _dbService = Get.find<DatabaseService>();
+  final ActiveBusinessService _activeBizService = Get.find<ActiveBusinessService>();
   final _uuid = const Uuid();
   final ImagePicker _picker = ImagePicker();
 
-  final Rx<BusinessesData?> currentBusiness = Rx<BusinessesData?>(null);
+  Rx<BusinessesData?> get currentBusiness => _activeBizService.activeBusiness;
   final RxList<ImportProductCandidate> candidates = <ImportProductCandidate>[].obs;
   final RxBool isProcessing = false.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    initBusiness();
-  }
-
-  Future<void> initBusiness() async {
-    final businesses = await _dbService.businessDao.getAllBusinesses();
-    if (businesses.isNotEmpty) {
-      currentBusiness.value = businesses.first;
-    }
-  }
 
   // --- Pick & Import from Excel (.xlsx) ---
   Future<void> importFromExcel() async {
@@ -141,7 +130,6 @@ class ProductImportController extends GetxController {
       final fields = await input.transform(utf8.decoder).transform(const CsvToListConverter()).toList();
 
       final list = <ImportProductCandidate>[];
-      // Skip header if first row has string prices
       int startIdx = 0;
       if (fields.isNotEmpty && double.tryParse(fields[0].length > 2 ? fields[0][2].toString() : '') == null) {
         startIdx = 1;
@@ -199,7 +187,6 @@ class ProductImportController extends GetxController {
           final text = line.text.trim();
           if (text.length < 2) continue;
 
-          // Attempt to extract product name and numbers
           final parts = text.split(RegExp(r'\s+'));
           String prodName = text;
           double price = 0.0;
@@ -242,8 +229,9 @@ class ProductImportController extends GetxController {
   }
 
   Future<bool> saveImportedProducts() async {
-    if (currentBusiness.value == null) {
-      AppSnackbar.error('ব্যবসা নির্বাচন করা নেই');
+    final biz = _activeBizService.activeBusiness.value;
+    if (biz == null) {
+      AppSnackbar.error('কোন সক্রিয় ব্যবসা নির্বাচন করা নেই');
       return false;
     }
 
@@ -255,7 +243,7 @@ class ProductImportController extends GetxController {
 
     try {
       isProcessing.value = true;
-      final bizId = currentBusiness.value!.id;
+      final bizId = biz.id;
       final now = DateTime.now().millisecondsSinceEpoch;
       final productsList = <ProductsCompanion>[];
 

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
+import '../../../../core/services/active_business_service.dart';
 import '../../../../core/services/database_service.dart';
 import '../../../../core/utils/currency_utils.dart';
 import 'package:mlb_manager/shared/widgets/app_snackbar.dart';
@@ -30,6 +31,7 @@ class ProductTierItem {
 
 class InventoryController extends GetxController {
   final DatabaseService _dbService = Get.find<DatabaseService>();
+  final ActiveBusinessService _activeBizService = Get.find<ActiveBusinessService>();
   final _uuid = const Uuid();
   final ImagePicker _picker = ImagePicker();
 
@@ -53,6 +55,10 @@ class InventoryController extends GetxController {
   final minStockController = TextEditingController(text: '5');
   final RxString selectedUnit = 'piece'.obs;
   final Rx<String?> selectedCategoryId = Rx<String?>(null);
+  final Rx<String?> selectedSubcategoryId = Rx<String?>(null);
+  final RxList<Category> subcategories = <Category>[].obs;
+  final RxString packageUnit = ''.obs;
+  final packageQuantityController = TextEditingController(text: '1');
   final Rx<String?> imagePath = Rx<String?>(null);
   final Rx<DateTime?> expiryDate = Rx<DateTime?>(null);
 
@@ -72,32 +78,57 @@ class InventoryController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initBusiness();
-  }
+    // React to active business changes
+    ever(_activeBizService.activeBusiness, (BusinessesData? b) {
+      activeBusinessId.value = b?.id;
+      if (b != null) {
+        loadCategories();
+        loadProducts();
+      } else {
+        productsWithStock.clear();
+        isLoading.value = false;
+      }
+    });
 
-  Future<void> initBusiness() async {
-    final businesses = await _dbService.businessDao.getAllBusinesses();
-    if (businesses.isNotEmpty) {
-      activeBusinessId.value = businesses.first.id;
-      await loadCategories();
-      await loadProducts();
+    final current = _activeBizService.activeBusiness.value;
+    if (current != null) {
+      activeBusinessId.value = current.id;
+      loadCategories();
+      loadProducts();
     } else {
       isLoading.value = false;
     }
   }
 
   Future<void> loadCategories() async {
-    final cats = await _dbService.coreDao.getAllCategories();
-    businessCategories.value =
-        cats.where((c) => c.scope == 'business' || c.scope == 'both').toList();
+    final cats = await _dbService.coreDao
+        .getProductCategories(businessId: activeBusinessId.value);
+    businessCategories.value = cats;
+  }
+
+  Future<void> onCategoryChanged(String? catId) async {
+    selectedCategoryId.value = catId;
+    selectedSubcategoryId.value = null;
+    subcategories.clear();
+    if (catId != null) {
+      final subs = await _dbService.coreDao.getSubcategories(
+        catId,
+        businessId: activeBusinessId.value,
+      );
+      subcategories.value = subs;
+    }
   }
 
   Future<void> loadProducts() async {
-    if (activeBusinessId.value == null) return;
+    final bizId = activeBusinessId.value;
+    if (bizId == null) {
+      productsWithStock.clear();
+      isLoading.value = false;
+      return;
+    }
     try {
       isLoading.value = true;
-      final prods =
-          await _dbService.inventoryDao.getAllProducts(activeBusinessId.value!);
+      final prods = await _dbService.inventoryDao.getAllProducts(bizId);
 
       final list = <ProductWithStock>[];
       final query = searchController.text.trim().toLowerCase();
@@ -142,6 +173,12 @@ class InventoryController extends GetxController {
   }
 
   Future<bool> saveProduct() async {
+    final bizId = activeBusinessId.value;
+    if (bizId == null) {
+      AppSnackbar.error('কোন সক্রিয় ব্যবসা নির্বাচন করা নেই');
+      return false;
+    }
+
     if (nameController.text.trim().isEmpty) {
       AppSnackbar.error('পণ্যের নাম লিখুন');
       return false;
@@ -162,13 +199,16 @@ class InventoryController extends GetxController {
       await _dbService.inventoryDao.insertProduct(
         ProductsCompanion(
           id: Value(productId),
-          businessId: Value(activeBusinessId.value!),
+          businessId: Value(bizId),
           name: Value(nameController.text.trim()),
           nameBn: Value(nameController.text.trim()),
           nameEn: Value(nameEnController.text.trim().isNotEmpty
               ? nameEnController.text.trim()
               : null),
           categoryId: Value(selectedCategoryId.value),
+          subcategoryId: Value(selectedSubcategoryId.value),
+          packageUnit: Value(packageUnit.value.isNotEmpty ? packageUnit.value : null),
+          packageQuantity: Value(double.tryParse(packageQuantityController.text) ?? 1.0),
           sku: Value(skuController.text.trim().isNotEmpty
               ? skuController.text.trim()
               : null),
@@ -239,9 +279,13 @@ class InventoryController extends GetxController {
     wholesalePriceController.clear();
     openingQtyController.text = '0';
     minStockController.text = '5';
+    packageQuantityController.text = '1';
+    packageUnit.value = '';
+    selectedCategoryId.value = null;
+    selectedSubcategoryId.value = null;
+    subcategories.clear();
     imagePath.value = null;
     expiryDate.value = null;
-    selectedCategoryId.value = null;
     for (var t in priceTiers) {
       t.dispose();
     }
@@ -249,6 +293,9 @@ class InventoryController extends GetxController {
   }
 
   Future<void> recordMovement(String productId) async {
+    final bizId = activeBusinessId.value;
+    if (bizId == null) return;
+
     final qty = double.tryParse(movementQtyController.text) ?? 0.0;
     if (qty <= 0) return;
 
@@ -257,7 +304,7 @@ class InventoryController extends GetxController {
       InventoryMovementsCompanion(
         id: Value(_uuid.v4()),
         productId: Value(productId),
-        businessId: Value(activeBusinessId.value!),
+        businessId: Value(bizId),
         movementType: Value(selectedMovementType.value),
         quantity: Value(qty),
         movementDate: Value(now),
@@ -285,6 +332,7 @@ class InventoryController extends GetxController {
     wholesalePriceController.dispose();
     openingQtyController.dispose();
     minStockController.dispose();
+    packageQuantityController.dispose();
     movementQtyController.dispose();
     movementNotesController.dispose();
     searchController.dispose();

@@ -3,6 +3,7 @@ import 'package:get/get.dart' hide Value;
 import 'package:uuid/uuid.dart';
 
 import '../constants/app_constants.dart';
+import '../constants/product_templates.dart';
 import '../database/app_database.dart';
 import '../database/daos/core_dao.dart';
 import '../database/daos/household_dao.dart';
@@ -116,6 +117,27 @@ class DatabaseService extends GetxService {
             scope: const Value('both'),
             icon: Value(cat['icon']),
             isSystem: const Value(1),
+            createdAt: Value(now),
+          ),
+        );
+      }
+    }
+
+    // Seed 24 starter product categories if not already present
+    final existingProductCategories =
+        await coreDao.getAllCategories(type: 'product');
+    if (existingProductCategories.isEmpty) {
+      for (var cat in ProductTemplates.starterCategories) {
+        await coreDao.insertCategory(
+          CategoriesCompanion(
+            id: Value(cat.id),
+            nameBn: Value(cat.nameBn),
+            nameEn: Value(cat.nameEn),
+            categoryType: const Value('product'),
+            scope: const Value('business'),
+            icon: Value(cat.icon),
+            isSystem: const Value(1),
+            isActive: const Value(1),
             createdAt: Value(now),
           ),
         );

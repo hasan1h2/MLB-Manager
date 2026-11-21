@@ -61,13 +61,16 @@ class ProductListView extends GetView<InventoryController> {
                             : AppColors.secondaryElectric
                                 .withValues(alpha: 0.12)),
                   ),
-                  title: Text(item.product.name,
+                  title: Text(item.product.nameBn ?? item.product.name,
                       style: const TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(
-                    'ক্রয়: ${CurrencyUtils.format(item.product.purchasePriceMinor)} • বিক্রয়: ${CurrencyUtils.format(item.product.sellingPriceMinor)}',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondaryLight),
+                    'ক্রয়: ${CurrencyUtils.format(item.product.purchasePriceMinor)} • খুচরা: ${CurrencyUtils.format(item.product.sellingPriceMinor)}${item.product.wholesalePriceMinor > 0 ? ' • পাইকারি: ${CurrencyUtils.format(item.product.wholesalePriceMinor)}' : ''}${item.product.packageUnit != null && item.product.packageQuantity > 1 ? '\nপ্যাকেজিং: ১ ${item.product.packageUnit} = ${item.product.packageQuantity.toInt()} ${item.product.unit}' : ''}',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight),
                   ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

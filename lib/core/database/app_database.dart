@@ -31,6 +31,7 @@ part 'app_database.g.dart';
     Suppliers,
     PartyPayments,
     Products,
+    ProductUnitConversions,
     ProductPriceTiers,
     InventoryMovements,
     PurchaseRecords,
@@ -125,6 +126,24 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(customers, customers.creditLimitMinor);
 
             await m.addColumn(suppliers, suppliers.company);
+          }
+          if (from < 4) {
+            await m.addColumn(categories, categories.businessId);
+            await m.addColumn(categories, categories.isActive);
+
+            await m.addColumn(products, products.subcategoryId);
+            await m.addColumn(products, products.packageUnit);
+            await m.addColumn(products, products.packageQuantity);
+
+            await m.createTable(productUnitConversions);
+
+            await m.addColumn(purchaseItems, purchaseItems.conversionFactor);
+            await m.addColumn(purchaseItems, purchaseItems.baseQuantity);
+            await m.addColumn(purchaseItems, purchaseItems.retailPriceMinor);
+            await m.addColumn(purchaseItems, purchaseItems.wholesalePriceMinor);
+
+            await m.addColumn(salesItems, salesItems.conversionFactor);
+            await m.addColumn(salesItems, salesItems.baseQuantity);
           }
         },
       );

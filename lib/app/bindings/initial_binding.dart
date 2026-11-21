@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../core/security/pin_service.dart';
+import '../../core/services/active_business_service.dart';
 import '../../core/services/database_service.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/theme/app_theme_controller.dart';
@@ -20,6 +21,9 @@ class InitialBinding extends Bindings {
     }
     if (!Get.isRegistered<DatabaseService>()) {
       Get.put<DatabaseService>(DatabaseService(), permanent: true);
+    }
+    if (!Get.isRegistered<ActiveBusinessService>()) {
+      Get.put<ActiveBusinessService>(ActiveBusinessService(), permanent: true);
     }
     if (!Get.isRegistered<AppThemeController>()) {
       Get.put<AppThemeController>(AppThemeController(), permanent: true);

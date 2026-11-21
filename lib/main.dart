@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import 'app/app.dart';
 import 'core/security/pin_service.dart';
+import 'core/services/active_business_service.dart';
 import 'core/services/database_service.dart';
 import 'core/services/storage_service.dart';
 import 'core/theme/app_theme_controller.dart';
@@ -28,6 +29,9 @@ void main() async {
 
   final dbService = await DatabaseService().init();
   Get.put<DatabaseService>(dbService, permanent: true);
+
+  final activeBizService = await ActiveBusinessService().init();
+  Get.put<ActiveBusinessService>(activeBizService, permanent: true);
 
   final themeController = AppThemeController();
   Get.put<AppThemeController>(themeController, permanent: true);

@@ -103,6 +103,55 @@ class CoreDao {
     return db.into(db.categories).insert(entry);
   }
 
+  Stream<List<Category>> watchProductCategories({String? businessId, bool activeOnly = true}) {
+    var query = db.select(db.categories)
+      ..where((tbl) => tbl.categoryType.equals('product'));
+    if (activeOnly) {
+      query = query..where((tbl) => tbl.isActive.equals(1));
+    }
+    if (businessId != null) {
+      query = query..where((tbl) => tbl.businessId.isNull() | tbl.businessId.equals(businessId));
+    } else {
+      query = query..where((tbl) => tbl.businessId.isNull());
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.asc(tbl.nameBn)])).watch();
+  }
+
+  Future<List<Category>> getProductCategories({String? businessId, bool activeOnly = true}) {
+    var query = db.select(db.categories)
+      ..where((tbl) => tbl.categoryType.equals('product'));
+    if (activeOnly) {
+      query = query..where((tbl) => tbl.isActive.equals(1));
+    }
+    if (businessId != null) {
+      query = query..where((tbl) => tbl.businessId.isNull() | tbl.businessId.equals(businessId));
+    } else {
+      query = query..where((tbl) => tbl.businessId.isNull());
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.asc(tbl.nameBn)])).get();
+  }
+
+  Future<List<Category>> getSubcategories(String parentCategoryId, {String? businessId, bool activeOnly = true}) {
+    var query = db.select(db.categories)
+      ..where((tbl) => tbl.parentId.equals(parentCategoryId));
+    if (activeOnly) {
+      query = query..where((tbl) => tbl.isActive.equals(1));
+    }
+    if (businessId != null) {
+      query = query..where((tbl) => tbl.businessId.isNull() | tbl.businessId.equals(businessId));
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.asc(tbl.nameBn)])).get();
+  }
+
+  Future<bool> updateCategory(Category entry) {
+    return db.update(db.categories).replace(entry);
+  }
+
+  Future<void> archiveCategory(String categoryId) async {
+    await (db.update(db.categories)..where((tbl) => tbl.id.equals(categoryId)))
+        .write(const CategoriesCompanion(isActive: Value(0)));
+  }
+
   // --- Transactions & Double-Entry Journal ---
   Future<Transaction?> getTransactionById(String id) {
     return (db.select(db.transactions)..where((tbl) => tbl.id.equals(id)))

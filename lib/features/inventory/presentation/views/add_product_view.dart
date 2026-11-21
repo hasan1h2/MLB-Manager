@@ -46,6 +46,47 @@ class AddProductView extends GetView<InventoryController> {
               prefixIcon: Icons.translate,
             ),
             const SizedBox(height: AppSizes.p12),
+            // Category & Subcategory Selector
+            Obx(() {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: controller.selectedCategoryId.value,
+                    decoration: const InputDecoration(
+                      labelText: 'ক্যাটাগরি নির্বাচন করুন*',
+                      prefixIcon: Icon(Icons.category_outlined),
+                    ),
+                    items: controller.businessCategories.map((c) {
+                      return DropdownMenuItem(
+                        value: c.id,
+                        child: Text(c.nameBn.isNotEmpty ? c.nameBn : c.nameEn),
+                      );
+                    }).toList(),
+                    onChanged: (val) => controller.onCategoryChanged(val),
+                  ),
+                  if (controller.subcategories.isNotEmpty) ...[
+                    const SizedBox(height: AppSizes.p12),
+                    DropdownButtonFormField<String>(
+                      value: controller.selectedSubcategoryId.value,
+                      decoration: const InputDecoration(
+                        labelText: 'সাবক্যাটাগরি (ঐচ্ছিক)',
+                        prefixIcon: Icon(Icons.subdirectory_arrow_right),
+                      ),
+                      items: controller.subcategories.map((sc) {
+                        return DropdownMenuItem(
+                          value: sc.id,
+                          child: Text(sc.nameBn),
+                        );
+                      }).toList(),
+                      onChanged: (val) =>
+                          controller.selectedSubcategoryId.value = val,
+                    ),
+                  ],
+                ],
+              );
+            }),
+            const SizedBox(height: AppSizes.p12),
             Row(
               children: [
                 Expanded(
@@ -61,6 +102,45 @@ class AddProductView extends GetView<InventoryController> {
                 ),
               ],
             ),
+            const SizedBox(height: AppSizes.p12),
+            // Packaging Unit & Factor
+            Obx(() {
+              return Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: controller.packageUnit.value.isEmpty
+                          ? null
+                          : controller.packageUnit.value,
+                      decoration: const InputDecoration(
+                        labelText: 'প্যাকেজিং একক (ঐচ্ছিক)',
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: '', child: Text('কোনটিই নয়')),
+                        DropdownMenuItem(value: 'carton', child: Text('কার্টন (Carton)')),
+                        DropdownMenuItem(value: 'box', child: Text('বক্স (Box)')),
+                        DropdownMenuItem(value: 'bag', child: Text('বস্তা (Bag)')),
+                        DropdownMenuItem(value: 'packet', child: Text('প্যাকেট (Packet)')),
+                      ],
+                      onChanged: (val) =>
+                          controller.packageUnit.value = val ?? '',
+                    ),
+                  ),
+                  if (controller.packageUnit.value.isNotEmpty) ...[
+                    const SizedBox(width: AppSizes.p12),
+                    Expanded(
+                      child: AppTextField(
+                        label:
+                            '১ ${controller.packageUnit.value} = কত ${controller.selectedUnit.value}?',
+                        controller: controller.packageQuantityController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            }),
             const SizedBox(height: AppSizes.p12),
             Row(
               children: [

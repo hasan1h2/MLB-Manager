@@ -4,6 +4,7 @@ import 'package:get/get.dart' hide Value;
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
+import '../../../../core/services/active_business_service.dart';
 import '../../../../core/services/database_service.dart';
 import '../../../../core/utils/currency_utils.dart';
 import 'package:mlb_manager/shared/widgets/app_snackbar.dart';
@@ -22,6 +23,7 @@ class SupplierWithPayable {
 
 class PartyController extends GetxController {
   final DatabaseService _dbService = Get.find<DatabaseService>();
+  final ActiveBusinessService _activeBizService = Get.find<ActiveBusinessService>();
   final _uuid = const Uuid();
 
   final RxList<CustomerWithDue> customersWithDue = <CustomerWithDue>[].obs;
@@ -47,24 +49,37 @@ class PartyController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initBusiness();
-  }
+    // React to active business change
+    ever(_activeBizService.activeBusiness, (BusinessesData? b) {
+      activeBusinessId.value = b?.id;
+      if (b != null) {
+        loadParties();
+      } else {
+        customersWithDue.clear();
+        suppliersWithPayable.clear();
+      }
+    });
 
-  Future<void> initBusiness() async {
-    final businesses = await _dbService.businessDao.getAllBusinesses();
-    if (businesses.isNotEmpty) {
-      activeBusinessId.value = businesses.first.id;
-      await loadParties();
+    final current = _activeBizService.activeBusiness.value;
+    if (current != null) {
+      activeBusinessId.value = current.id;
+      loadParties();
     } else {
       isLoading.value = false;
     }
   }
 
   Future<void> loadParties() async {
-    if (activeBusinessId.value == null) return;
+    final bizId = activeBusinessId.value;
+    if (bizId == null) {
+      customersWithDue.clear();
+      suppliersWithPayable.clear();
+      isLoading.value = false;
+      return;
+    }
+
     try {
       isLoading.value = true;
-      final bizId = activeBusinessId.value!;
 
       // Customers
       final custs = await _dbService.businessDao.getAllCustomers(bizId);
@@ -91,6 +106,12 @@ class PartyController extends GetxController {
   }
 
   Future<bool> saveCustomer() async {
+    final bizId = activeBusinessId.value;
+    if (bizId == null) {
+      AppSnackbar.error('কোন সক্রিয় ব্যবসা নির্বাচন করা নেই');
+      return false;
+    }
+
     if (nameController.text.trim().isEmpty) {
       AppSnackbar.error('নাম লিখুন');
       return false;
@@ -106,7 +127,7 @@ class PartyController extends GetxController {
       await _dbService.businessDao.insertCustomer(
         CustomersCompanion(
           id: Value(_uuid.v4()),
-          businessId: Value(activeBusinessId.value!),
+          businessId: Value(bizId),
           name: Value(nameController.text.trim()),
           company: Value(companyController.text.trim().isNotEmpty
               ? companyController.text.trim()
@@ -138,6 +159,12 @@ class PartyController extends GetxController {
   }
 
   Future<bool> saveSupplier() async {
+    final bizId = activeBusinessId.value;
+    if (bizId == null) {
+      AppSnackbar.error('কোন সক্রিয় ব্যবসা নির্বাচন করা নেই');
+      return false;
+    }
+
     if (nameController.text.trim().isEmpty) {
       AppSnackbar.error('নাম লিখুন');
       return false;
@@ -151,7 +178,7 @@ class PartyController extends GetxController {
       await _dbService.businessDao.insertSupplier(
         SuppliersCompanion(
           id: Value(_uuid.v4()),
-          businessId: Value(activeBusinessId.value!),
+          businessId: Value(bizId),
           name: Value(nameController.text.trim()),
           company: Value(companyController.text.trim().isNotEmpty
               ? companyController.text.trim()
@@ -182,6 +209,9 @@ class PartyController extends GetxController {
 
   Future<void> recordPayment(
       {required String partyType, required String partyId}) async {
+    final bizId = activeBusinessId.value;
+    if (bizId == null) return;
+
     final amount = CurrencyUtils.takaToMinor(paymentAmountController.text);
     if (amount <= 0) return;
 
@@ -191,7 +221,7 @@ class PartyController extends GetxController {
         id: Value(_uuid.v4()),
         partyType: Value(partyType),
         partyId: Value(partyId),
-        businessId: Value(activeBusinessId.value!),
+        businessId: Value(bizId),
         amountMinor: Value(amount),
         paymentDate: Value(now),
         notes: Value(paymentNotesController.text.trim()),

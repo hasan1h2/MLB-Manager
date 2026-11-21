@@ -209,33 +209,52 @@ class _BusinessTransactionDetailsViewState
           const Divider(),
           if (isSale)
             ..._saleItems.map((item) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 5,
-                      child: Text(
-                        item.productName ?? 'পণ্য',
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.productName ?? 'পণ্য',
+                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                          ),
+                        ),
+                        Text(
+                          CurrencyUtils.format(item.totalMinor),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                        ),
+                      ],
                     ),
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        '${item.quantity} ${item.unit ?? ''}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: Text(
-                        CurrencyUtils.format(item.totalMinor),
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 13),
-                      ),
+                    const SizedBox(height: 2),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${item.quantity} ${item.unit ?? ''} × ${CurrencyUtils.format(item.unitPriceMinor)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        if (item.conversionFactor > 1)
+                          Text(
+                            'বেস স্টক কর্তন: ${item.baseQuantity} টি',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.incomeGreen,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -243,34 +262,56 @@ class _BusinessTransactionDetailsViewState
             })
           else
             ..._purchaseItems.map((item) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 5,
-                      child: Text(
-                        item.productName ?? 'পণ্য',
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.productName ?? 'পণ্য',
+                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                          ),
+                        ),
+                        Text(
+                          CurrencyUtils.format(item.totalMinor),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'পরিমাণ: ${item.quantity} ${item.unit ?? ''} × ক্রয়দর ${CurrencyUtils.format(item.unitCostMinor)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                       ),
                     ),
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        '${item.quantity} ${item.unit ?? ''}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: Text(
-                        CurrencyUtils.format(item.totalMinor),
-                        textAlign: TextAlign.right,
+                    if (item.conversionFactor > 1)
+                      Text(
+                        'প্যাকেজিং: ১ ${item.unit} = ${item.conversionFactor} বেস একক (স্টক বৃদ্ধি: +${item.baseQuantity})',
                         style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 13),
+                          fontSize: 11,
+                          color: AppColors.incomeGreen,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
+                    if (item.retailPriceMinor > 0)
+                      Text(
+                        'নির্ধারিত খুচরা বিক্রয়: ${CurrencyUtils.format(item.retailPriceMinor)}${item.wholesalePriceMinor > 0 ? ' | পাইকারি: ${CurrencyUtils.format(item.wholesalePriceMinor)}' : ''}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                        ),
+                      ),
                   ],
                 ),
               );

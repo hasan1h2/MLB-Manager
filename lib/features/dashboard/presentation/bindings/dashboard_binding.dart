@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../../core/services/active_business_service.dart';
 import '../../../business/presentation/controllers/business_controller.dart';
 import '../../../reports/presentation/controllers/report_controller.dart';
 import '../../../transactions/presentation/controllers/transaction_controller.dart';
@@ -8,6 +9,9 @@ import '../controllers/main_nav_controller.dart';
 class DashboardBinding extends Bindings {
   @override
   void dependencies() {
+    if (!Get.isRegistered<ActiveBusinessService>()) {
+      Get.put<ActiveBusinessService>(ActiveBusinessService(), permanent: true);
+    }
     Get.lazyPut<MainNavController>(() => MainNavController(), fenix: true);
     Get.lazyPut<DashboardController>(() => DashboardController(), fenix: true);
     Get.lazyPut<TransactionController>(() => TransactionController(),

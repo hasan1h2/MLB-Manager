@@ -71,6 +71,27 @@ class InventoryDao {
     });
   }
 
+  // --- Unit Conversions ---
+  Future<List<ProductUnitConversion>> getProductUnitConversions(String productId) {
+    return (db.select(db.productUnitConversions)
+          ..where((tbl) => tbl.productId.equals(productId)))
+        .get();
+  }
+
+  Future<void> setProductUnitConversions(
+    String productId,
+    List<ProductUnitConversionsCompanion> conversions,
+  ) async {
+    await db.transaction(() async {
+      await (db.delete(db.productUnitConversions)
+            ..where((tbl) => tbl.productId.equals(productId)))
+          .go();
+      for (var conv in conversions) {
+        await db.into(db.productUnitConversions).insert(conv);
+      }
+    });
+  }
+
   // --- Wholesale Price Tiers ---
   Future<List<ProductPriceTier>> getProductPriceTiers(String productId) {
     return (db.select(db.productPriceTiers)
@@ -138,6 +159,7 @@ class InventoryDao {
         netMovements += m.quantity;
       } else if (m.movementType == 'out' ||
           m.movementType == 'sale' ||
+          m.movementType == 'wholesale_sale' ||
           m.movementType == 'damage' ||
           m.movementType == 'wastage') {
         netMovements -= m.quantity;
@@ -161,10 +183,44 @@ class InventoryDao {
     required List<InventoryMovementsCompanion> movements,
     String? accountId,
   }) async {
+    final bizId = purchase.businessId.value;
+
+    // Strict Cross-Business Ownership Check
+    for (var item in items) {
+      final product = await getProductById(item.productId.value);
+      if (product == null) {
+        throw Exception('পণ্যটি ডাটাবেজে পাওয়া যায়নি');
+      }
+      if (product.businessId != bizId) {
+        throw Exception('এই পণ্যটি (${product.name}) নির্বাচিত ব্যবসার অন্তর্ভুক্ত নয়!');
+      }
+    }
+
     await db.transaction(() async {
       await db.into(db.purchaseRecords).insert(purchase);
       for (var item in items) {
         await db.into(db.purchaseItems).insert(item);
+
+        // Update product's cost and selling prices atomically
+        final baseQty = item.baseQuantity.present && item.baseQuantity.value > 0
+            ? item.baseQuantity.value
+            : item.quantity.value;
+        final baseUnitCostMinor = (item.totalMinor.value / baseQty).round();
+
+        final updates = ProductsCompanion(
+          purchasePriceMinor: Value(baseUnitCostMinor),
+          sellingPriceMinor:
+              item.retailPriceMinor.present && item.retailPriceMinor.value > 0
+                  ? item.retailPriceMinor
+                  : const Value.absent(),
+          wholesalePriceMinor: item.wholesalePriceMinor.present &&
+                  item.wholesalePriceMinor.value > 0
+              ? item.wholesalePriceMinor
+              : const Value.absent(),
+        );
+        await (db.update(db.products)
+              ..where((tbl) => tbl.id.equals(item.productId.value)))
+            .write(updates);
       }
       for (var movement in movements) {
         await db.into(db.inventoryMovements).insert(movement);
@@ -215,6 +271,21 @@ class InventoryDao {
     required List<InventoryMovementsCompanion> movements,
     String? accountId,
   }) async {
+    final bizId = sale.businessId.value;
+
+    // Strict Cross-Business Ownership Check
+    for (var item in items) {
+      if (item.productId.value != null) {
+        final product = await getProductById(item.productId.value!);
+        if (product == null) {
+          throw Exception('পণ্যটি ডাটাবেজে পাওয়া যায়নি');
+        }
+        if (product.businessId != bizId) {
+          throw Exception('এই পণ্যটি (${product.name}) নির্বাচিত ব্যবসার অন্তর্ভুক্ত নয়!');
+        }
+      }
+    }
+
     await db.transaction(() async {
       await db.into(db.salesRecords).insert(sale);
       for (var item in items) {

@@ -11,7 +11,10 @@ class Products extends Table {
   TextColumn get nameBn => text().nullable()();
   TextColumn get nameEn => text().nullable()();
   TextColumn get categoryId => text().nullable().references(Categories, #id)();
-  TextColumn get unit => text()();
+  TextColumn get subcategoryId => text().nullable().references(Categories, #id)();
+  TextColumn get unit => text()(); // base stock unit (e.g. kg, liter, piece, packet)
+  TextColumn get packageUnit => text().nullable()(); // optional pack unit (e.g. box, carton, bag)
+  RealColumn get packageQuantity => real().withDefault(const Constant(1.0))(); // base units per package
   IntColumn get purchasePriceMinor =>
       integer().withDefault(const Constant(0))();
   IntColumn get sellingPriceMinor => integer().withDefault(const Constant(0))();
@@ -27,6 +30,19 @@ class Products extends Table {
   RealColumn get openingQuantity => real().withDefault(const Constant(0.0))();
   RealColumn get minimumStock => real().withDefault(const Constant(0.0))();
   IntColumn get isActive => integer().withDefault(const Constant(1))();
+  IntColumn get createdAt => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class ProductUnitConversions extends Table {
+  TextColumn get id => text()();
+  TextColumn get productId =>
+      text().references(Products, #id, onDelete: KeyAction.cascade)();
+  TextColumn get unit => text()(); // e.g. box, carton, dozen, g, kg
+  RealColumn get conversionFactor => real()(); // how many base units in this unit
+  IntColumn get priceMinor => integer().nullable()();
   IntColumn get createdAt => integer()();
 
   @override
@@ -93,7 +109,11 @@ class PurchaseItems extends Table {
   TextColumn get productName => text().nullable()();
   TextColumn get unit => text().nullable()();
   RealColumn get quantity => real()();
+  RealColumn get conversionFactor => real().withDefault(const Constant(1.0))();
+  RealColumn get baseQuantity => real().withDefault(const Constant(0.0))();
   IntColumn get unitCostMinor => integer()();
+  IntColumn get retailPriceMinor => integer().withDefault(const Constant(0))();
+  IntColumn get wholesalePriceMinor => integer().withDefault(const Constant(0))();
   IntColumn get totalMinor => integer()();
 
   @override
@@ -132,6 +152,8 @@ class SalesItems extends Table {
   TextColumn get productName => text().nullable()();
   TextColumn get unit => text().nullable()();
   RealColumn get quantity => real()();
+  RealColumn get conversionFactor => real().withDefault(const Constant(1.0))();
+  RealColumn get baseQuantity => real().withDefault(const Constant(0.0))();
   IntColumn get unitPriceMinor => integer()();
   IntColumn get unitCostMinor => integer().withDefault(const Constant(0))();
   IntColumn get totalMinor => integer()();

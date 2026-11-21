@@ -14,7 +14,7 @@ class AppConstants {
 
   // Database
   static const String databaseName = 'mlb_manager.sqlite';
-  static const int databaseVersion = 3;
+  static const int databaseVersion = 4;
 
   // Pagination
   static const int defaultPageSize = 25;
@@ -38,9 +38,12 @@ class AppConstants {
     'ml',
     'piece',
     'packet',
-    'dozen',
-    'bag',
     'box',
+    'carton',
+    'dozen',
+    'bottle',
+    'pair',
+    'bag',
     'meter',
     'yard',
     'sqft',

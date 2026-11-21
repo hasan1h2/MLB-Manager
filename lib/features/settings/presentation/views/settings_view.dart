@@ -35,8 +35,6 @@ class SettingsView extends GetView<SettingsController> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedColor =
         isDark ? AppColors.secondaryElectric : AppColors.primaryNavy;
-    final unselectedTextColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final unselectedBg = isDark ? AppColors.surfaceDark : Colors.white;
     final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
 
@@ -64,18 +62,29 @@ class SettingsView extends GetView<SettingsController> {
             const SizedBox(height: AppSizes.p12),
             Obx(() {
               final isBn = controller.currentLocale.value.languageCode == 'bn';
+              final activeText = Colors.white;
+              final inactiveText = isDark ? Colors.white : AppColors.textPrimaryLight;
+
               return Row(
                 children: [
                   Expanded(
                     child: ChoiceChip(
-                      label: const Center(child: Text('বাংলা (Bengali)')),
+                      label: Center(
+                        child: Text(
+                          'বাংলা (Bengali)',
+                          style: TextStyle(
+                            color: isBn ? activeText : inactiveText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                       selected: isBn,
                       selectedColor: selectedColor,
                       backgroundColor: unselectedBg,
                       side:
                           BorderSide(color: isBn ? selectedColor : borderColor),
                       labelStyle: TextStyle(
-                        color: isBn ? Colors.white : unselectedTextColor,
+                        color: isBn ? activeText : inactiveText,
                         fontWeight: FontWeight.w600,
                       ),
                       onSelected: (_) =>
@@ -85,14 +94,22 @@ class SettingsView extends GetView<SettingsController> {
                   const SizedBox(width: AppSizes.p8),
                   Expanded(
                     child: ChoiceChip(
-                      label: const Center(child: Text('English (US)')),
+                      label: Center(
+                        child: Text(
+                          'English (US)',
+                          style: TextStyle(
+                            color: !isBn ? activeText : inactiveText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                       selected: !isBn,
                       selectedColor: selectedColor,
                       backgroundColor: unselectedBg,
                       side: BorderSide(
                           color: !isBn ? selectedColor : borderColor),
                       labelStyle: TextStyle(
-                        color: !isBn ? Colors.white : unselectedTextColor,
+                        color: !isBn ? activeText : inactiveText,
                         fontWeight: FontWeight.w600,
                       ),
                       onSelected: (_) =>

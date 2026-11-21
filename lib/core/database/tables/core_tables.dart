@@ -84,12 +84,14 @@ class Categories extends Table {
   TextColumn get id => text()();
   TextColumn get nameBn => text()();
   TextColumn get nameEn => text()();
-  TextColumn get categoryType => text()(); // income, expense
+  TextColumn get categoryType => text()(); // income, expense, product
   TextColumn get parentId => text().nullable().references(Categories, #id)();
   TextColumn get scope => text()(); // personal, family, business, both
+  TextColumn get businessId => text().nullable().references(Businesses, #id)();
   TextColumn get icon => text().nullable()();
   TextColumn get color => text().nullable()();
   IntColumn get isSystem => integer().withDefault(const Constant(0))();
+  IntColumn get isActive => integer().withDefault(const Constant(1))();
   IntColumn get createdAt => integer()();
 
   @override

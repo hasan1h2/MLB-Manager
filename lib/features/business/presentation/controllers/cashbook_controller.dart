@@ -4,15 +4,17 @@ import 'package:get/get.dart' hide Value;
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
+import '../../../../core/services/active_business_service.dart';
 import '../../../../core/services/database_service.dart';
 import '../../../../core/utils/currency_utils.dart';
 import 'package:mlb_manager/shared/widgets/app_snackbar.dart';
 
 class CashbookController extends GetxController {
   final DatabaseService _dbService = Get.find<DatabaseService>();
+  final ActiveBusinessService _activeBizService = Get.find<ActiveBusinessService>();
   final _uuid = const Uuid();
 
-  final Rx<BusinessesData?> currentBusiness = Rx<BusinessesData?>(null);
+  Rx<BusinessesData?> get currentBusiness => _activeBizService.activeBusiness;
   final Rx<CashSession?> activeSession = Rx<CashSession?>(null);
   final RxList<CashSession> pastSessions = <CashSession>[].obs;
   final RxBool isLoading = true.obs;
@@ -48,14 +50,22 @@ class CashbookController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    ever(_activeBizService.activeBusiness, (BusinessesData? b) {
+      if (b != null) {
+        loadSession(b.id);
+      } else {
+        activeSession.value = null;
+        pastSessions.clear();
+      }
+    });
+
     initCashbook();
   }
 
   Future<void> initCashbook() async {
-    final businesses = await _dbService.businessDao.getAllBusinesses();
-    if (businesses.isNotEmpty) {
-      currentBusiness.value = businesses.first;
-      await loadSession(currentBusiness.value!.id);
+    final b = _activeBizService.activeBusiness.value;
+    if (b != null) {
+      await loadSession(b.id);
     } else {
       isLoading.value = false;
     }
@@ -177,7 +187,8 @@ class CashbookController extends GetxController {
   int get differenceMinor => actualCountedCashMinor - expectedClosingCashMinor;
 
   Future<bool> startSession() async {
-    if (currentBusiness.value == null) return false;
+    final biz = _activeBizService.activeBusiness.value;
+    if (biz == null) return false;
     final openingMinor = CurrencyUtils.takaToMinor(openingCashController.text);
     final now = DateTime.now();
     final todayMidnight = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
@@ -187,7 +198,7 @@ class CashbookController extends GetxController {
       await _dbService.businessDao.openCashSession(
         CashSessionsCompanion(
           id: Value(sessionId),
-          businessId: Value(currentBusiness.value!.id),
+          businessId: Value(biz.id),
           sessionDate: Value(todayMidnight),
           openingCashMinor: Value(openingMinor),
           expectedClosingMinor: Value(openingMinor),
@@ -200,7 +211,7 @@ class CashbookController extends GetxController {
       );
 
       AppSnackbar.success('দৈনিক ক্যাশ হিসাব শুরু হয়েছে');
-      await loadSession(currentBusiness.value!.id);
+      await loadSession(biz.id);
       return true;
     } catch (e) {
       AppSnackbar.error('ত্রুটি: $e');
