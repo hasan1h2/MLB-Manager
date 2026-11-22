@@ -7,6 +7,7 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/services/database_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
+import '../../../../core/utils/unit_conversion_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_loading_indicator.dart';
 import '../utils/receipt_printer.dart';
@@ -287,24 +288,60 @@ class _BusinessTransactionDetailsViewState
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'পরিমাণ: ${item.quantity} ${item.unit ?? ''} × ক্রয়দর ${CurrencyUtils.format(item.unitCostMinor)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                      ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'ক্রয় পরিমাণ: ${item.quantity % 1 == 0 ? item.quantity.toInt() : item.quantity} ${UnitConversionUtils.getShortUnitLabel(item.unit ?? '')}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                          ),
+                        ),
+                        Text(
+                          'দর: ${CurrencyUtils.format(item.unitCostMinor)} / ${UnitConversionUtils.getShortUnitLabel(item.unit ?? '')}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                          ),
+                        ),
+                      ],
                     ),
-                    if (item.conversionFactor > 1)
-                      Text(
-                        'প্যাকেজিং: ১ ${item.unit} = ${item.conversionFactor} বেস একক (স্টক বৃদ্ধি: +${item.baseQuantity})',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.incomeGreen,
-                          fontWeight: FontWeight.w600,
+                    if (item.conversionFactor > 1) ...[
+                      const SizedBox(height: 3),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.incomeGreen.withValues(alpha: isDark ? 0.15 : 0.08),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'প্যাকেজ রূপান্তর: ১ ${UnitConversionUtils.getShortUnitLabel(item.unit ?? '')} = ${item.conversionFactor % 1 == 0 ? item.conversionFactor.toInt() : item.conversionFactor} বেস একক',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.incomeGreen,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              'ইনভেন্টরি বৃদ্ধি: +${item.baseQuantity % 1 == 0 ? item.baseQuantity.toInt() : item.baseQuantity}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.incomeGreen,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    if (item.retailPriceMinor > 0)
+                    ],
+                    if (item.retailPriceMinor > 0) ...[
+                      const SizedBox(height: 2),
                       Text(
                         'নির্ধারিত খুচরা বিক্রয়: ${CurrencyUtils.format(item.retailPriceMinor)}${item.wholesalePriceMinor > 0 ? ' | পাইকারি: ${CurrencyUtils.format(item.wholesalePriceMinor)}' : ''}',
                         style: TextStyle(
@@ -312,6 +349,7 @@ class _BusinessTransactionDetailsViewState
                           color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                         ),
                       ),
+                    ],
                   ],
                 ),
               );

@@ -4,22 +4,27 @@ import '../../core/theme/app_colors.dart';
 
 class AppSnackbar {
   static void success(String message, {String? title}) {
-    showSuccess(title: title ?? 'success'.tr, message: message);
+    showSuccess(title: title ?? 'সফল', message: message);
   }
 
   static void error(String message, {String? title}) {
-    showError(title: title ?? 'error'.tr, message: message);
+    showError(title: title ?? 'ত্রুটি', message: message);
   }
 
   static void warning(String message, {String? title}) {
-    showWarning(title: title ?? 'warning'.tr, message: message);
+    showWarning(title: title ?? 'সতর্কতা', message: message);
   }
 
   static void info(String message, {String? title}) {
-    showInfo(title: title ?? 'information'.tr, message: message);
+    showInfo(title: title ?? 'তথ্য', message: message);
+  }
+
+  static void validation(String message, {String? title}) {
+    showValidation(title: title ?? 'যাচাইকরণ', message: message);
   }
 
   static void showSuccess({required String title, required String message}) {
+    if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
     Get.snackbar(
       title,
       message,
@@ -41,6 +46,7 @@ class AppSnackbar {
   }
 
   static void showError({required String title, required String message}) {
+    if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
     Get.snackbar(
       title,
       message,
@@ -62,6 +68,7 @@ class AppSnackbar {
   }
 
   static void showWarning({required String title, required String message}) {
+    if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
     Get.snackbar(
       title,
       message,
@@ -83,6 +90,7 @@ class AppSnackbar {
   }
 
   static void showInfo({required String title, required String message}) {
+    if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
     Get.snackbar(
       title,
       message,
@@ -90,6 +98,28 @@ class AppSnackbar {
       backgroundColor: AppColors.primaryNavy.withValues(alpha: 0.95),
       colorText: Colors.white,
       icon: const Icon(Icons.info_outline, color: Colors.white),
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+      duration: const Duration(seconds: 3),
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  static void showValidation({required String title, required String message}) {
+    if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: AppColors.warningAmberDark.withValues(alpha: 0.95),
+      colorText: Colors.white,
+      icon: const Icon(Icons.fact_check_outlined, color: Colors.white),
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
       duration: const Duration(seconds: 3),

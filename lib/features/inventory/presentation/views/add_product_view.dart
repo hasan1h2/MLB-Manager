@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/currency_utils.dart';
+import '../../../../core/utils/unit_conversion_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/currency_input_field.dart';
@@ -103,38 +105,134 @@ class AddProductView extends GetView<InventoryController> {
               ],
             ),
             const SizedBox(height: AppSizes.p12),
-            // Packaging Unit & Factor
+            // Packaging Unit, Content & Conversion
             Obx(() {
-              return Row(
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: controller.packageUnit.value.isEmpty
-                          ? null
-                          : controller.packageUnit.value,
-                      decoration: const InputDecoration(
-                        labelText: 'প্যাকেজিং একক (ঐচ্ছিক)',
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: controller.packageUnit.value.isEmpty
+                              ? null
+                              : controller.packageUnit.value,
+                          decoration: const InputDecoration(
+                            labelText: 'প্যাকেজিং ধরণ / একক (ঐচ্ছিক)',
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: '', child: Text('কোনটিই নয় (শুধুমাত্র বেস একক)')),
+                            DropdownMenuItem(value: 'carton', child: Text('কার্টন (Carton)')),
+                            DropdownMenuItem(value: 'box', child: Text('বক্স (Box)')),
+                            DropdownMenuItem(value: 'sack', child: Text('বস্তা (Sack)')),
+                            DropdownMenuItem(value: 'bag', child: Text('ব্যাগ (Bag)')),
+                            DropdownMenuItem(value: 'packet', child: Text('প্যাকেট (Packet)')),
+                            DropdownMenuItem(value: 'bottle', child: Text('বোতল (Bottle)')),
+                            DropdownMenuItem(value: 'custom', child: Text('কাস্টম প্যাকেজ নাম')),
+                          ],
+                          onChanged: (val) {
+                            controller.packageUnit.value = val ?? '';
+                            if (val != null && val.isNotEmpty) {
+                              controller.hasPackageConversion.value = true;
+                            } else {
+                              controller.hasPackageConversion.value = false;
+                            }
+                          },
+                        ),
                       ),
-                      items: const [
-                        DropdownMenuItem(value: '', child: Text('কোনটিই নয়')),
-                        DropdownMenuItem(value: 'carton', child: Text('কার্টন (Carton)')),
-                        DropdownMenuItem(value: 'box', child: Text('বক্স (Box)')),
-                        DropdownMenuItem(value: 'bag', child: Text('বস্তা (Bag)')),
-                        DropdownMenuItem(value: 'packet', child: Text('প্যাকেট (Packet)')),
+                      if (controller.packageUnit.value == 'custom') ...[
+                        const SizedBox(width: AppSizes.p12),
+                        Expanded(
+                          child: AppTextField(
+                            label: 'প্যাকেজের নাম লিখুন',
+                            hint: 'যেমন: পেটি, ড্রাম',
+                            controller: controller.customPackageNameController,
+                          ),
+                        ),
                       ],
-                      onChanged: (val) =>
-                          controller.packageUnit.value = val ?? '',
-                    ),
+                    ],
                   ),
                   if (controller.packageUnit.value.isNotEmpty) ...[
-                    const SizedBox(width: AppSizes.p12),
-                    Expanded(
-                      child: AppTextField(
-                        label:
-                            '১ ${controller.packageUnit.value} = কত ${controller.selectedUnit.value}?',
-                        controller: controller.packageQuantityController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
+                    const SizedBox(height: AppSizes.p8),
+                    Container(
+                      padding: const EdgeInsets.all(AppSizes.p12),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(AppSizes.r8),
+                        border: Border.all(color: borderColor),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: controller.hasPackageConversion.value,
+                                onChanged: (v) =>
+                                    controller.hasPackageConversion.value = v ?? false,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  'প্যাকেজের ভেতরের পণ্য খুচরা/আলাদা বিক্রি হবে (কনভার্সন চালু)',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? AppColors.textPrimaryDark
+                                        : AppColors.textPrimaryLight,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (controller.hasPackageConversion.value) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: AppTextField(
+                                    label:
+                                        '১ ${controller.packageUnit.value == 'custom' ? (controller.customPackageNameController.text.isNotEmpty ? controller.customPackageNameController.text : 'প্যাকেজ') : UnitConversionUtils.getShortUnitLabel(controller.packageUnit.value)} = কত ${UnitConversionUtils.getShortUnitLabel(controller.selectedUnit.value)}?',
+                                    hint: 'যেমন: 50 বা 24',
+                                    controller: controller.packageQuantityController,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    onChanged: (val) => controller.onPackageQuantityChanged(val),
+                                  ),
+                                ),
+                                const SizedBox(width: AppSizes.p12),
+                                Expanded(
+                                  child: CurrencyInputField(
+                                    label: 'প্যাকেজ ক্রয় মূল্য (৳)',
+                                    controller: controller.packageCostController,
+                                    onChanged: (val) => controller.onPackageCostChanged(val),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Obx(() {
+                              final pCost = double.tryParse(controller.packageCostController.text) ?? 0.0;
+                              final pQty = double.tryParse(controller.packageQuantityController.text) ?? 1.0;
+                              if (pCost > 0 && pQty > 0) {
+                                final perBase = pCost / pQty;
+                                return Text(
+                                  '💡 হিসাবকৃত একক ক্রয়দর: ${CurrencyUtils.format((perBase * 100).round())} / ${UnitConversionUtils.getShortUnitLabel(controller.selectedUnit.value)}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.incomeGreen,
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            }),
+                          ] else ...[
+                            const Text(
+                              'প্যাকেজ সরাসরি বিক্রি হবে, কোনো কেজি/গ্রাম/পিস রূপান্তর প্রয়োজন নেই।',
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ],
@@ -171,6 +269,7 @@ class AddProductView extends GetView<InventoryController> {
                   child: CurrencyInputField(
                     label: 'একক ক্রয় মূল্য',
                     controller: controller.purchasePriceController,
+                    onChanged: (val) => controller.onBaseCostChanged(val),
                   ),
                 ),
                 const SizedBox(width: AppSizes.p12),
@@ -359,6 +458,23 @@ class AddProductView extends GetView<InventoryController> {
 
   Widget _buildUnitDropdown() {
     return Obx(() {
+      const units = [
+        'piece',
+        'packet',
+        'kg',
+        'g',
+        'mg',
+        'liter',
+        'ml',
+        'box',
+        'carton',
+        'dozen',
+        'bottle',
+        'bag',
+        'sack',
+        'pair',
+        'custom',
+      ];
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -366,19 +482,15 @@ class AddProductView extends GetView<InventoryController> {
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: AppSizes.p4),
           DropdownButtonFormField<String>(
-            value: controller.selectedUnit.value,
-            items: const [
-              DropdownMenuItem(value: 'piece', child: Text('পিস (Piece)')),
-              DropdownMenuItem(value: 'kg', child: Text('কেজি (kg)')),
-              DropdownMenuItem(value: 'gm', child: Text('গ্রাম (gm)')),
-              DropdownMenuItem(value: 'liter', child: Text('লিটার (Liter)')),
-              DropdownMenuItem(
-                  value: 'packet', child: Text('প্যাকেট (Packet)')),
-              DropdownMenuItem(value: 'box', child: Text('বক্স (Box)')),
-              DropdownMenuItem(value: 'bag', child: Text('বস্তা (Bag)')),
-              DropdownMenuItem(value: 'dozen', child: Text('ডজন (Dozen)')),
-              DropdownMenuItem(value: 'carton', child: Text('কার্টন (Carton)')),
-            ],
+            value: units.contains(controller.selectedUnit.value)
+                ? controller.selectedUnit.value
+                : 'piece',
+            items: units.map((u) {
+              return DropdownMenuItem(
+                value: u,
+                child: Text(UnitConversionUtils.getUnitLabel(u)),
+              );
+            }).toList(),
             onChanged: (val) {
               if (val != null) controller.selectedUnit.value = val;
             },

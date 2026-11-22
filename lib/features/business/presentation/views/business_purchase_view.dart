@@ -6,6 +6,7 @@ import '../../../../core/constants/app_icons.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_utils.dart';
+import '../../../../core/utils/unit_conversion_utils.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../../shared/widgets/app_text_field.dart';
@@ -767,41 +768,92 @@ class BusinessPurchaseView extends GetView<BusinessPurchaseController> {
                         const SizedBox(width: 8),
                         Expanded(
                           flex: 3,
-                          child: DropdownButtonFormField<String>(
-                            value: controller.selectedUnit.value,
-                            decoration: const InputDecoration(
-                              labelText: 'ক্রয় একক (Unit)*',
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 8),
-                            ),
-                            items: const [
-                              DropdownMenuItem(value: 'piece', child: Text('পিস (Piece)')),
-                              DropdownMenuItem(value: 'packet', child: Text('প্যাকেট (Packet)')),
-                              DropdownMenuItem(value: 'kg', child: Text('কেজি (KG)')),
-                              DropdownMenuItem(value: 'g', child: Text('গ্রাম (G)')),
-                              DropdownMenuItem(value: 'liter', child: Text('লিটার (L)')),
-                              DropdownMenuItem(value: 'bottle', child: Text('বোতল (Bottle)')),
-                              DropdownMenuItem(value: 'box', child: Text('বক্স (Box)')),
-                              DropdownMenuItem(value: 'carton', child: Text('কার্টন (Carton)')),
-                              DropdownMenuItem(value: 'bag', child: Text('বস্তা (Bag)')),
-                              DropdownMenuItem(value: 'dozen', child: Text('ডজন (Dozen)')),
-                              DropdownMenuItem(value: 'pair', child: Text('জোড়া (Pair)')),
-                            ],
-                            onChanged: (val) {
-                              if (val != null) controller.selectedUnit.value = val;
-                            },
-                          ),
+                          child: Obx(() {
+                            const units = [
+                              'piece',
+                              'packet',
+                              'kg',
+                              'g',
+                              'mg',
+                              'liter',
+                              'ml',
+                              'bottle',
+                              'box',
+                              'carton',
+                              'bag',
+                              'sack',
+                              'dozen',
+                              'pair',
+                              'custom',
+                            ];
+                            return DropdownButtonFormField<String>(
+                              value: units.contains(controller.selectedUnit.value)
+                                  ? controller.selectedUnit.value
+                                  : 'piece',
+                              decoration: const InputDecoration(
+                                labelText: 'ক্রয় একক (Unit)*',
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 8),
+                              ),
+                              items: units.map((u) {
+                                return DropdownMenuItem(
+                                  value: u,
+                                  child: Text(
+                                    UnitConversionUtils.getShortUnitLabel(u),
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) controller.selectedUnit.value = val;
+                              },
+                            );
+                          }),
                         ),
                       ],
                     ),
 
                     const SizedBox(height: 10),
 
-                    // Unit Purchase Cost
-                    CurrencyInputField(
-                      label: 'প্রতি একক ক্রয়মূল্য (Purchase Cost)*',
-                      controller: controller.unitCostController,
+                    // Package Cost (Optional for bulk bag/carton purchase)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CurrencyInputField(
+                            label: 'প্যাকেজ ক্রয়মূল্য (ঐচ্ছিক)',
+                            controller: controller.packageCostController,
+                            onChanged: (val) => controller.onPackageCostChanged(val),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: CurrencyInputField(
+                            label: 'প্রতি একক ক্রয়মূল্য*',
+                            controller: controller.unitCostController,
+                            onChanged: (val) => controller.onBaseCostChanged(val),
+                          ),
+                        ),
+                      ],
                     ),
+                    Obx(() {
+                      final pCost = double.tryParse(controller.packageCostController.text) ?? 0.0;
+                      final pQty = double.tryParse(controller.packageQuantityController.text) ?? 1.0;
+                      if (pCost > 0 && pQty > 1) {
+                        final perBase = pCost / pQty;
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            '💡 প্যাকেজ ক্রয়: ৳${pCost.toInt()} ÷ $pQty = ৳${perBase % 1 == 0 ? perBase.toInt() : perBase.toStringAsFixed(2)} / ${controller.selectedUnit.value}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.incomeGreen,
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
 
                     const SizedBox(height: 10),
 

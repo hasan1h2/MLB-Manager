@@ -213,7 +213,10 @@ class PartyController extends GetxController {
     if (bizId == null) return;
 
     final amount = CurrencyUtils.takaToMinor(paymentAmountController.text);
-    if (amount <= 0) return;
+    if (amount <= 0) {
+      AppSnackbar.validation('সঠিক পেমেন্টের পরিমাণ লিখুন');
+      return;
+    }
 
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
     await _dbService.businessDao.insertPartyPayment(

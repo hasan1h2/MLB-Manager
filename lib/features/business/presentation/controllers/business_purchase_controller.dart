@@ -92,8 +92,46 @@ class BusinessPurchaseController extends GetxController {
   final retailPriceController = TextEditingController();
   final wholesalePriceController = TextEditingController();
   final packageQuantityController = TextEditingController(text: '1');
+  final packageCostController = TextEditingController();
+  final customPackageNameController = TextEditingController();
+  final RxBool hasPackageConversion = false.obs;
   final RxString selectedUnit = 'piece'.obs;
   final RxString selectedPackageUnit = ''.obs;
+
+  void onPackageCostChanged(String val) {
+    final packCost = double.tryParse(val) ?? 0.0;
+    final packQty = double.tryParse(packageQuantityController.text) ?? 1.0;
+    if (packQty > 0 && packCost > 0 && hasPackageConversion.value) {
+      final baseCost = packCost / packQty;
+      unitCostController.text = baseCost % 1 == 0
+          ? baseCost.toInt().toString()
+          : baseCost.toStringAsFixed(2);
+    } else if (packCost > 0) {
+      unitCostController.text = val;
+    }
+  }
+
+  void onBaseCostChanged(String val) {
+    final baseCost = double.tryParse(val) ?? 0.0;
+    final packQty = double.tryParse(packageQuantityController.text) ?? 1.0;
+    if (packQty > 0 && baseCost > 0 && hasPackageConversion.value) {
+      final packCost = baseCost * packQty;
+      packageCostController.text = packCost % 1 == 0
+          ? packCost.toInt().toString()
+          : packCost.toStringAsFixed(2);
+    }
+  }
+
+  void onPackageQuantityChanged(String val) {
+    final packQty = double.tryParse(val) ?? 1.0;
+    final packCost = double.tryParse(packageCostController.text) ?? 0.0;
+    if (packQty > 0 && packCost > 0 && hasPackageConversion.value) {
+      final baseCost = packCost / packQty;
+      unitCostController.text = baseCost % 1 == 0
+          ? baseCost.toInt().toString()
+          : baseCost.toStringAsFixed(2);
+    }
+  }
 
   // Inline product creation
   final inlineNameController = TextEditingController();
@@ -339,8 +377,10 @@ class BusinessPurchaseController extends GetxController {
     selectedProductToAdd.value = null;
     qtyController.text = '1';
     unitCostController.clear();
+    packageCostController.clear();
     retailPriceController.clear();
     wholesalePriceController.clear();
+    AppSnackbar.success('তালিকায় পণ্য যোগ করা হয়েছে!');
     Get.back(); // close dialog
   }
 
@@ -488,6 +528,8 @@ class BusinessPurchaseController extends GetxController {
     retailPriceController.dispose();
     wholesalePriceController.dispose();
     packageQuantityController.dispose();
+    packageCostController.dispose();
+    customPackageNameController.dispose();
     inlineNameController.dispose();
     inlineSkuController.dispose();
     inlineBarcodeController.dispose();

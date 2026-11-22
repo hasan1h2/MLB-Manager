@@ -1283,61 +1283,318 @@ class BusinessSaleView extends GetView<BusinessSaleController> {
   }
 
   void _showQuickSaleDialog(BuildContext context) {
-    Get.defaultDialog(
-      title: 'কুইক সেল আইটেম যোগ করুন',
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller.quickItemNameController,
-              decoration: const InputDecoration(labelText: 'পণ্যের নাম *', hintText: 'যেমন: ডিম, রুটি'),
-            ),
-            const SizedBox(height: 8),
-            Row(
+    controller.clearQuickSaleForm();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.r16)),
+      ),
+      builder: (sheetContext) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + AppSizes.p16,
+            left: AppSizes.p16,
+            right: AppSizes.p16,
+            top: AppSizes.p16,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller.quickItemQtyController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'পরিমাণ', hintText: '1'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.flash_on_rounded, color: AppColors.secondaryElectric),
+                        SizedBox(width: 8),
+                        Text(
+                          'কুইক সেল (Quick Sale)',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        controller.clearQuickSaleForm();
+                        Navigator.pop(sheetContext);
+                      },
+                    ),
+                  ],
+                ),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // Selected Product Badge if one is selected
+                Obx(() {
+                  final p = controller.selectedQuickProduct.value;
+                  if (p == null) return const SizedBox.shrink();
+                  final stock = controller.getProductStock(p.id);
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.incomeGreen.withValues(alpha: isDark ? 0.2 : 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.incomeGreen),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: AppColors.incomeGreen, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                p.nameBn ?? p.name,
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                              ),
+                              Text(
+                                'সংরক্ষিত ইনভেন্টরি পণ্য • বর্তমান মজুদ: ${stock % 1 == 0 ? stock.toInt() : stock} ${p.unit}',
+                                style: const TextStyle(fontSize: 11, color: AppColors.incomeGreen),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 18),
+                          tooltip: 'বাছাই বাতিল করুন',
+                          onPressed: () {
+                            controller.selectedQuickProduct.value = null;
+                            controller.quickItemNameController.clear();
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+
+                // Search / Enter Product Name
+                TextField(
+                  controller: controller.quickItemNameController,
+                  onChanged: (val) => controller.onQuickItemNameChanged(val),
+                  decoration: InputDecoration(
+                    labelText: 'পণ্যের নাম, কোড বা বারকোড *',
+                    hintText: 'যেমন: মিনিকেট চাল, ডিম, লাক্স সাবান',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: Obx(() {
+                      if (controller.quickItemNameController.text.isNotEmpty) {
+                        return IconButton(
+                          icon: const Icon(Icons.clear, size: 16),
+                          onPressed: () {
+                            controller.quickItemNameController.clear();
+                            controller.onQuickItemNameChanged('');
+                            controller.selectedQuickProduct.value = null;
+                          },
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Obx(() => DropdownButtonFormField<String>(
-                        value: controller.quickItemUnit.value,
-                        decoration: const InputDecoration(labelText: 'একক'),
-                        items: ['piece', 'kg', 'liter', 'packet']
-                            .map((u) => DropdownMenuItem(value: u, child: Text(u)))
-                            .toList(),
-                        onChanged: (val) {
-                          if (val != null) controller.quickItemUnit.value = val;
-                        },
-                      )),
+
+                // Suggestions List
+                Obx(() {
+                  final suggestions = controller.quickProductSuggestions;
+                  if (suggestions.isEmpty) return const SizedBox.shrink();
+                  return Container(
+                    constraints: const BoxConstraints(maxHeight: 180),
+                    margin: const EdgeInsets.only(top: 4, bottom: 8),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: borderColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: suggestions.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, idx) {
+                        final p = suggestions[idx];
+                        final stock = controller.getProductStock(p.id);
+                        final price = controller.saleType.value == 'wholesale' && p.wholesalePriceMinor > 0
+                            ? p.wholesalePriceMinor
+                            : p.sellingPriceMinor;
+                        return ListTile(
+                          dense: true,
+                          leading: const CircleAvatar(
+                            radius: 14,
+                            child: Icon(Icons.inventory_2, size: 16),
+                          ),
+                          title: Text(
+                            p.nameBn ?? p.name,
+                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                          ),
+                          subtitle: Text(
+                            'স্টক: ${stock % 1 == 0 ? stock.toInt() : stock} ${p.unit} • ${CurrencyUtils.format(price)}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                            ),
+                          ),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 12),
+                          onTap: () => controller.selectQuickProduct(p),
+                        );
+                      },
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 12),
+
+                // Quantity and Unit Row
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: TextField(
+                        controller: controller.quickItemQtyController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: 'পরিমাণ (Qty) *',
+                          hintText: '1',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 4,
+                      child: Obx(() {
+                        final units = controller.quickAvailableUnits;
+                        return DropdownButtonFormField<String>(
+                          value: units.contains(controller.quickItemUnit.value)
+                              ? controller.quickItemUnit.value
+                              : (units.isNotEmpty ? units.first : 'piece'),
+                          decoration: InputDecoration(
+                            labelText: 'একক (Unit) *',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          items: units.map((u) {
+                            return DropdownMenuItem<String>(
+                              value: u,
+                              child: Text(
+                                UnitConversionUtils.getUnitLabel(u),
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) controller.quickItemUnit.value = val;
+                          },
+                        );
+                      }),
+                    ),
+                  ],
                 ),
+
+                const SizedBox(height: 12),
+
+                // Selling Price and Purchase Cost Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: controller.quickItemPriceController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: 'বিক্রয় মূল্য (৳) *',
+                          hintText: '0.00',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: controller.quickItemCostController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: 'ক্রয় মূল্য (৳)',
+                          hintText: '0.00',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Notice if not existing product
+                Obx(() {
+                  if (controller.selectedQuickProduct.value == null &&
+                      controller.quickItemNameController.text.trim().isNotEmpty) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondaryElectric.withValues(alpha: isDark ? 0.2 : 0.08),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 16, color: AppColors.secondaryElectric),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'নতুন পণ্য হলে এটি তালিকায় যুক্ত হয়ে ইনভেন্টরিতে সংরক্ষিত হবে।',
+                              style: TextStyle(fontSize: 11, color: AppColors.secondaryElectric),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
+
+                // Add to Cart Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.incomeGreen,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    icon: const Icon(Icons.add_shopping_cart),
+                    label: const Text(
+                      'কার্টে যোগ করুন (Add to Cart)',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () async {
+                      await controller.addQuickSaleItem();
+                      if (sheetContext.mounted) {
+                        Navigator.pop(sheetContext);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
               ],
             ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller.quickItemPriceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'বিক্রয় মূল্য (৳) *', hintText: '0.00'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller.quickItemCostController,
-              keyboardType: TextInputType.number,
-              decoration:
-                  const InputDecoration(labelText: 'ক্রয় মূল্য / খরচ (৳)', hintText: '0.00'),
-            ),
-          ],
-        ),
-      ),
-      textConfirm: 'কার্টে যোগ করুন',
-      textCancel: 'বাতিল',
-      confirmTextColor: Colors.white,
-      onConfirm: controller.addQuickSaleItem,
+          ),
+        );
+      },
     );
   }
 

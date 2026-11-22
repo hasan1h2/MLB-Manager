@@ -1,45 +1,56 @@
 class UnitConversionUtils {
-  static const String unitKg = 'kg';
+  static const String unitMg = 'mg';
   static const String unitG = 'g';
-  static const String unitLiter = 'liter';
+  static const String unitKg = 'kg';
   static const String unitMl = 'ml';
+  static const String unitLiter = 'liter';
   static const String unitPiece = 'piece';
   static const String unitPacket = 'packet';
   static const String unitBox = 'box';
   static const String unitCarton = 'carton';
   static const String unitDozen = 'dozen';
   static const String unitBottle = 'bottle';
-  static const String unitPair = 'pair';
   static const String unitBag = 'bag';
+  static const String unitSack = 'sack';
+  static const String unitPair = 'pair';
+  static const String unitCustom = 'custom';
 
   static const Map<String, String> unitLabelsBn = {
-    unitKg: 'কেজি (KG)',
-    unitG: 'গ্রাম (G)',
+    unitMg: 'মিলিগ্রাম (mg)',
+    unitG: 'গ্রাম (g)',
+    unitKg: 'কেজি (kg)',
+    unitMl: 'মিলিলিটার (ml)',
     unitLiter: 'লিটার (L)',
-    unitMl: 'মিলি (ML)',
-    unitPiece: 'পিস (PCS)',
-    unitPacket: 'প্যাকেট (Packet)',
-    unitBox: 'বক্স (Box)',
-    unitCarton: 'কার্টন (Carton)',
-    unitDozen: 'ডজন (Dozen)',
-    unitBottle: 'বোতল (Bottle)',
-    unitPair: 'জোড়া (Pair)',
-    unitBag: 'বস্তা (Bag)',
+    unitPiece: 'পিস (pcs)',
+    'pcs': 'পিস (pcs)',
+    unitPacket: 'প্যাকেট',
+    unitBox: 'বক্স',
+    unitCarton: 'কার্টন',
+    unitDozen: 'ডজন',
+    unitBottle: 'বোতল',
+    unitBag: 'ব্যাগ',
+    unitSack: 'বস্তা',
+    unitPair: 'জোড়া',
+    unitCustom: 'কাস্টম একক',
   };
 
   static const Map<String, String> unitLabelsEn = {
-    unitKg: 'Kilogram (KG)',
-    unitG: 'Gram (G)',
-    unitLiter: 'Liter (L)',
-    unitMl: 'Milliliter (ML)',
-    unitPiece: 'Piece (PCS)',
+    unitMg: 'Milligram (mg)',
+    unitG: 'Gram (g)',
+    unitKg: 'Kilogram (kg)',
+    unitMl: 'Millilitre (ml)',
+    unitLiter: 'Litre (L)',
+    unitPiece: 'Piece (pcs)',
+    'pcs': 'Piece (pcs)',
     unitPacket: 'Packet',
     unitBox: 'Box',
     unitCarton: 'Carton',
     unitDozen: 'Dozen',
     unitBottle: 'Bottle',
+    unitBag: 'Bag',
+    unitSack: 'Sack',
     unitPair: 'Pair',
-    unitBag: 'Bag / Sack',
+    unitCustom: 'Custom Unit',
   };
 
   static String getUnitLabel(String unit, {bool isBangla = true}) {
@@ -54,15 +65,19 @@ class UnitConversionUtils {
   static String getShortUnitLabel(String unit, {bool isBangla = true}) {
     final normalized = unit.trim().toLowerCase();
     switch (normalized) {
-      case unitKg:
-        return isBangla ? 'কেজি' : 'KG';
+      case unitMg:
+        return isBangla ? 'মিলিগ্রাম' : 'mg';
       case unitG:
         return isBangla ? 'গ্রাম' : 'g';
-      case unitLiter:
-        return isBangla ? 'লিটার' : 'L';
+      case unitKg:
+        return isBangla ? 'কেজি' : 'kg';
       case unitMl:
         return isBangla ? 'মিলি' : 'ml';
+      case unitLiter:
+      case 'l':
+        return isBangla ? 'লিটার' : 'L';
       case unitPiece:
+      case 'pcs':
         return isBangla ? 'পিস' : 'pcs';
       case unitPacket:
         return isBangla ? 'প্যাকেট' : 'pkt';
@@ -74,10 +89,14 @@ class UnitConversionUtils {
         return isBangla ? 'ডজন' : 'doz';
       case unitBottle:
         return isBangla ? 'বোতল' : 'btl';
+      case unitBag:
+        return isBangla ? 'ব্যাগ' : 'bag';
+      case unitSack:
+        return isBangla ? 'বস্তা' : 'sack';
       case unitPair:
         return isBangla ? 'জোড়া' : 'pair';
-      case unitBag:
-        return isBangla ? 'বস্তা' : 'bag';
+      case unitCustom:
+        return isBangla ? 'কাস্টম' : 'custom';
       default:
         return unit;
     }
@@ -92,14 +111,14 @@ class UnitConversionUtils {
     final normalizedBase = baseUnit.trim().toLowerCase();
     final result = <String>{normalizedBase};
 
-    if (normalizedBase == unitKg) {
-      result.add(unitG);
-    } else if (normalizedBase == unitG) {
+    // Weight conversions
+    if (normalizedBase == unitKg || normalizedBase == unitG || normalizedBase == unitMg) {
       result.add(unitKg);
-    } else if (normalizedBase == unitLiter) {
-      result.add(unitMl);
-    } else if (normalizedBase == unitMl) {
+      result.add(unitG);
+      result.add(unitMg);
+    } else if (normalizedBase == unitLiter || normalizedBase == 'l' || normalizedBase == unitMl) {
       result.add(unitLiter);
+      result.add(unitMl);
     } else if (normalizedBase == unitPiece ||
         normalizedBase == 'pcs' ||
         normalizedBase == unitPacket ||
@@ -167,12 +186,24 @@ class UnitConversionUtils {
     if (from == unitKg && base == unitG) {
       return 1000.0;
     }
-
-    // Volume conversions
-    if (from == unitMl && base == unitLiter) {
+    if (from == unitMg && base == unitG) {
       return 0.001;
     }
-    if (from == unitLiter && base == unitMl) {
+    if (from == unitG && base == unitMg) {
+      return 1000.0;
+    }
+    if (from == unitMg && base == unitKg) {
+      return 0.000001;
+    }
+    if (from == unitKg && base == unitMg) {
+      return 1000000.0;
+    }
+
+    // Volume conversions
+    if (from == unitMl && (base == unitLiter || base == 'l')) {
+      return 0.001;
+    }
+    if ((from == unitLiter || from == 'l') && base == unitMl) {
       return 1000.0;
     }
 

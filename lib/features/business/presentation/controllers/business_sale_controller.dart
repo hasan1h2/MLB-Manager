@@ -83,12 +83,29 @@ class BusinessSaleController extends GetxController {
   final notesController = TextEditingController();
   final invoiceController = TextEditingController();
 
-  // Quick Sale Item Dialog Controllers
+  // Quick Sale Item Dialog Controllers & State
   final quickItemNameController = TextEditingController();
   final quickItemQtyController = TextEditingController(text: '1');
   final quickItemPriceController = TextEditingController();
   final quickItemCostController = TextEditingController();
   final RxString quickItemUnit = 'piece'.obs;
+  final Rx<Product?> selectedQuickProduct = Rx<Product?>(null);
+  final RxList<Product> quickProductSuggestions = <Product>[].obs;
+  final RxList<String> quickAvailableUnits = <String>[
+    'piece',
+    'packet',
+    'kg',
+    'g',
+    'liter',
+    'ml',
+    'box',
+    'carton',
+    'dozen',
+    'bottle',
+    'bag',
+    'sack',
+    'pair',
+  ].obs;
 
   // Barcode / Search
   final searchController = TextEditingController();
@@ -249,6 +266,7 @@ class BusinessSaleController extends GetxController {
         (item) => item.productId == product.id && item.unit.value == unitToUse);
     if (existing != null) {
       await updateItemQuantity(existing, existing.quantity.value + qty);
+      AppSnackbar.success('কার্টে পণ্য যোগ করা হয়েছে!');
       return;
     }
 
@@ -289,6 +307,7 @@ class BusinessSaleController extends GetxController {
 
     cartItems.add(cartItem);
     _syncPaidField();
+    AppSnackbar.success('কার্টে পণ্য যোগ করা হয়েছে!');
   }
 
   Future<void> changeCartItemUnit(SaleCartItem item, String newUnit) async {
@@ -322,37 +341,149 @@ class BusinessSaleController extends GetxController {
     _syncPaidField();
   }
 
-  void addQuickSaleItem() {
-    final name = quickItemNameController.text.trim();
-    if (name.isEmpty) {
-      AppSnackbar.error('পণ্যের নাম লিখুন');
+  void onQuickItemNameChanged(String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) {
+      quickProductSuggestions.clear();
       return;
     }
-    final qty = double.tryParse(quickItemQtyController.text) ?? 1.0;
-    final priceMinor =
-        CurrencyUtils.takaToMinor(quickItemPriceController.text);
-    final costMinor =
-        CurrencyUtils.takaToMinor(quickItemCostController.text);
+    final bizId = currentBusiness.value?.id;
+    final matches = availableProducts.where((p) {
+      if (bizId != null && p.businessId != bizId) return false;
+      if (p.isActive != 1) return false;
+      final nameMatch = p.name.toLowerCase().contains(q);
+      final bnMatch = (p.nameBn ?? '').toLowerCase().contains(q);
+      final enMatch = (p.nameEn ?? '').toLowerCase().contains(q);
+      final skuMatch = (p.sku ?? '').toLowerCase().contains(q);
+      final barcodeMatch = (p.barcode ?? '').toLowerCase().contains(q);
+      return nameMatch || bnMatch || enMatch || skuMatch || barcodeMatch;
+    }).take(8).toList();
 
-    final item = SaleCartItem(
-      productId: null,
-      productName: name,
-      baseUnit: quickItemUnit.value,
-      unit: quickItemUnit.value,
-      conversionFactor: 1.0,
-      purchasePriceMinor: costMinor,
-      quantity: qty,
-      unitPriceMinor: priceMinor,
+    quickProductSuggestions.value = matches;
+
+    if (selectedQuickProduct.value != null) {
+      final cur = selectedQuickProduct.value!;
+      final curName = (cur.nameBn ?? cur.name).toLowerCase();
+      if (!curName.contains(q)) {
+        selectedQuickProduct.value = null;
+      }
+    }
+  }
+
+  void selectQuickProduct(Product product) {
+    selectedQuickProduct.value = product;
+    quickItemNameController.text = product.nameBn ?? product.name;
+    quickItemUnit.value = product.unit;
+
+    quickAvailableUnits.value = UnitConversionUtils.getAvailableUnitsForProduct(
+      baseUnit: product.unit,
+      packageUnit: product.packageUnit,
     );
 
-    cartItems.add(item);
-    _syncPaidField();
+    final isWholesale = saleType.value == 'wholesale';
+    final price = (isWholesale && product.wholesalePriceMinor > 0)
+        ? product.wholesalePriceMinor
+        : product.sellingPriceMinor;
+    final priceTaka = CurrencyUtils.minorToTaka(price);
+    quickItemPriceController.text =
+        priceTaka % 1 == 0 ? priceTaka.toInt().toString() : priceTaka.toStringAsFixed(2);
+    final costTaka = CurrencyUtils.minorToTaka(product.purchasePriceMinor);
+    quickItemCostController.text =
+        costTaka % 1 == 0 ? costTaka.toInt().toString() : costTaka.toStringAsFixed(2);
 
+    quickProductSuggestions.clear();
+  }
+
+  void clearQuickSaleForm() {
+    selectedQuickProduct.value = null;
+    quickProductSuggestions.clear();
     quickItemNameController.clear();
     quickItemQtyController.text = '1';
     quickItemPriceController.clear();
     quickItemCostController.clear();
-    Get.back(); // close dialog
+    quickItemUnit.value = 'piece';
+  }
+
+  Future<void> addQuickSaleItem() async {
+    final name = quickItemNameController.text.trim();
+    if (name.isEmpty) {
+      AppSnackbar.validation('পণ্যের নাম লিখুন');
+      return;
+    }
+    final qty = double.tryParse(quickItemQtyController.text) ?? 1.0;
+    if (qty <= 0) {
+      AppSnackbar.validation('পরিমাণ অবশ্যই শূন্যের বেশি হতে হবে');
+      return;
+    }
+
+    final priceMinor =
+        CurrencyUtils.takaToMinor(quickItemPriceController.text);
+    final costMinor =
+        CurrencyUtils.takaToMinor(quickItemCostController.text);
+    final unit = quickItemUnit.value;
+    final biz = currentBusiness.value;
+
+    if (biz == null) {
+      AppSnackbar.error('কোন সক্রিয় ব্যবসা নির্বাচন করা নেই');
+      return;
+    }
+
+    Product? targetProduct = selectedQuickProduct.value;
+
+    // If not explicitly selected from suggestions, search if product already exists
+    if (targetProduct == null) {
+      final q = name.toLowerCase();
+      targetProduct = availableProducts.firstWhereOrNull((p) {
+        if (p.businessId != biz.id || p.isActive != 1) return false;
+        final pName = p.name.trim().toLowerCase();
+        final pNameBn = (p.nameBn ?? '').trim().toLowerCase();
+        final pNameEn = (p.nameEn ?? '').trim().toLowerCase();
+        final pSku = (p.sku ?? '').trim().toLowerCase();
+        return pName == q || pNameBn == q || pNameEn == q || (pSku.isNotEmpty && pSku == q);
+      });
+    }
+
+    // If product does not exist, create a new inventory record with real ID
+    if (targetProduct == null) {
+      final newId = _uuid.v4();
+      final now = DateTime.now().toUtc().millisecondsSinceEpoch;
+      final newCompanion = ProductsCompanion(
+        id: Value(newId),
+        businessId: Value(biz.id),
+        name: Value(name),
+        nameBn: Value(name),
+        unit: Value(unit),
+        purchasePriceMinor: Value(costMinor),
+        sellingPriceMinor: Value(priceMinor),
+        wholesalePriceMinor: Value(priceMinor),
+        openingQuantity: const Value(0.0),
+        minimumStock: const Value(5.0),
+        isActive: const Value(1),
+        createdAt: Value(now),
+      );
+
+      await _dbService.inventoryDao.insertProduct(newCompanion);
+      await loadProductsAndCustomers(biz.id);
+      targetProduct = availableProducts.firstWhereOrNull((p) => p.id == newId);
+    }
+
+    if (targetProduct == null) {
+      AppSnackbar.error('পণ্য যুক্ত করতে সমস্যা হয়েছে');
+      return;
+    }
+
+    // Add to cart with original/created product and its actual ID
+    await addProductToCart(
+      targetProduct,
+      qty: qty,
+      selectedUnit: unit,
+      customUnitPriceMinor: priceMinor > 0 ? priceMinor : null,
+    );
+
+    clearQuickSaleForm();
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
   }
 
   Future<void> updateItemQuantity(SaleCartItem item, double newQty) async {

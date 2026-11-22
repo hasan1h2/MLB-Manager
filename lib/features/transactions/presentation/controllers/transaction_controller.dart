@@ -253,18 +253,18 @@ class TransactionController extends GetxController {
         entries: entries,
       );
 
-      AppSnackbar.success('transaction_saved'.tr);
+      AppSnackbar.success('লেনদেন সফলভাবে সংরক্ষণ করা হয়েছে!');
       resetForm();
       return true;
     } catch (e) {
-      AppSnackbar.error('Error saving transaction: $e');
+      AppSnackbar.error('লেনদেন সংরক্ষণ ব্যর্থ: $e');
       return false;
     }
   }
 
   Future<void> deleteTransaction(String id) async {
     await _dbService.coreDao.softDeleteTransaction(id);
-    AppSnackbar.info('Transaction deleted');
+    AppSnackbar.success('লেনদেন সফলভাবে মুছে ফেলা হয়েছে!');
   }
 
   void resetForm() {

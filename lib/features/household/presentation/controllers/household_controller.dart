@@ -626,7 +626,7 @@ class HouseholdController extends GetxController {
       resetForm();
       return true;
     } catch (e) {
-      AppSnackbar.error('Error: $e');
+      AppSnackbar.error('বাজারের খরচ সংরক্ষণ ব্যর্থ: $e');
       return false;
     }
   }

@@ -30,11 +30,12 @@ class SettingsController extends GetxController {
     currentLocale.value = locale;
     await Get.updateLocale(locale);
     await _storage.setString(AppConstants.keyLanguage, locale.languageCode);
-    AppSnackbar.success('Language updated');
+    AppSnackbar.success(locale.languageCode == 'bn' ? 'ভাষা সফলভাবে পরিবর্তন করা হয়েছে' : 'Language updated successfully');
   }
 
   void toggleTheme(ThemeMode mode) {
     themeController.setThemeMode(mode);
+    AppSnackbar.success('থিম সফলভাবে আপডেট হয়েছে');
   }
 
   void openPinSetup() {
@@ -47,11 +48,12 @@ class SettingsController extends GetxController {
 
   Future<void> removePin() async {
     await pinService.removePin();
-    AppSnackbar.info('পিন লক নিষ্ক্রিয় করা হয়েছে');
+    AppSnackbar.success('পিন লক নিষ্ক্রিয় করা হয়েছে');
   }
 
   Future<void> toggleBiometric(bool value) async {
     await pinService.setBiometricEnabled(value);
+    AppSnackbar.success(value ? 'বায়োমেট্রিক লক চালু হয়েছে' : 'বায়োমেট্রিক লক বন্ধ হয়েছে');
   }
 
   Future<void> toggleBiometrics(bool value) async {

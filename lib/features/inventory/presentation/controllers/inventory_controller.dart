@@ -59,8 +59,46 @@ class InventoryController extends GetxController {
   final RxList<Category> subcategories = <Category>[].obs;
   final RxString packageUnit = ''.obs;
   final packageQuantityController = TextEditingController(text: '1');
+  final packageCostController = TextEditingController();
+  final customPackageNameController = TextEditingController();
+  final RxBool hasPackageConversion = false.obs;
   final Rx<String?> imagePath = Rx<String?>(null);
   final Rx<DateTime?> expiryDate = Rx<DateTime?>(null);
+
+  void onPackageCostChanged(String val) {
+    final packCost = double.tryParse(val) ?? 0.0;
+    final packQty = double.tryParse(packageQuantityController.text) ?? 1.0;
+    if (packQty > 0 && packCost > 0 && hasPackageConversion.value) {
+      final baseCost = packCost / packQty;
+      purchasePriceController.text = baseCost % 1 == 0
+          ? baseCost.toInt().toString()
+          : baseCost.toStringAsFixed(2);
+    } else if (packCost > 0) {
+      purchasePriceController.text = val;
+    }
+  }
+
+  void onBaseCostChanged(String val) {
+    final baseCost = double.tryParse(val) ?? 0.0;
+    final packQty = double.tryParse(packageQuantityController.text) ?? 1.0;
+    if (packQty > 0 && baseCost > 0 && hasPackageConversion.value) {
+      final packCost = baseCost * packQty;
+      packageCostController.text = packCost % 1 == 0
+          ? packCost.toInt().toString()
+          : packCost.toStringAsFixed(2);
+    }
+  }
+
+  void onPackageQuantityChanged(String val) {
+    final packQty = double.tryParse(val) ?? 1.0;
+    final packCost = double.tryParse(packageCostController.text) ?? 0.0;
+    if (packQty > 0 && packCost > 0 && hasPackageConversion.value) {
+      final baseCost = packCost / packQty;
+      purchasePriceController.text = baseCost % 1 == 0
+          ? baseCost.toInt().toString()
+          : baseCost.toStringAsFixed(2);
+    }
+  }
 
   // Wholesale Price Tiers
   final RxList<ProductTierItem> priceTiers = <ProductTierItem>[].obs;
@@ -195,6 +233,15 @@ class InventoryController extends GetxController {
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
     final productId = _uuid.v4();
 
+    final pkgUnitVal = packageUnit.value == 'custom'
+        ? (customPackageNameController.text.trim().isNotEmpty
+            ? customPackageNameController.text.trim()
+            : null)
+        : (packageUnit.value.isNotEmpty ? packageUnit.value : null);
+    final packQuantityVal = (hasPackageConversion.value || pkgUnitVal != null)
+        ? (double.tryParse(packageQuantityController.text) ?? 1.0)
+        : 1.0;
+
     try {
       await _dbService.inventoryDao.insertProduct(
         ProductsCompanion(
@@ -207,8 +254,8 @@ class InventoryController extends GetxController {
               : null),
           categoryId: Value(selectedCategoryId.value),
           subcategoryId: Value(selectedSubcategoryId.value),
-          packageUnit: Value(packageUnit.value.isNotEmpty ? packageUnit.value : null),
-          packageQuantity: Value(double.tryParse(packageQuantityController.text) ?? 1.0),
+          packageUnit: Value(pkgUnitVal),
+          packageQuantity: Value(packQuantityVal),
           sku: Value(skuController.text.trim().isNotEmpty
               ? skuController.text.trim()
               : null),
@@ -280,6 +327,9 @@ class InventoryController extends GetxController {
     openingQtyController.text = '0';
     minStockController.text = '5';
     packageQuantityController.text = '1';
+    packageCostController.clear();
+    customPackageNameController.clear();
+    hasPackageConversion.value = false;
     packageUnit.value = '';
     selectedCategoryId.value = null;
     selectedSubcategoryId.value = null;
@@ -333,6 +383,8 @@ class InventoryController extends GetxController {
     openingQtyController.dispose();
     minStockController.dispose();
     packageQuantityController.dispose();
+    packageCostController.dispose();
+    customPackageNameController.dispose();
     movementQtyController.dispose();
     movementNotesController.dispose();
     searchController.dispose();
